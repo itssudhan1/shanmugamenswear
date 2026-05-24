@@ -1,4 +1,4 @@
-/* Shanmuga Mens Wear Products — 2 items — Updated 24/5/2026, 6:35:56 pm */
+/* Shanmuga Mens Wear Products — 2 items — Updated 24/5/2026, 6:37:18 pm */
 /* © 2026 Shanmuga Mens Wear. All rights reserved. */
 
 var SMW_DEFAULT_PRODUCTS = [
