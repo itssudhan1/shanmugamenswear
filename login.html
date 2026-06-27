@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="copyright" content="© 2026 Shanmuga Mens Wear. All rights reserved.">
+<title>Login — Shanmuga Mens Wear</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#111110;--white:#fff;--off:#f5f4f1;--stone:#e8e6e1;
+  --warm:#c8c4bc;--mid:#8a8680;--red:#d93025;--green:#16a34a;
+  --serif:'Cormorant Garamond',serif;--sans:'Manrope',sans-serif;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+html,body{min-height:100%;font-family:var(--sans);background:var(--off);color:var(--black)}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;font-family:var(--sans);border:none}
+
+/* HEADER */
+.login-header{position:fixed;top:0;left:0;right:0;z-index:10;background:var(--black);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem}
+.lh-back{display:flex;align-items:center;gap:.5rem;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);transition:color .2s}
+.lh-back:hover{color:#fff}
+.lh-brand{position:absolute;left:50%;transform:translateX(-50%);font-family:var(--serif);font-size:1.35rem;font-weight:600;letter-spacing:.2em;color:#fff;text-transform:uppercase;text-align:center;white-space:nowrap}
+.lh-brand span{display:block;font-family:var(--sans);font-size:7px;letter-spacing:.35em;color:var(--warm);margin-top:2px;font-weight:400}
+
+/* PAGE */
+.login-page{min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:80px 1rem 2rem}
+.login-card{width:100%;max-width:440px;background:var(--white);box-shadow:0 8px 48px rgba(0,0,0,.1);margin-top:1rem}
+.login-card-head{background:var(--black);padding:2rem 1.5rem 1.75rem;text-align:center}
+.login-card-title{font-family:var(--serif);font-size:2rem;font-weight:500;letter-spacing:.12em;color:#fff;text-transform:uppercase;margin-bottom:.3rem}
+.login-card-sub{font-size:12px;color:var(--warm);letter-spacing:.06em}
+
+/* TABS */
+.login-tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--stone)}
+.login-tab{padding:.85rem;text-align:center;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mid);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;cursor:pointer}
+.login-tab.active{color:var(--black);border-bottom-color:var(--black)}
+
+/* FORM */
+.login-form-wrap{padding:1.5rem}
+.form-group{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem}
+.form-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;font-weight:700}
+.form-input{border:1px solid var(--stone);padding:.75rem 1rem;font-size:14px;outline:none;transition:border-color .2s;font-family:var(--sans);background:var(--white);width:100%}
+.form-input:focus{border-color:var(--black)}
+.form-input-wrap{position:relative}
+.form-input-wrap .form-input{padding-right:2.5rem}
+.eye-toggle{position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--mid);cursor:pointer;display:flex;align-items:center;font-size:14px;padding:4px}
+
+.form-forgot{font-size:11px;color:var(--mid);text-align:right;display:block;margin-top:-.4rem;margin-bottom:1rem;cursor:pointer;transition:color .2s;letter-spacing:.04em}
+.form-forgot:hover{color:var(--black)}
+
+.btn-login{width:100%;height:50px;background:var(--black);color:#fff;border:none;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:background .2s;margin-bottom:.85rem}
+.btn-login:hover{background:#2a2a28}
+.btn-login:disabled{opacity:.6;pointer-events:none}
+
+.or-divider{display:flex;align-items:center;gap:.75rem;margin-bottom:.85rem}
+.or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:var(--stone)}
+.or-divider span{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--warm)}
+
+.social-btns{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.25rem}
+.btn-social{width:100%;height:50px;border:1px solid var(--stone);background:#fff;display:flex;align-items:center;justify-content:center;gap:.65rem;font-size:12px;font-weight:600;color:var(--black);letter-spacing:.05em;cursor:pointer;transition:border-color .2s,background .2s,transform .15s}
+.btn-social:hover{border-color:var(--black);background:var(--off);transform:translateY(-1px)}
+.btn-social:disabled{opacity:.7;pointer-events:none}
+.btn-social-spinner{display:none;width:16px;height:16px;border:2px solid var(--stone);border-top-color:var(--black);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-social.loading .btn-social-icon{display:none}
+.btn-social.loading .btn-social-spinner{display:block}
+
+.security-note{display:flex;align-items:center;gap:.5rem;font-size:11px;color:var(--mid);letter-spacing:.04em;padding:.85rem 1rem;background:var(--off);border-top:1px solid var(--stone)}
+.terms-note{text-align:center;font-size:11px;color:var(--mid);padding:1rem 1.5rem 1.5rem;line-height:1.7}
+.terms-note a{color:var(--black);text-decoration:underline;text-underline-offset:2px}
+
+.field-error{font-size:11px;color:var(--red);margin-top:.25rem;display:none}
+.field-error.show{display:block}
+.form-input.error{border-color:var(--red)}
+
+.firebase-notice{background:#fff3cd;border:1px solid #ffc107;padding:.75rem 1rem;margin-bottom:1rem;font-size:12px;color:#664d03;line-height:1.6;display:none}
+.firebase-notice.show{display:block}
+.firebase-notice strong{display:block;margin-bottom:.25rem}
+
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(16px);background:var(--black);color:#fff;padding:.65rem 1.5rem;font-size:13px;font-weight:500;opacity:0;transition:opacity .3s,transform .3s;z-index:200;pointer-events:none;min-width:200px;text-align:center;max-width:calc(100vw - 2rem)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{background:var(--green)}
+.toast.error-toast{background:var(--red)}
+
+/* Logged in state */
+.user-info-card{display:none;padding:1.5rem;text-align:center;border-top:1px solid var(--stone)}
+.user-info-card.show{display:block}
+.user-avatar{width:64px;height:64px;border-radius:50%;margin:0 auto .75rem;object-fit:cover;border:2px solid var(--stone)}
+.user-avatar-placeholder{width:64px;height:64px;border-radius:50%;margin:0 auto .75rem;background:var(--black);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:600;font-family:var(--serif)}
+.user-name{font-size:16px;font-weight:600;margin-bottom:.25rem}
+.user-email{font-size:12px;color:var(--mid);margin-bottom:1rem}
+.btn-logout{border:1px solid var(--stone);background:none;padding:.5rem 1.5rem;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.btn-logout:hover{border-color:var(--red);color:var(--red)}
+.btn-goto{display:block;background:var(--black);color:#fff;padding:.75rem;font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;text-align:center;margin-bottom:.75rem;transition:background .2s}
+.btn-goto:hover{background:#2a2a28}
+
+/* Firebase setup notice container */
+.setup-notice-wrap{max-width:440px;margin:1rem auto 0;padding:0 1rem 2rem}
+
+/* RESPONSIVE */
+@media(max-width:480px){
+  .login-form-wrap{padding:1.25rem 1rem}
+  .login-card-head{padding:1.5rem 1rem}
+  .terms-note{padding:.75rem 1rem 1.25rem}
+  .lh-brand{font-size:1.1rem;letter-spacing:.15em}
+}
+</style>
+</head>
+<body>
+
+<header class="login-header">
+  <a href="index.html" class="lh-back">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+    Back
+  </a>
+  <a href="index.html" class="lh-brand">Shanmuga<span>Mens Wear</span></a>
+  <div style="width:60px"></div>
+</header>
+
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-card-head">
+      <div class="login-card-title" id="cardTitle">Welcome Back</div>
+      <div class="login-card-sub" id="cardSub">Sign in to your account</div>
+    </div>
+
+    <div class="login-tabs">
+      <button class="login-tab active" id="tab-login" onclick="showTab('login')">Login</button>
+      <button class="login-tab" id="tab-signup" onclick="showTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- Logged-in state -->
+    <div id="logged-in-section" style="display:none">
+      <div class="user-info-card show" id="userInfoCard">
+        <div id="userAvatarWrap"></div>
+        <div class="user-name" id="userDisplayName"></div>
+        <div class="user-email" id="userDisplayEmail"></div>
+        <a href="index.html" class="btn-goto">Continue Shopping →</a>
+        <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+      </div>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="form-login">
+      <div class="login-form-wrap">
+        <div class="form-group">
+          <label class="form-label" for="loginEmail">Email Address</label>
+          <input class="form-input" type="email" id="loginEmail" placeholder="your@email.com" autocomplete="email">
+          <span class="field-error" id="loginEmailErr">Please enter a valid email.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="loginPass">Password</label>
+          <div class="form-input-wrap">
+            <input class="form-input" type="password" id="loginPass" placeholder="Enter your password" autocomplete="current-password">
+            <button class="eye-toggle" onclick="toggleEye('loginPass',this)" type="button" tabindex="-1" aria-label="Toggle password visibility">👁</button>
+          </div>
+          <span class="field-error" id="loginPassErr">Password must be at least 6 characters.</span>
+        </div>
+        <a class="form-forgot" onclick="doForgotPassword()" role="button">Forgot password?</a>
+        <button class="btn-login" onclick="doLogin()" id="loginBtn">Sign In</button>
+        <div class="or-divider"><span>or continue with</span></div>
+        <div class="social-btns">
+          <button class="btn-social" id="googleSignInBtn" onclick="signInWithGoogle()">
+            <svg class="btn-social-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            <div class="btn-social-spinner"></div>
+            Continue with Google
+          </button>
+        </div>
+      </div>
+      <div class="security-note">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Your information is encrypted and secure.
+      </div>
+      <div class="terms-note">By signing in you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</div>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="form-signup" style="display:none">
+      <div class="login-form-wrap">
+        <div class="form-group">
+          <label class="form-label" for="signupName">Full Name</label>
+          <input class="form-input" type="text" id="signupName" placeholder="Your full name" autocomplete="name">
+          <span class="field-error" id="signupNameErr">Please enter your name.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signupEmail">Email Address</label>
+          <input class="form-input" type="email" id="signupEmail" placeholder="your@email.com" autocomplete="email">
+          <span class="field-error" id="signupEmailErr">Please enter a valid email.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signupPass">Password</label>
+          <div class="form-input-wrap">
+            <input class="form-input" type="password" id="signupPass" placeholder="Min 6 characters" autocomplete="new-password">
+            <button class="eye-toggle" onclick="toggleEye('signupPass',this)" type="button" tabindex="-1" aria-label="Toggle password visibility">👁</button>
+          </div>
+          <span class="field-error" id="signupPassErr">Password must be at least 6 characters.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signupPass2">Confirm Password</label>
+          <div class="form-input-wrap">
+            <input class="form-input" type="password" id="signupPass2" placeholder="Repeat your password" autocomplete="new-password">
+            <button class="eye-toggle" onclick="toggleEye('signupPass2',this)" type="button" tabindex="-1" aria-label="Toggle password visibility">👁</button>
+          </div>
+          <span class="field-error" id="signupPass2Err">Passwords do not match.</span>
+        </div>
+        <button class="btn-login" onclick="doSignup()" id="signupBtn">Create Account</button>
+        <div class="or-divider"><span>or sign up with</span></div>
+        <div class="social-btns">
+          <button class="btn-social" id="googleSignUpBtn" onclick="signInWithGoogle()">
+            <svg class="btn-social-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            <div class="btn-social-spinner"></div>
+            Continue with Google
+          </button>
+        </div>
+      </div>
+      <div class="security-note">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        256-bit encrypted · Your data is never shared.
+      </div>
+      <div class="terms-note">By creating an account you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase setup notice -->
+<div class="setup-notice-wrap">
+  <div id="firebaseSetupNotice" class="firebase-notice">
+    <strong>🔧 Firebase Setup Required for Google Login</strong>
+    1. Go to <a href="https://console.firebase.google.com" target="_blank" rel="noopener" style="color:#664d03;font-weight:600">console.firebase.google.com</a><br>
+    2. Create project → Add Web App → Enable Google Authentication<br>
+    3. Replace the placeholder config in login.html<br>
+    4. Add your domain to Authorized Domains<br><br>
+    Email/password login works now without any setup.
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module">
+  import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import{getAuth,signInWithPopup,GoogleAuthProvider,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile,sendPasswordResetEmail}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB0onzty6LC3kGpQmKq4f6CR7J7Bn0Ov_g",
+  authDomain: "shanmuga-mens-wear.firebaseapp.com",
+  projectId: "shanmuga-mens-wear",
+  storageBucket: "shanmuga-mens-wear.firebasestorage.app",
+  messagingSenderId: "525819935373",
+  appId: "1:525819935373:web:b65ca8df1f026b7ea340c4"
+};
+
+  const isConfigured = true;
+  let auth,provider;
+
+  if(isConfigured){
+    const app=initializeApp(firebaseConfig);
+    auth=getAuth(app);
+    provider=new GoogleAuthProvider();
+    provider.setCustomParameters({prompt:'select_account'});
+    onAuthStateChanged(auth,user=>{user?showUserLoggedIn(user):showLoginForms();});
+  }
+
+  function showUserLoggedIn(user){
+    document.getElementById('form-login').style.display='none';
+    document.getElementById('form-signup').style.display='none';
+    document.getElementById('logged-in-section').style.display='block';
+    document.getElementById('cardTitle').textContent='Welcome!';
+    document.getElementById('cardSub').textContent='You are signed in';
+    const wrap=document.getElementById('userAvatarWrap');
+    if(user.photoURL){wrap.innerHTML=`<img class="user-avatar" src="${user.photoURL}" alt="${user.displayName||'User'}">`;}
+    else{wrap.innerHTML=`<div class="user-avatar-placeholder">${(user.displayName||user.email||'U')[0].toUpperCase()}</div>`;}
+    document.getElementById('userDisplayName').textContent=user.displayName||'User';
+    document.getElementById('userDisplayEmail').textContent=user.email;
+    localStorage.setItem('smw_user',JSON.stringify({email:user.email,name:user.displayName||user.email.split('@')[0],photo:user.photoURL||'',uid:user.uid}));
+  }
+
+  function showLoginForms(){
+    document.getElementById('logged-in-section').style.display='none';
+    document.getElementById('form-login').style.display='block';
+    document.getElementById('cardTitle').textContent='Welcome Back';
+    document.getElementById('cardSub').textContent='Sign in to your account';
+    localStorage.removeItem('smw_user');
+  }
+
+  window.signInWithGoogle=async function(){
+    if(!isConfigured){showToast('⚙️ Configure Firebase first','error-toast');document.getElementById('firebaseSetupNotice').classList.add('show');return;}
+    document.querySelectorAll('.btn-social').forEach(b=>b.classList.add('loading'));
+    try{
+      const r=await signInWithPopup(auth,provider);
+      showToast('✓ Signed in as '+r.user.displayName,'success');
+      setTimeout(()=>location.href='index.html',1200);
+    }catch(err){
+      if(err.code==='auth/popup-closed-by-user'){showToast('Sign-in cancelled.');}
+      else if(err.code==='auth/popup-blocked'){showToast('Popup blocked — allow popups for this site.','error-toast');}
+      else{showToast('Google sign-in failed.','error-toast');}
+    }finally{document.querySelectorAll('.btn-social').forEach(b=>b.classList.remove('loading'));}
+  };
+
+  window.doLogin=async function(){
+    let ok=true;
+    const email=document.getElementById('loginEmail').value.trim();
+    const pass=document.getElementById('loginPass').value;
+    if(!validateEmail(email)){showErr('loginEmailErr','loginEmail');ok=false;}else{clearErr('loginEmailErr','loginEmail');}
+    if(pass.length<6){showErr('loginPassErr','loginPass');ok=false;}else{clearErr('loginPassErr','loginPass');}
+    if(!ok)return;
+    const btn=document.getElementById('loginBtn');
+    btn.textContent='Signing in…';btn.disabled=true;
+    if(!isConfigured){
+      setTimeout(()=>{localStorage.setItem('smw_user',JSON.stringify({email,name:email.split('@')[0]}));showToast('Welcome back!','success');setTimeout(()=>location.href='index.html',1000);},900);
+      return;
+    }
+    try{
+      const r=await signInWithEmailAndPassword(auth,email,pass);
+      showToast('Welcome back, '+(r.user.displayName||email.split('@')[0])+'!','success');
+      setTimeout(()=>location.href='index.html',1000);
+    }catch(err){
+      btn.textContent='Sign In';btn.disabled=false;
+      if(['auth/user-not-found','auth/wrong-password','auth/invalid-credential'].includes(err.code)){showToast('Invalid email or password.','error-toast');}
+      else{showToast('Login failed. Please try again.','error-toast');}
+    }
+  };
+
+  window.doSignup=async function(){
+    let ok=true;
+    const name=document.getElementById('signupName').value.trim();
+    const email=document.getElementById('signupEmail').value.trim();
+    const pass=document.getElementById('signupPass').value;
+    const pass2=document.getElementById('signupPass2').value;
+    if(!name){showErr('signupNameErr','signupName');ok=false;}else{clearErr('signupNameErr','signupName');}
+    if(!validateEmail(email)){showErr('signupEmailErr','signupEmail');ok=false;}else{clearErr('signupEmailErr','signupEmail');}
+    if(pass.length<6){showErr('signupPassErr','signupPass');ok=false;}else{clearErr('signupPassErr','signupPass');}
+    if(pass!==pass2){showErr('signupPass2Err','signupPass2');ok=false;}else{clearErr('signupPass2Err','signupPass2');}
+    if(!ok)return;
+    const btn=document.getElementById('signupBtn');
+    btn.textContent='Creating account…';btn.disabled=true;
+    if(!isConfigured){
+      setTimeout(()=>{localStorage.setItem('smw_user',JSON.stringify({email,name}));showToast('Account created! Welcome, '+name+'!','success');setTimeout(()=>location.href='index.html',1000);},1000);
+      return;
+    }
+    try{
+      const r=await createUserWithEmailAndPassword(auth,email,pass);
+      await updateProfile(r.user,{displayName:name});
+      showToast('Welcome, '+name+'!','success');
+      setTimeout(()=>location.href='index.html',1000);
+    }catch(err){
+      btn.textContent='Create Account';btn.disabled=false;
+      if(err.code==='auth/email-already-in-use'){showToast('Email already registered. Try logging in.','error-toast');}
+      else{showToast('Sign-up failed. Please try again.','error-toast');}
+    }
+  };
+
+  window.doForgotPassword=async function(){
+    const email=document.getElementById('loginEmail').value.trim();
+    if(!validateEmail(email)){showToast('Enter your email address first.','error-toast');return;}
+    if(!isConfigured){showToast('Password reset sent! (demo mode)','success');return;}
+    try{await sendPasswordResetEmail(auth,email);showToast('Password reset email sent to '+email,'success');}
+    catch(err){showToast('Failed to send reset email.','error-toast');}
+  };
+
+  window.doLogout=async function(){
+    if(!isConfigured){localStorage.removeItem('smw_user');showLoginForms();showToast('Signed out.');return;}
+    try{await signOut(auth);showToast('Signed out successfully.');}
+    catch(err){showToast('Sign out failed.','error-toast');}
+  };
+</script>
+
+<script>
+function showTab(tab){
+  if(document.getElementById('logged-in-section').style.display!=='none')return;
+  const isLogin=tab==='login';
+  document.getElementById('form-login').style.display=isLogin?'':'none';
+  document.getElementById('form-signup').style.display=isLogin?'none':'';
+  document.getElementById('tab-login').classList.toggle('active',isLogin);
+  document.getElementById('tab-signup').classList.toggle('active',!isLogin);
+  document.getElementById('cardTitle').textContent=isLogin?'Welcome Back':'Create Account';
+  document.getElementById('cardSub').textContent=isLogin?'Sign in to your account':'Join Shanmuga Mens Wear';
+}
+function toggleEye(id,btn){const inp=document.getElementById(id);inp.type=inp.type==='password'?'text':'password';btn.textContent=inp.type==='password'?'👁':'🙈';}
+function validateEmail(e){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);}
+function showErr(errId,inpId){document.getElementById(errId).classList.add('show');document.getElementById(inpId).classList.add('error');}
+function clearErr(errId,inpId){document.getElementById(errId).classList.remove('show');document.getElementById(inpId).classList.remove('error');}
+let toastTimer;
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type?type:'');t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+/* Press Enter to submit */
+document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const fl=document.getElementById('form-login');const fs=document.getElementById('form-signup');if(fl&&fl.style.display!=='none'&&document.getElementById('logged-in-section').style.display==='none')doLogin();else if(fs&&fs.style.display!=='none')doSignup();});
+
+/* ── COPYRIGHT PROTECTION ── */
+document.addEventListener('contextmenu',function(e){e.preventDefault();return false;});
+document.addEventListener('keydown',function(e){
+  if(e.ctrlKey&&(e.key==='u'||e.key==='s'||e.key==='p')){e.preventDefault();return false;}
+  if(e.key==='F12'){e.preventDefault();return false;}
+  if(e.ctrlKey&&e.shiftKey&&(e.key==='I'||e.key==='i'||e.key==='J'||e.key==='j')){e.preventDefault();return false;}
+});
+(function(){console.log('%c© 2026 Shanmuga Mens Wear. All Rights Reserved.','color:#d93025;font-size:14px;font-weight:bold;');})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<title>Shanmuga Mens Wear — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f2efe9;--surface:#fff;--surface2:#f8f6f2;--border:#e4dfd8;--text:#1c1713;--text2:#7a746e;
+  --accent:#1c1713;--gold:#c9a96e;--gold-light:#f5ecd8;--green:#1e6b44;--green-bg:#d4f0e2;
+  --red:#b83232;--red-bg:#fde8e8;--orange:#c26b1a;--orange-bg:#fdecd9;--blue:#1d52a8;--blue-bg:#dce9fb;
+  --sidebar-w:230px;--topbar-h:58px;--r:10px;--shadow:0 1px 12px rgba(0,0,0,.07)
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+a{color:inherit;text-decoration:none}
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--accent)}
+.login-card{background:var(--surface);border-radius:18px;padding:44px 40px;width:360px;max-width:94vw;box-shadow:0 32px 80px rgba(0,0,0,.35)}
+.login-brand{font-family:'Syne',sans-serif;font-weight:800;font-size:21px;letter-spacing:.04em;margin-bottom:4px}
+.login-brand em{background:var(--gold);color:#000;font-style:normal;font-size:10px;font-weight:800;padding:2px 8px;border-radius:4px;margin-left:7px;vertical-align:middle;letter-spacing:.1em}
+.login-sub{font-size:13px;color:var(--text2);margin-bottom:28px}
+.lf-group{margin-bottom:14px}
+.lf-group label{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:5px}
+.lf-group input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--surface2);color:var(--text);transition:border .18s}
+.lf-group input:focus{outline:none;border-color:var(--gold)}
+#loginErr{display:none;background:var(--red-bg);color:var(--red);font-size:12px;font-weight:600;padding:8px 12px;border-radius:7px;margin-bottom:12px}
+.btn-login{width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:background .18s}
+.btn-login:hover{background:#333}
+#app{display:none}
+.sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--accent);color:#fff;display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+.s-brand{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.s-brand .name{font-family:'Syne',sans-serif;font-weight:800;font-size:15px;letter-spacing:.05em}
+.s-brand .badge{background:var(--gold);color:#000;font-size:9px;font-weight:800;padding:2px 7px;border-radius:4px;margin-left:6px;vertical-align:middle}
+.s-section{padding:16px 14px 5px;font-size:10px;font-weight:700;letter-spacing:.13em;color:rgba(255,255,255,.28);text-transform:uppercase}
+.nav-btn{display:flex;align-items:center;gap:10px;width:calc(100% - 16px);margin:2px 8px;padding:9px 12px;border-radius:8px;border:none;background:none;color:rgba(255,255,255,.65);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;text-align:left;transition:all .16s}
+.nav-btn:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav-btn.active{background:var(--gold);color:#000;font-weight:700}
+.nav-btn .nbadge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:12px}
+.s-foot{margin-top:auto;padding:14px 16px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:rgba(255,255,255,.35)}
+.s-foot strong{color:rgba(255,255,255,.75);display:block;font-size:12px;margin-bottom:2px}
+.topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;gap:8px;z-index:90}
+.topbar-title{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;flex:1}
+.btn{padding:8px 16px;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;border:none;transition:all .16s;white-space:nowrap}
+.btn-sm{padding:6px 12px;font-size:12px}.btn-xs{padding:4px 10px;font-size:11px}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#333}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}.btn-outline:hover{border-color:var(--accent);background:var(--surface2)}
+.btn-danger{background:var(--red);color:#fff}.btn-danger:hover{background:#961f1f}
+.btn-success{background:var(--green);color:#fff}.btn-success:hover{background:#155132}
+.btn-warning{background:var(--orange);color:#fff}.btn-warning:hover{background:#a0580f}
+.btn-gold{background:var(--gold);color:#000;font-weight:700}.btn-gold:hover{background:#b8943e}
+.btn-info{background:var(--blue);color:#fff}.btn-info:hover{background:#163d80}
+.main{margin-left:var(--sidebar-w);margin-top:var(--topbar-h);padding:26px;min-height:calc(100vh - var(--topbar-h))}
+.page{display:none}.page.active{display:block}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+.ph-left h1{font-family:'Syne',sans-serif;font-weight:800;font-size:22px}
+.ph-left .sub{font-size:12px;color:var(--text2);margin-top:3px}
+.ph-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:22px}
+.stat-card{background:var(--surface);border-radius:var(--r);padding:18px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.stat-card.dark{background:var(--accent);color:#fff}
+.stat-card .s-lbl{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);margin-bottom:7px}
+.stat-card.dark .s-lbl{color:rgba(255,255,255,.4)}
+.stat-card .s-val{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;line-height:1}
+.table-wrap{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--surface2)}
+th{padding:10px 15px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2)}
+td{padding:11px 15px;border-top:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:#fafaf7}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.tg{background:var(--green-bg);color:var(--green)}.tr{background:var(--red-bg);color:var(--red)}.to{background:var(--orange-bg);color:var(--orange)}.tb{background:var(--blue-bg);color:var(--blue)}.ty{background:var(--surface2);color:var(--text2)}
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:22px;box-shadow:var(--shadow)}
+.card-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:16px;letter-spacing:.02em}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);margin-bottom:5px}
+.fg input,.fg select,.fg textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface2);color:var(--text);transition:border .18s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--gold);background:var(--surface)}
+.fg textarea{min-height:80px;resize:vertical}
+.fg .hint{font-size:11px;color:var(--text2);margin-top:3px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:900px){.g2{grid-template-columns:1fr}}
+.size-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+.s-chip{padding:6px 13px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);transition:all .16s;font-family:'DM Sans',sans-serif}
+.s-chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.b-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:5px}
+.b-chip{padding:6px 14px;border:1.5px solid var(--border);border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .16s;font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text2)}
+.b-chip.sel-none{background:var(--accent);color:#fff;border-color:var(--accent)}
+.b-chip.sel-new{background:var(--blue);color:#fff;border-color:var(--blue)}
+.b-chip.sel-sale{background:var(--red);color:#fff;border-color:var(--red)}
+.b-chip.sel-offer{background:var(--orange);color:#fff;border-color:var(--orange)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-label{font-weight:600;font-size:13px}
+.toggle-desc{font-size:11px;color:var(--text2);margin-top:1px}
+.toggle{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:22px;transition:.25s}
+.slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.25s}
+input:checked+.slider{background:var(--accent)}
+input:checked+.slider::before{transform:translateX(18px)}
+.upload-zone{border:2.5px dashed var(--gold);border-radius:12px;background:var(--gold-light);padding:32px 20px;text-align:center;cursor:pointer;position:relative;transition:all .2s}
+.upload-zone:hover,.upload-zone.dragover{background:#ebd9a8;border-color:#a07838}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:44px;display:block;margin-bottom:10px}
+.upload-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--accent);margin-bottom:5px}
+.upload-sub{font-size:12px;color:var(--text2)}
+.progress-wrap{display:none;margin-top:14px;background:#fff;border-radius:8px;padding:12px 16px;border:1px solid var(--border)}
+.progress-wrap.show{display:block}
+.progress-bar-bg{height:7px;background:var(--border);border-radius:4px;margin-top:8px;overflow:hidden}
+.progress-bar{height:100%;background:var(--green);border-radius:4px;transition:width .3s;width:0}
+.img-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.img-thumb{position:relative;width:90px;height:110px}
+.img-thumb img{width:90px;height:110px;object-fit:cover;border-radius:8px;border:2px solid var(--border);display:block}
+.img-thumb.main-img img{border-color:var(--gold);border-width:3px}
+.main-lbl{position:absolute;bottom:4px;left:4px;background:var(--gold);color:#000;font-size:8px;font-weight:800;padding:2px 6px;border-radius:3px}
+.del-btn{position:absolute;top:-6px;right:-6px;width:20px;height:20px;background:var(--red);color:#fff;border:none;border-radius:50%;font-size:14px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cloud-setup{background:linear-gradient(135deg,#1c1713,#3a2e28);color:#fff;border-radius:12px;padding:20px;margin-bottom:18px}
+.cloud-setup h3{font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:var(--gold);margin-bottom:8px}
+.cloud-setup p{font-size:12px;color:rgba(255,255,255,.65);line-height:1.7;margin-bottom:14px}
+.cloud-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cloud-fields input{width:100%;padding:9px 12px;border:1.5px solid rgba(255,255,255,.15);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;background:rgba(255,255,255,.08);color:#fff}
+.cloud-fields input:focus{outline:none;border-color:var(--gold)}
+.cloud-fields input::placeholder{color:rgba(255,255,255,.3)}
+.cloud-status{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px}
+.cloud-status.ok{background:var(--green-bg);color:var(--green)}
+.cloud-status.bad{background:var(--red-bg);color:var(--red)}
+.mtabs{display:flex;gap:6px;margin-bottom:14px}
+.mtab{padding:7px 18px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);font-family:'DM Sans',sans-serif;transition:all .15s}
+.mtab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.mpanel{display:none}.mpanel.on{display:block}
+.pv-wrap{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:hidden}
+.pv-gallery{background:var(--surface2);padding:16px;display:flex;gap:10px;border-bottom:1px solid var(--border)}
+.pv-main{width:170px;height:210px;object-fit:cover;border-radius:7px;flex-shrink:0}
+.pv-thumbs{display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start}
+.pv-thumb{width:56px;height:68px;object-fit:cover;border-radius:5px;border:2px solid var(--border);cursor:pointer}
+.pv-thumb.active{border-color:var(--gold)}
+.pv-body{padding:18px}
+.pv-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:6px}
+.pv-price{display:flex;gap:10px;align-items:baseline;margin-bottom:10px}
+.pv-sale{font-size:20px;font-weight:800;color:var(--red)}.pv-orig{font-size:15px;color:var(--text2);text-decoration:line-through}.pv-reg{font-size:20px;font-weight:800}
+.pv-sizes{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.pv-sz{padding:3px 11px;border:1.5px solid var(--border);border-radius:5px;font-size:12px;font-weight:600}
+.coupon-card{background:var(--surface);border:2px dashed var(--border);border-radius:var(--r);padding:14px 16px;position:relative;margin-bottom:10px}
+.coupon-code{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;letter-spacing:.1em}
+.coupon-meta{font-size:11px;color:var(--text2);margin-top:3px}
+.review-card{background:var(--surface2);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:10px}
+.rev-head{display:flex;align-items:center;gap:9px;margin-bottom:8px;flex-wrap:wrap}
+.rev-av{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0}
+.stars{color:var(--gold);font-size:14px;letter-spacing:1px}
+.rev-text{font-size:13px;color:var(--text2);line-height:1.55}
+.notif-item{display:flex;gap:11px;padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .16s}
+.notif-item:hover{background:var(--surface2)}.notif-item.unread{background:#fffbf3}
+.notif-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.notif-title{font-size:13px;font-weight:600}.notif-desc{font-size:11px;color:var(--text2);margin-top:2px}.notif-time{font-size:10px;color:var(--text2);margin-top:3px}
+.unread-dot{width:7px;height:7px;background:var(--red);border-radius:50%;flex-shrink:0;margin-top:5px}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--accent);color:#fff;padding:11px 18px;border-radius:9px;font-size:13px;font-weight:600;z-index:9999;transform:translateY(60px);opacity:0;transition:all .28s;pointer-events:none;max-width:380px;box-shadow:0 4px 20px rgba(0,0,0,.25)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:var(--green)}.toast.error{background:var(--red)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--surface);border-radius:14px;padding:26px;width:560px;max-width:94vw;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:88vh;overflow-y:auto}
+.modal-box h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:16px}
+.modal-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.alert{border-radius:9px;padding:13px 16px;font-size:13px;line-height:1.65;margin-bottom:14px}
+.alert-info{background:var(--blue-bg);border:1px solid #93c5fd;color:#1e3a5f}
+.alert-success{background:var(--green-bg);border:1px solid #86efac;color:#14532d}
+.alert-warn{background:#fef3c7;border:1px solid #fcd34d;color:#78350f}
+.log-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}.log-item:last-child{border-bottom:none}
+.log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.log-text{font-size:12px;font-weight:600}.log-time{font-size:11px;color:var(--text2);margin-top:1px}
+.search-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.search-bar input{flex:1;min-width:160px;padding:8px 13px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface)}
+.search-bar input:focus{outline:none;border-color:var(--gold)}
+.search-bar select{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface)}
+.pw-msg{display:none;margin-bottom:12px;font-size:12px;font-weight:600;padding:8px 12px;border-radius:7px}
+.pw-msg.ok{background:var(--green-bg);color:var(--green)}.pw-msg.err{background:var(--red-bg);color:var(--red)}
+.gh-dark{background:linear-gradient(135deg,#1c1713,#2e2420);color:#fff;border-radius:12px;padding:22px;margin-bottom:18px}
+.gh-input{width:100%;padding:9px 12px;border:1.5px solid rgba(255,255,255,.15);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;background:rgba(255,255,255,.08);color:#fff}
+.gh-input:focus{outline:none;border-color:var(--gold)}
+.gh-input::placeholder{color:rgba(255,255,255,.35)}
+.pub-btn{width:100%;padding:18px;font-size:16px;font-weight:800;border-radius:10px;border:none;background:var(--green);color:#fff;cursor:pointer;font-family:'Syne',sans-serif;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px}
+.pub-btn:hover:not(:disabled){background:#155132;transform:translateY(-2px)}
+.pub-btn:disabled{background:#aaa;cursor:not-allowed;transform:none}
+.site-bar{display:flex;align-items:center;gap:10px;background:var(--green-bg);border:1.5px solid #86efac;border-radius:10px;padding:13px 16px;margin-bottom:18px;flex-wrap:wrap}
+.site-bar a{font-size:13px;font-weight:700;color:var(--green);text-decoration:underline;flex:1;word-break:break-all}
+.unpub-bar{background:#fef3c7;border:1px solid #fcd34d;color:#78350f;border-radius:9px;padding:11px 16px;margin-bottom:16px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+
+/* ── ORDER STYLES ── */
+.order-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow)}
+.order-card-head{padding:14px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:var(--surface2)}
+.order-id{font-family:'Syne',sans-serif;font-weight:800;font-size:13px;letter-spacing:.04em}
+.order-date{font-size:11px;color:var(--text2)}
+.order-card-body{padding:14px 18px}
+.order-customer{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.order-customer-item{display:flex;flex-direction:column;gap:2px}
+.order-customer-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)}
+.order-customer-val{font-size:13px;font-weight:600;color:var(--text)}
+.order-items-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.order-item-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:4px 0;border-bottom:1px solid var(--border)}
+.order-item-row:last-child{border-bottom:none}
+.order-item-name{color:var(--text);font-weight:500}
+.order-item-meta{font-size:11px;color:var(--text2);margin-top:1px}
+.order-totals{display:flex;gap:14px;flex-wrap:wrap;align-items:center;padding-top:10px;border-top:1px solid var(--border)}
+.order-total-chip{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--green)}
+.order-ship-status{display:flex;gap:8px;align-items:center;margin-left:auto}
+.ship-select{padding:5px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;background:var(--surface);color:var(--text);cursor:pointer}
+.ship-select:focus{outline:none;border-color:var(--gold)}
+.no-orders{text-align:center;padding:60px 20px;color:var(--text2)}
+.no-orders h3{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:8px;color:var(--text)}
+.no-orders p{font-size:13px;line-height:1.8}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-brand">SHANMUGA <em>ADMIN</em></div>
+    <div class="login-sub">Sign in to manage your store</div>
+    <div id="loginErr">❌ Incorrect credentials.</div>
+    <div class="lf-group"><label>Username</label><input type="text" id="lu" placeholder="admin" autocomplete="off"></div>
+    <div class="lf-group"><label>Password</label><input type="password" id="lp" placeholder="••••••••"></div>
+    <button class="btn-login" onclick="doLogin()">Sign In →</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+<aside class="sidebar">
+  <div class="s-brand"><span class="name">SHANMUGA</span><span class="badge">ADMIN</span></div>
+  <div class="s-section">Orders</div>
+  <button class="nav-btn" id="nav-orders" onclick="goto('orders')">🛒 Orders <span class="nbadge" id="nb-orders" style="display:none">0</span></button>
+  <div class="s-section">Catalogue</div>
+  <button class="nav-btn active" id="nav-products" onclick="goto('products')">📦 Products</button>
+  <button class="nav-btn" id="nav-add" onclick="gotoAdd()">➕ Add Product</button>
+  <div class="s-section">Marketing</div>
+  <button class="nav-btn" id="nav-offers" onclick="goto('offers')">🏷️ Offers &amp; Coupons</button>
+  <button class="nav-btn" id="nav-reviews" onclick="goto('reviews')">⭐ Reviews</button>
+  <div class="s-section">System</div>
+  <button class="nav-btn" id="nav-deploy" onclick="goto('deploy')">🚀 Publish to Website</button>
+  <button class="nav-btn" id="nav-notifications" onclick="goto('notifications')">🔔 Notifications</button>
+  <button class="nav-btn" id="nav-security" onclick="goto('security')">🔒 Security</button>
+  <div class="s-foot"><strong>Admin</strong>Session: <span id="stimer">30:00</span><br><span style="font-size:9px;color:rgba(255,255,255,.2)">© 2026 Shanmuga Mens Wear</span></div>
+</aside>
+
+<div class="topbar">
+  <div class="topbar-title" id="topTitle">Products</div>
+  <button class="btn btn-success btn-sm" onclick="goto('deploy')">🚀 Publish</button>
+  <button class="btn btn-info btn-sm" onclick="goto('orders')">🛒 Orders</button>
+  <button class="btn btn-primary btn-sm" onclick="gotoAdd()">+ Add Product</button>
+  <button class="btn btn-outline btn-sm" onclick="doLogout()">Logout</button>
+</div>
+
+<main class="main">
+
+<!-- ══════════════════════════════════════════
+     ORDERS PAGE
+══════════════════════════════════════════ -->
+<div class="page" id="page-orders">
+  <div class="ph">
+    <div class="ph-left"><h1>Orders</h1><div class="sub" id="orderSub">Loading...</div></div>
+    <div class="ph-right">
+      <button class="btn btn-outline btn-sm" onclick="renderOrders()">↻ Refresh</button>
+      <button class="btn btn-danger btn-sm" onclick="clearOrders()">🗑 Clear All</button>
+    </div>
+  </div>
+
+  <div class="stat-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="stat-card dark"><div class="s-lbl">Total Orders</div><div class="s-val" id="o-total">0</div></div>
+    <div class="stat-card"><div class="s-lbl">Revenue</div><div class="s-val" id="o-revenue" style="color:var(--green);font-size:20px">Rs.0</div></div>
+    <div class="stat-card"><div class="s-lbl">Pending Dispatch</div><div class="s-val" id="o-pending" style="color:var(--orange)">0</div></div>
+    <div class="stat-card"><div class="s-lbl">Delivered</div><div class="s-val" id="o-delivered" style="color:var(--green)">0</div></div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="orderSearch" placeholder="🔍 Search by name, phone, order ID…" oninput="renderOrders()">
+    <select id="orderStatusFilter" onchange="renderOrders()">
+      <option value="">All Shipping Status</option>
+      <option value="pending">Pending</option>
+      <option value="dispatched">Dispatched</option>
+      <option value="delivered">Delivered</option>
+      <option value="cancelled">Cancelled</option>
+    </select>
+  </div>
+
+  <div id="ordersList"></div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PRODUCTS PAGE
+══════════════════════════════════════════ -->
+<div class="page active" id="page-products">
+  <div class="ph">
+    <div class="ph-left"><h1>Products</h1><div class="sub" id="prodSub">Loading...</div></div>
+    <div class="ph-right">
+      <button class="btn btn-success btn-sm" onclick="goto('deploy')">🚀 Publish to Site</button>
+      <button class="btn btn-primary btn-sm" onclick="gotoAdd()">+ Add Product</button>
+    </div>
+  </div>
+  <div class="stat-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="stat-card dark"><div class="s-lbl">Total Products</div><div class="s-val" id="s-total">0</div></div>
+    <div class="stat-card"><div class="s-lbl">Shirts</div><div class="s-val" id="s-shirts" style="color:var(--orange)">0</div></div>
+    <div class="stat-card"><div class="s-lbl">T-Shirts</div><div class="s-val" id="s-tshirts" style="color:var(--blue)">0</div></div>
+    <div class="stat-card"><div class="s-lbl">Pants</div><div class="s-val" id="s-pants" style="color:var(--green)">0</div></div>
+  </div>
+  <div id="unpubBar" class="unpub-bar" style="display:none">
+    ⚠️ You have unpublished changes — your live site is out of date.
+    <button class="btn btn-sm" style="background:#78350f;color:#fff;white-space:nowrap" onclick="goto('deploy')">Publish Now →</button>
+  </div>
+  <div class="search-bar">
+    <input type="text" id="prodSearch" placeholder="🔍 Search by name..." oninput="renderProds()">
+    <select id="prodCat" onchange="renderProds()">
+      <option value="">All Categories</option>
+      <option value="shirts">Shirts</option>
+      <option value="tshirts">T-Shirts</option>
+      <option value="pants">Pants</option>
+    </select>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Badge</th><th>Sizes</th><th>Actions</th></tr></thead>
+      <tbody id="prodTbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ADD/EDIT -->
+<div class="page" id="page-add">
+  <div class="ph">
+    <div class="ph-left"><h1 id="addTitle">Add New Product</h1><div class="sub" id="addSub">Fill in details below</div></div>
+    <div class="ph-right">
+      <button class="btn btn-outline btn-sm" onclick="goto('products')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveProduct()">💾 Save Product</button>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1.1fr .9fr;gap:22px">
+    <div>
+      <div class="card" style="margin-bottom:18px">
+        <div class="card-title">📷 Product Images</div>
+        <div class="cloud-setup" id="cloudSetup">
+          <h3>⚙️ One-Time: Connect Cloudinary for Photos</h3>
+          <p><strong>① Go to</strong> <a href="https://cloudinary.com/users/register_free" target="_blank" style="color:var(--gold);font-weight:700">cloudinary.com</a> → Sign up FREE<br>
+          <strong>② Dashboard</strong> → Copy <strong>Cloud Name</strong><br>
+          <strong>③ Settings → Upload → Add preset → Unsigned</strong> → Copy preset name<br>
+          <strong>④ Paste below and Save</strong></p>
+          <div class="cloud-fields">
+            <input type="text" id="cl-cloud" placeholder="Cloud Name">
+            <input type="text" id="cl-preset" placeholder="Upload Preset">
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-gold btn-sm" onclick="saveCloudConfig()">💾 Save Config</button>
+            <span id="cloudStatus" class="cloud-status bad">⚠ Not configured</span>
+            <button class="btn btn-sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:11px" onclick="document.getElementById('cloudSetup').style.display='none'">Hide ↑</button>
+          </div>
+        </div>
+        <div class="mtabs">
+          <button class="mtab on" id="tab-upload-btn" onclick="switchTab('upload',this)">📷 Upload Photo</button>
+          <button class="mtab" id="tab-url-btn" onclick="switchTab('url',this)">🔗 Paste URL</button>
+        </div>
+        <div class="mpanel on" id="tab-upload">
+          <div class="upload-zone" id="uploadZone" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="onDrop(event)">
+            <input type="file" id="imgFiles" accept="image/*" multiple onchange="handleFiles(this)">
+            <span class="upload-icon">📷</span>
+            <div class="upload-title">Click or Drag &amp; Drop Photos</div>
+            <div class="upload-sub">JPG, PNG, WEBP • Multiple allowed</div>
+          </div>
+          <div class="progress-wrap" id="progressWrap">
+            <div style="display:flex;justify-content:space-between"><span style="font-size:12px;font-weight:700" id="progressMsg">Uploading...</span><span style="font-size:11px;color:var(--text2)" id="progressPct">0%</span></div>
+            <div class="progress-bar-bg"><div class="progress-bar" id="progressBar"></div></div>
+          </div>
+          <div style="font-size:11px;color:var(--text2);margin-top:10px;padding:9px 12px;background:var(--surface2);border-radius:7px;border:1px solid var(--border)">💡 Set up Cloudinary above so photos work on your live website.</div>
+        </div>
+        <div class="mpanel" id="tab-url">
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <input type="text" id="newImgUrl" placeholder="https://i.ibb.co/xxx/photo.jpg" style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface2)">
+            <button class="btn btn-primary btn-sm" onclick="addImgUrl()">+ Add</button>
+          </div>
+          <div style="font-size:11px;color:var(--text2)">Free hosts: <a href="https://imgbb.com" target="_blank" style="color:var(--blue);font-weight:700">imgbb.com</a> • <a href="https://postimages.org" target="_blank" style="color:var(--blue);font-weight:700">postimages.org</a></div>
+        </div>
+        <div class="img-grid" id="imgGrid"></div>
+        <div id="imgCount" style="font-size:11px;color:var(--text2);margin-top:8px"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 Product Information</div>
+        <div class="fg"><label>Product Name *</label><input type="text" id="f-name" placeholder="e.g. Classic White Oxford Shirt"></div>
+        <div class="fg"><label>Category *</label>
+          <select id="f-cat"><option value="">Select category...</option><option value="shirts">Shirts</option><option value="tshirts">T-Shirts</option><option value="pants">Pants</option></select>
+        </div>
+        <div class="fg"><label>Tagline</label><input type="text" id="f-tagline" placeholder="e.g. Premium cotton, regular fit"></div>
+        <div class="fg"><label>Description</label><textarea id="f-desc" placeholder="Describe the product..."></textarea></div>
+        <div class="g2">
+          <div class="fg"><label>Fabric</label><input type="text" id="f-fabric" placeholder="100% Cotton"></div>
+          <div class="fg"><label>Fit</label><input type="text" id="f-fit" placeholder="Regular Fit"></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">💰 Pricing</div>
+        <div class="g2">
+          <div class="fg"><label>Original Price (Rs.) *</label><input type="number" id="f-orig" placeholder="999" min="0"></div>
+          <div class="fg"><label>Sale Price (Rs.)</label><input type="number" id="f-sale" placeholder="Leave blank if no sale" min="0"><div class="hint">Leave blank if no discount</div></div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">📊 Stock</div>
+        <div class="g2">
+          <div class="fg"><label>Quantity *</label><input type="number" id="f-stock" placeholder="20" min="0"></div>
+          <div class="fg"><label>Low Stock Alert At</label><input type="number" id="f-threshold" placeholder="5" min="0"></div>
+        </div>
+        <div class="fg" style="margin-bottom:0"><label>Status</label>
+          <select id="f-status"><option value="instock">In Stock</option><option value="lowstock">Low Stock</option><option value="outofstock">Out of Stock</option></select>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">📐 Available Sizes</div>
+        <div class="size-chips" id="sizeChips"></div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">🏷️ Product Badge</div>
+        <div class="b-chips" id="badgeChips"></div>
+        <input type="hidden" id="f-badge" value="">
+      </div>
+      <div class="card">
+        <div class="card-title">👁️ Visibility</div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Show in Store</div><div class="toggle-desc">Visible on product pages</div></div>
+          <label class="toggle"><input type="checkbox" id="f-visible" checked><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Low Stock Warning</div></div>
+          <label class="toggle"><input type="checkbox" id="f-lowstock"><span class="slider"></span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px">
+    <button class="btn btn-outline" onclick="goto('products')">Cancel</button>
+    <button class="btn btn-primary" style="padding:10px 28px;font-size:14px" onclick="saveProduct()">💾 Save &amp; Publish</button>
+  </div>
+  <input type="hidden" id="f-editId" value="">
+</div>
+
+<!-- VIEW -->
+<div class="page" id="page-view">
+  <div class="ph">
+    <div class="ph-left"><h1>Product Details</h1><div class="sub" id="viewSub"></div></div>
+    <div class="ph-right">
+      <button class="btn btn-outline btn-sm" onclick="goto('products')">← Back</button>
+      <button class="btn btn-warning btn-sm" onclick="editViewProd()">✏️ Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteViewProd()">🗑️ Delete</button>
+    </div>
+  </div>
+  <div id="viewContent"></div>
+</div>
+
+<!-- PUBLISH -->
+<div class="page" id="page-deploy">
+  <div class="ph">
+    <div class="ph-left"><h1>🚀 Publish to Website</h1><div class="sub">One click — no coding needed</div></div>
+    <div class="ph-right">
+      <a href="https://shanmugamenswear.vercel.app" target="_blank" class="btn btn-success btn-sm">🌐 Visit Live Site</a>
+    </div>
+  </div>
+  <div class="site-bar">
+    <span>🌐 Your live site:</span>
+    <a href="https://shanmugamenswear.vercel.app" target="_blank">https://shanmugamenswear.vercel.app</a>
+    <button class="btn btn-sm" style="background:var(--green);color:#fff" onclick="window.open('https://shanmugamenswear.vercel.app','_blank')">Open →</button>
+  </div>
+  <div class="gh-dark" id="ghSetupCard">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--gold)">⚙️ One-Time GitHub Setup</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:3px">Do this once. After that, just click Publish every time.</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="ghStatus" class="cloud-status bad">⚠ Not connected</span>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:11px" onclick="toggleGHSetup()">Hide ↑</button>
+      </div>
+    </div>
+    <div id="ghSetupBody">
+      <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:14px;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,.65);line-height:2.1">
+        <strong style="color:var(--gold)">Step 1 —</strong> <a href="https://github.com/settings/tokens/new" target="_blank" style="color:#7dd3fc;font-weight:700">github.com/settings/tokens/new</a> → Give a name → <strong style="color:#fff">No expiration</strong> → Tick <strong style="color:#fff">repo</strong> only → Generate token<br>
+        <strong style="color:var(--gold)">Step 2 —</strong> Copy the token (starts with <code style="background:rgba(255,255,255,.12);padding:1px 6px;border-radius:3px">ghp_</code>)<br>
+        <strong style="color:var(--gold)">Step 3 —</strong> Fill below → <strong style="color:#fff">Save &amp; Test</strong>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <input type="password" id="gh-token" class="gh-input" placeholder="GitHub Token (ghp_...)">
+        <input type="text" id="gh-user" class="gh-input" placeholder="GitHub username">
+        <input type="text" id="gh-repo" class="gh-input" placeholder="Repo name (shanmugamenswear)">
+        <input type="text" id="gh-branch" class="gh-input" placeholder="Branch (default: main)">
+      </div>
+      <button class="btn btn-gold btn-sm" onclick="saveGHConfig()">💾 Save &amp; Test Connection</button>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+    <div class="card">
+      <div class="card-title">🌐 Publish to Live Website</div>
+      <div class="alert alert-success" style="margin-bottom:16px"><strong>One click updates your store.</strong> No VS Code, no terminal needed.</div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;text-align:center">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);margin-bottom:6px">Products ready to publish</div>
+        <div style="font-family:'Syne',sans-serif;font-size:44px;font-weight:800" id="expCount">0</div>
+      </div>
+      <button class="pub-btn" id="publishBtn" onclick="publishToGitHub()">🚀 Publish to Website Now</button>
+      <div id="publishStatus" style="display:none;border-radius:8px;padding:12px 16px;font-size:13px;font-weight:600;margin-top:12px;white-space:pre-line"></div>
+      <div style="margin-top:12px;font-size:11px;color:var(--text2);text-align:center">⏱ Vercel updates in ~30 seconds after publish</div>
+    </div>
+    <div class="card">
+      <div class="card-title">💾 Backup &amp; Restore</div>
+      <div class="alert alert-info" style="margin-bottom:14px">Download backup or restore from a previous file.</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button class="btn btn-primary" onclick="doExport()" style="padding:12px">📥 Download Backup (.js file)</button>
+        <button class="btn btn-outline btn-sm" onclick="doCopyJSON()">📋 Copy JSON to Clipboard</button>
+        <div class="upload-zone" style="padding:18px">
+          <input type="file" id="importFile" accept=".json" onchange="doImport(this)">
+          <div style="font-size:26px;margin-bottom:6px">📤</div>
+          <div style="font-size:12px;color:var(--text2);font-weight:600">Click to restore from backup</div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="clearProds()">🗑️ Clear All Products</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 Publish History</div>
+    <div id="publishLog" style="max-height:220px;overflow-y:auto"><p style="color:var(--text2);font-size:12px">No publishes yet.</p></div>
+  </div>
+</div>
+
+<!-- OFFERS -->
+<div class="page" id="page-offers">
+  <div class="ph"><div class="ph-left"><h1>Offers &amp; Coupons</h1></div><button class="btn btn-primary btn-sm" onclick="openMod('couponMod')">+ Create Coupon</button></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:14px">Active Coupons <span id="couponCount" style="background:var(--surface2);border:1px solid var(--border);font-size:11px;font-weight:600;padding:2px 8px;border-radius:12px;color:var(--text2);margin-left:6px"></span></div>
+      <div id="couponList"></div>
+    </div>
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:14px">Quick Create</div>
+      <div class="card">
+        <div class="fg"><label>Coupon Code</label><input type="text" id="nc-code" placeholder="DIWALI30" style="text-transform:uppercase;font-weight:700"></div>
+        <div class="g2">
+          <div class="fg"><label>Type</label><select id="nc-type"><option value="percent">% Off</option><option value="flat">Flat Rs.</option></select></div>
+          <div class="fg"><label>Value</label><input type="number" id="nc-val" placeholder="20" min="1"></div>
+        </div>
+        <div class="g2">
+          <div class="fg"><label>Min Order (Rs.)</label><input type="number" id="nc-min" placeholder="499" min="0"></div>
+          <div class="fg"><label>Expiry Date</label><input type="date" id="nc-exp"></div>
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="createCoupon()">✅ Create Coupon</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEWS -->
+<div class="page" id="page-reviews">
+  <div class="ph"><div class="ph-left"><h1>Reviews &amp; Ratings</h1></div></div>
+  <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">
+    <div class="stat-card"><div class="s-lbl">Total Reviews</div><div class="s-val" id="rv-total">0</div></div>
+    <div class="stat-card"><div class="s-lbl">Pending</div><div class="s-val" id="rv-pending" style="color:var(--orange)">0</div></div>
+    <div class="stat-card"><div class="s-lbl">Approved</div><div class="s-val" id="rv-approved" style="color:var(--green)">0</div></div>
+  </div>
+  <div style="display:flex;gap:7px;margin-bottom:14px" id="revFilters">
+    <button class="btn btn-sm btn-primary" style="border-radius:20px" onclick="setRevF('all',this)">All</button>
+    <button class="btn btn-sm btn-outline" style="border-radius:20px" onclick="setRevF('pending',this)">Pending</button>
+    <button class="btn btn-sm btn-outline" style="border-radius:20px" onclick="setRevF('approved',this)">Approved</button>
+  </div>
+  <div id="revList"></div>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div class="page" id="page-notifications">
+  <div class="ph"><div class="ph-left"><h1>Notifications</h1></div><button class="btn btn-outline btn-sm" onclick="markAllRead()">✓ Mark All Read</button></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+    <div><div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:12px">All Notifications</div><div class="table-wrap" id="notifList"></div></div>
+    <div><div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:12px">Alert Settings</div>
+      <div class="card">
+        <div class="toggle-row"><div><div class="toggle-label">Low Stock Alert</div></div><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="toggle-row"><div><div class="toggle-label">New Order Alert</div></div><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECURITY -->
+<div class="page" id="page-security">
+  <div class="ph"><div class="ph-left"><h1>Security</h1></div><span class="tag tg" style="padding:5px 12px;font-size:12px">🔒 Secure</span></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+    <div><div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:12px">Change Password</div>
+      <div class="card">
+        <div id="pwMsg" class="pw-msg"></div>
+        <div class="fg"><label>Current Password</label><input type="password" id="pw-cur"></div>
+        <div class="fg"><label>New Password</label><input type="password" id="pw-new" placeholder="Min 8 characters"></div>
+        <div class="fg"><label>Confirm New Password</label><input type="password" id="pw-confirm"></div>
+        <button class="btn btn-primary btn-sm" onclick="changePw()">🔑 Update Password</button>
+      </div>
+    </div>
+    <div><div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:12px">Activity Log</div>
+      <div class="card" id="actLog" style="max-height:400px;overflow-y:auto"><p style="color:var(--text2);font-size:12px">No activity yet.</p></div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- ORDER DETAIL MODAL -->
+<div class="modal-overlay" id="orderDetailMod">
+  <div class="modal-box">
+    <h3>Order Details</h3>
+    <div id="orderDetailContent"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeMod('orderDetailMod')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- COUPON MODAL -->
+<div class="modal-overlay" id="couponMod">
+  <div class="modal-box">
+    <h3>Create Coupon</h3>
+    <div class="fg"><label>Coupon Code</label><input type="text" id="mc-code" placeholder="FESTIVE30" style="text-transform:uppercase;font-weight:700"></div>
+    <div class="fg"><label>Type</label><select id="mc-type"><option value="percent">Percentage (%)</option><option value="flat">Flat Amount (Rs.)</option></select></div>
+    <div class="fg"><label>Discount Value</label><input type="number" id="mc-val" placeholder="30" min="1"></div>
+    <div class="fg"><label>Expiry Date</label><input type="date" id="mc-exp"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeMod('couponMod')">Cancel</button>
+      <button class="btn btn-primary" onclick="createCouponMod()">✅ Create</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CREDENTIALS ──
+var DEFAULT_USER='admin',DEFAULT_PASS='shanmuga2026';
+var ADMIN_USER=localStorage.getItem('smw_admin_user')||DEFAULT_USER;
+var ADMIN_PASS=localStorage.getItem('smw_admin_pass')||DEFAULT_PASS;
+if(!localStorage.getItem('smw_admin_user'))localStorage.setItem('smw_admin_user',DEFAULT_USER);
+if(!localStorage.getItem('smw_admin_pass'))localStorage.setItem('smw_admin_pass',DEFAULT_PASS);
+
+// ── STATE ──
+var CL_CLOUD='',CL_PRESET='';
+var GH_TOKEN='',GH_USER_V='',GH_REPO='',GH_BRANCH='main';
+var ghSetupOpen=true;
+var nextId=200;
+var currentImgs=[],selSizes=[],selBadge='',viewingId=-1,revFilter='all',uploading=false;
+var ALL_SIZES=['XS','S','M','L','XL','XXL','28','30','32','34','36','38'];
+var ALL_BADGES=[{val:'',label:'None',cls:'sel-none'},{val:'new',label:'New',cls:'sel-new'},{val:'sale',label:'Sale',cls:'sel-sale'},{val:'offer',label:'Offer',cls:'sel-offer'}];
+var coupons=[{code:'SAVE10',type:'percent',val:10,min:0,expiry:'31 Dec 2026',uses:0,active:true},{code:'WELCOME',type:'percent',val:5,min:0,expiry:'31 Dec 2026',uses:0,active:true},{code:'SMW20',type:'percent',val:20,min:999,expiry:'31 Dec 2026',uses:0,active:true}];
+var notifs=[];
+var reviews=[
+  {init:'R',name:'Rahul Menon',prod:'Classic Blue Oxford Shirt',date:'2 days ago',stars:5,text:'Absolutely love this shirt! Premium cotton and perfect fit.',status:'pending'},
+  {init:'A',name:'Arjun S.',prod:'Beige Linen Pant',date:'1 week ago',stars:5,text:'Great quality, very comfortable.',status:'approved'}
+];
+var VERCEL_URL='https://shanmugamenswear.vercel.app';
+
+// ── HELPERS ──
+function loadProds(){try{var r=localStorage.getItem('smw_products');if(!r||r==='null'||r==='[]')return[];var a=JSON.parse(r);return Array.isArray(a)?a:[];}catch(e){return[];}}
+function saveProds(arr){try{localStorage.setItem('smw_products',JSON.stringify(arr));}catch(e){toast('Storage error: '+e.message,'error');}}
+function loadOrders(){try{var r=localStorage.getItem('smw_orders');if(!r)return[];var a=JSON.parse(r);return Array.isArray(a)?a:[];}catch(e){return[];}}
+function saveOrders(arr){try{localStorage.setItem('smw_orders',JSON.stringify(arr));}catch(e){toast('Storage error','error');}}
+function catLabel(c){return{shirts:'Shirts',tshirts:'T-Shirts',pants:'Pants'}[c]||c;}
+function catTagClass(c){return{shirts:'to',tshirts:'tb',pants:'tg'}[c]||'ty';}
+function badgeHTML(b){if(!b)return'';return{new:'<span class="tag tb">New</span>',sale:'<span class="tag tr">Sale</span>',offer:'<span class="tag to">Offer</span>'}[b]||'';}
+function stockHTML(p){var s=parseInt(p.stock)||0,t=parseInt(p.threshold)||5;if(s===0)return'<span class="tag tr">Out of Stock</span>';if(s<=t)return'<span class="tag to">Low Stock</span>';return'<span class="tag tg">In Stock</span>';}
+function fmtRs(n){return'Rs.'+Number(n).toLocaleString('en-IN');}
+function starsHTML(n){var s='';for(var i=0;i<5;i++)s+=i<n?'★':'☆';return s;}
+function nowTime(){var d=new Date(),h=d.getHours(),m=d.getMinutes(),ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+(m<10?'0'+m:m)+' '+ap;}
+function escHTML(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── SHIPPING STATUS COLOR ──
+function shipTagClass(s){return{pending:'to',dispatched:'tb',delivered:'tg',cancelled:'tr'}[s]||'ty';}
+function shipTagLabel(s){return{pending:'⏳ Pending',dispatched:'📦 Dispatched',delivered:'✅ Delivered',cancelled:'❌ Cancelled'}[s]||s;}
+
+// ── ORDERS ──
+function renderOrders(){
+  var orders=loadOrders();
+  var q=(document.getElementById('orderSearch')||{value:''}).value.toLowerCase();
+  var sf=(document.getElementById('orderStatusFilter')||{value:''}).value;
+
+  // Stats
+  var totalRev=0,pending=0,delivered=0;
+  orders.forEach(function(o){
+    totalRev+=o.total||0;
+    if(o.shippingStatus==='delivered')delivered++;
+    else if(o.shippingStatus==='pending'||!o.shippingStatus)pending++;
+  });
+  document.getElementById('o-total').textContent=orders.length;
+  document.getElementById('o-revenue').textContent='Rs.'+Number(totalRev).toLocaleString('en-IN');
+  document.getElementById('o-pending').textContent=pending;
+  document.getElementById('o-delivered').textContent=delivered;
+
+  var sub=document.getElementById('orderSub');
+  if(sub)sub.textContent=orders.length+' order'+(orders.length!==1?'s':'')+' received';
+
+  // Filter
+  var filtered=orders.filter(function(o){
+    if(sf&&(o.shippingStatus||'pending')!==sf)return false;
+    if(q){
+      var hay=(o.customer&&(o.customer.name+' '+o.customer.phone+' '+o.customer.email)||'')+' '+o.id+' '+(o.paymentId||'');
+      if(hay.toLowerCase().indexOf(q)<0)return false;
+    }
+    return true;
+  });
+
+  var el=document.getElementById('ordersList');
+  if(!filtered.length){
+    el.innerHTML='<div class="no-orders"><h3>'+(orders.length===0?'No orders yet':'No matching orders')+'</h3><p>'+(orders.length===0?'Orders placed through checkout will appear here automatically.<br>Share your store and start selling!':'Try a different search or filter.')+'</p></div>';
+    return;
+  }
+
+  el.innerHTML=filtered.map(function(o,idx){
+    var c=o.customer||{};
+    var itemsHTML=(o.items||[]).map(function(it){
+      return '<div class="order-item-row">'+
+        '<div><div class="order-item-name">'+escHTML(it.name)+'</div><div class="order-item-meta">Size: '+escHTML(it.size||'—')+' &nbsp;•&nbsp; Qty: '+it.qty+'</div></div>'+
+        '<div style="font-weight:700">'+fmtRs(it.total||it.price*it.qty)+'</div>'+
+      '</div>';
+    }).join('');
+    var curStatus=o.shippingStatus||'pending';
+    return '<div class="order-card">'+
+      '<div class="order-card-head">'+
+        '<div>'+
+          '<div class="order-id">'+escHTML(o.id)+'</div>'+
+          '<div class="order-date">'+escHTML(o.dateStr||o.date||'')+'</div>'+
+        '</div>'+
+        '<span class="tag '+shipTagClass(curStatus)+'">'+shipTagLabel(curStatus)+'</span>'+
+        '<span class="tag tg" style="margin-left:4px">💳 Paid</span>'+
+        '<div style="margin-left:auto;display:flex;gap:8px">'+
+          '<button class="btn btn-outline btn-xs" onclick="showOrderDetail(\''+escHTML(o.id)+'\')">View Details</button>'+
+          '<button class="btn btn-danger btn-xs" onclick="deleteOrder(\''+escHTML(o.id)+'\')">Delete</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="order-card-body">'+
+        '<div class="order-customer">'+
+          '<div class="order-customer-item"><div class="order-customer-label">Customer</div><div class="order-customer-val">'+escHTML(c.name||'—')+'</div></div>'+
+          '<div class="order-customer-item"><div class="order-customer-label">Phone</div><div class="order-customer-val">'+escHTML(c.phone||'—')+'</div></div>'+
+          '<div class="order-customer-item"><div class="order-customer-label">Email</div><div class="order-customer-val" style="font-size:12px">'+escHTML(c.email||'—')+'</div></div>'+
+          '<div class="order-customer-item"><div class="order-customer-label">Address</div><div class="order-customer-val" style="font-size:12px;max-width:220px">'+escHTML(c.address||'—')+'</div></div>'+
+        '</div>'+
+        '<div class="order-items-list">'+itemsHTML+'</div>'+
+        '<div class="order-totals">'+
+          '<div class="order-total-chip">Total: '+fmtRs(o.total)+'</div>'+
+          (o.coupon&&o.coupon!=='none'?'<span class="tag tg">🏷 '+escHTML(o.coupon)+'</span>':'')+
+          (o.shipping>0?'<span class="tag ty">Express Shipping</span>':'<span class="tag tg">Free Shipping</span>')+
+          '<div class="order-ship-status">'+
+            '<span style="font-size:11px;color:var(--text2);font-weight:600">Update Status:</span>'+
+            '<select class="ship-select" onchange="updateShipStatus(\''+escHTML(o.id)+'\',this.value)">'+
+              '<option value="pending"'+(curStatus==='pending'?' selected':'')+'>⏳ Pending</option>'+
+              '<option value="dispatched"'+(curStatus==='dispatched'?' selected':'')+'>📦 Dispatched</option>'+
+              '<option value="delivered"'+(curStatus==='delivered'?' selected':'')+'>✅ Delivered</option>'+
+              '<option value="cancelled"'+(curStatus==='cancelled'?' selected':'')+'>❌ Cancelled</option>'+
+            '</select>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+
+  // Update sidebar badge
+  var unread=parseInt(localStorage.getItem('smw_orders_unread')||'0');
+  var nb=document.getElementById('nb-orders');
+  if(nb){nb.textContent=unread;nb.style.display=unread>0?'':'none';}
+}
+
+function updateShipStatus(orderId, status){
+  var orders=loadOrders();
+  var o=orders.find(function(x){return x.id===orderId;});
+  if(!o)return;
+  o.shippingStatus=status;
+  saveOrders(orders);
+  renderOrders();
+  toast('Shipping status updated to: '+status,'success');
+  logAct('Order '+orderId+' → '+status,'var(--green)');
+}
+
+function showOrderDetail(orderId){
+  var orders=loadOrders();
+  var o=orders.find(function(x){return x.id===orderId;});
+  if(!o)return;
+  var c=o.customer||{};
+  var itemsHTML=(o.items||[]).map(function(it){
+    return '<tr><td>'+escHTML(it.name)+'</td><td>'+escHTML(it.size||'—')+'</td><td>'+it.qty+'</td><td>'+fmtRs(it.price)+'</td><td><strong>'+fmtRs(it.total||it.price*it.qty)+'</strong></td></tr>';
+  }).join('');
+  document.getElementById('orderDetailContent').innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">'+
+      '<div><div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:5px">Order ID</div><div style="font-weight:700">'+escHTML(o.id)+'</div></div>'+
+      '<div><div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:5px">Payment ID</div><div style="font-weight:700;font-size:12px">'+escHTML(o.paymentId||'—')+'</div></div>'+
+      '<div><div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:5px">Date</div><div>'+escHTML(o.dateStr||o.date||'—')+'</div></div>'+
+      '<div><div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:5px">Status</div><span class="tag '+shipTagClass(o.shippingStatus||'pending')+'">'+shipTagLabel(o.shippingStatus||'pending')+'</span></div>'+
+    '</div>'+
+    '<div style="background:var(--surface2);border-radius:8px;padding:14px;margin-bottom:16px">'+
+      '<div style="font-family:\'Syne\',sans-serif;font-weight:800;font-size:13px;margin-bottom:10px">👤 Customer</div>'+
+      '<div style="font-size:13px;line-height:1.9"><strong>'+escHTML(c.name||'—')+'</strong><br>📱 '+escHTML(c.phone||'—')+'<br>✉️ '+escHTML(c.email||'—')+'<br>📍 '+escHTML(c.address||'—')+'</div>'+
+    '</div>'+
+    '<div style="font-family:\'Syne\',sans-serif;font-weight:800;font-size:13px;margin-bottom:10px">🛍️ Items Ordered</div>'+
+    '<div class="table-wrap" style="margin-bottom:14px"><table><thead><tr><th>Product</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>'+itemsHTML+'</tbody></table></div>'+
+    '<div style="background:var(--surface2);border-radius:8px;padding:12px;display:flex;gap:18px;flex-wrap:wrap">'+
+      '<div><div style="font-size:10px;text-transform:uppercase;color:var(--text2);font-weight:700">Subtotal</div><div style="font-weight:700">'+fmtRs(o.subtotal||0)+'</div></div>'+
+      (o.discount>0?'<div><div style="font-size:10px;text-transform:uppercase;color:var(--text2);font-weight:700">Discount'+(o.coupon&&o.coupon!=='none'?' ('+o.coupon+')':'')+'</div><div style="font-weight:700;color:var(--green)">−'+fmtRs(o.discount)+'</div></div>':'')+
+      '<div><div style="font-size:10px;text-transform:uppercase;color:var(--text2);font-weight:700">Shipping</div><div style="font-weight:700">'+(o.shipping>0?fmtRs(o.shipping):'Free')+'</div></div>'+
+      '<div><div style="font-size:10px;text-transform:uppercase;color:var(--text2);font-weight:700">Total Paid</div><div style="font-family:\'Syne\',sans-serif;font-size:20px;font-weight:800;color:var(--green)">'+fmtRs(o.total)+'</div></div>'+
+    '</div>';
+  openMod('orderDetailMod');
+}
+
+function deleteOrder(orderId){
+  if(!confirm('Delete this order? This cannot be undone.'))return;
+  var orders=loadOrders().filter(function(o){return o.id!==orderId;});
+  saveOrders(orders);
+  renderOrders();
+  toast('Order deleted','success');
+}
+
+function clearOrders(){
+  if(!confirm('Delete ALL orders? This cannot be undone!'))return;
+  localStorage.removeItem('smw_orders');
+  localStorage.removeItem('smw_orders_unread');
+  renderOrders();
+  toast('All orders cleared');
+}
+
+// ── NAV ──
+var PAGE_TITLES={orders:'Orders',products:'Products',add:'Add Product',view:'Product Details',deploy:'Publish to Website',offers:'Offers & Coupons',reviews:'Reviews',notifications:'Notifications',security:'Security'};
+function goto(pg){
+  document.querySelectorAll('.page').forEach(function(e){e.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(e){e.classList.remove('active');});
+  var pe=document.getElementById('page-'+pg);if(pe)pe.classList.add('active');
+  var ne=document.getElementById('nav-'+pg);if(ne)ne.classList.add('active');
+  document.getElementById('topTitle').textContent=PAGE_TITLES[pg]||pg;
+  if(pg==='products'){renderProds();checkUnpublished();}
+  if(pg==='deploy'){updateExpCount();}
+  if(pg==='orders'){
+    // Clear unread badge when visiting orders
+    localStorage.setItem('smw_orders_unread','0');
+    var nb=document.getElementById('nb-orders');if(nb){nb.style.display='none';}
+    renderOrders();
+  }
+}
+function gotoAdd(){resetForm();goto('add');document.getElementById('addTitle').textContent='Add New Product';document.getElementById('addSub').textContent='Fill in details below';}
+function openMod(id){document.getElementById(id).classList.add('open');}
+function closeMod(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(function(m){m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('open');});});
+
+// ── TOAST ──
+var toastTimer;
+function toast(msg,type){
+  var t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(type?' '+type:'');t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},3500);
+}
+
+// ── PRODUCT HELPERS ──
+function syncFromPublished(){
+  var existing=loadProds();
+  if(existing.length>0){existing.forEach(function(p){if(p.id>=nextId)nextId=p.id+1;});return;}
+  if(typeof SMW_DEFAULT_PRODUCTS!=='undefined'&&Array.isArray(SMW_DEFAULT_PRODUCTS)&&SMW_DEFAULT_PRODUCTS.length>0){
+    saveProds(SMW_DEFAULT_PRODUCTS);SMW_DEFAULT_PRODUCTS.forEach(function(p){if(p.id>=nextId)nextId=p.id+1;});
+    toast('Loaded '+SMW_DEFAULT_PRODUCTS.length+' products from published site!','success');
+  }
+}
+function checkUnpublished(){
+  var bar=document.getElementById('unpubBar');if(!bar)return;
+  var prods=loadProds();var lastPub=parseInt(localStorage.getItem('smw_last_pub_count')||'-1');
+  bar.style.display=(lastPub===-1||prods.length!==lastPub)?'flex':'none';
+}
+function updateExpCount(){var el=document.getElementById('expCount');if(el)el.textContent=loadProds().length;}
+
+// ── CLOUDINARY ──
+function loadCloudConfig(){
+  CL_CLOUD=localStorage.getItem('smw_cl_cloud')||'';CL_PRESET=localStorage.getItem('smw_cl_preset')||'';
+  var ci=document.getElementById('cl-cloud'),pi=document.getElementById('cl-preset');
+  if(ci&&CL_CLOUD)ci.value=CL_CLOUD;if(pi&&CL_PRESET)pi.value=CL_PRESET;updateCloudStatus();
+}
+function saveCloudConfig(){
+  var c=document.getElementById('cl-cloud').value.trim(),p=document.getElementById('cl-preset').value.trim();
+  if(!c||!p){toast('Enter both Cloud Name and Preset','error');return;}
+  CL_CLOUD=c;CL_PRESET=p;localStorage.setItem('smw_cl_cloud',c);localStorage.setItem('smw_cl_preset',p);
+  updateCloudStatus();toast('Cloudinary configured!','success');
+}
+function updateCloudStatus(){
+  var el=document.getElementById('cloudStatus');if(!el)return;
+  if(CL_CLOUD&&CL_PRESET){el.className='cloud-status ok';el.textContent='✓ '+CL_CLOUD;}
+  else{el.className='cloud-status bad';el.textContent='⚠ Not configured';}
+}
+
+// ── GITHUB ──
+function loadGHConfig(){
+  GH_TOKEN=localStorage.getItem('smw_gh_token')||'';GH_USER_V=localStorage.getItem('smw_gh_user')||'';GH_REPO=localStorage.getItem('smw_gh_repo')||'';GH_BRANCH=localStorage.getItem('smw_gh_branch')||'main';
+  var ti=document.getElementById('gh-token'),ui=document.getElementById('gh-user'),ri=document.getElementById('gh-repo'),bi=document.getElementById('gh-branch');
+  if(ti&&GH_TOKEN)ti.value=GH_TOKEN;if(ui&&GH_USER_V)ui.value=GH_USER_V;if(ri&&GH_REPO)ri.value=GH_REPO;if(bi)bi.value=GH_BRANCH;
+  updateGHStatus();
+}
+function saveGHConfig(){
+  var t=document.getElementById('gh-token').value.trim(),u=document.getElementById('gh-user').value.trim(),r=document.getElementById('gh-repo').value.trim(),b=document.getElementById('gh-branch').value.trim()||'main';
+  if(!t||!u||!r){toast('Please fill Token, Username, and Repo name','error');return;}
+  GH_TOKEN=t;GH_USER_V=u;GH_REPO=r;GH_BRANCH=b;
+  localStorage.setItem('smw_gh_token',t);localStorage.setItem('smw_gh_user',u);localStorage.setItem('smw_gh_repo',r);localStorage.setItem('smw_gh_branch',b);
+  updateGHStatus();testGHConnection();
+}
+function updateGHStatus(){
+  var el=document.getElementById('ghStatus');if(!el)return;
+  if(GH_TOKEN&&GH_USER_V&&GH_REPO){el.className='cloud-status ok';el.textContent='✓ '+GH_USER_V+'/'+GH_REPO;}
+  else{el.className='cloud-status bad';el.textContent='⚠ Not connected';}
+}
+function testGHConnection(){
+  var el=document.getElementById('ghStatus');if(el){el.className='cloud-status bad';el.textContent='⏳ Testing...';}
+  fetch('https://api.github.com/repos/'+GH_USER_V+'/'+GH_REPO,{headers:{'Authorization':'token '+GH_TOKEN,'Accept':'application/vnd.github.v3+json'}})
+  .then(function(r){if(r.ok){updateGHStatus();toast('✓ GitHub connected!','success');logAct('GitHub connected','var(--green)');}else if(r.status===401){toast('Token invalid','error');if(el){el.className='cloud-status bad';el.textContent='✗ Invalid token';}}else{toast('Repo not found','error');}})
+  .catch(function(){toast('Network error','error');});
+}
+function toggleGHSetup(){ghSetupOpen=!ghSetupOpen;var body=document.getElementById('ghSetupBody');if(body)body.style.display=ghSetupOpen?'block':'none';}
+function publishToGitHub(){
+  if(!GH_TOKEN||!GH_USER_V||!GH_REPO){toast('Set up GitHub first','error');return;}
+  var prods=loadProds();if(!prods.length){toast('No products to publish!','error');return;}
+  var btn=document.getElementById('publishBtn');setPS('info','📡 Connecting to GitHub...');if(btn){btn.disabled=true;btn.textContent='⏳ Publishing...';}
+  var clean=prods.map(function(p){var photos=(p.photos||[]).filter(function(u){return u&&u.indexOf('data:image')<0;});return Object.assign({},p,{photos:photos});});
+  var jsContent='/* Shanmuga Mens Wear Products — '+clean.length+' items — Updated '+new Date().toLocaleString('en-IN')+' */\n/* © 2026 Shanmuga Mens Wear. All rights reserved. */\n\nvar SMW_DEFAULT_PRODUCTS = '+JSON.stringify(clean,null,2)+';\n';
+  var encoded;try{encoded=btoa(unescape(encodeURIComponent(jsContent)));}catch(e){toast('Encoding error','error');if(btn){btn.disabled=false;btn.textContent='🚀 Publish to Website Now';}return;}
+  var apiUrl='https://api.github.com/repos/'+GH_USER_V+'/'+GH_REPO+'/contents/smw-products.js';
+  var headers={'Authorization':'token '+GH_TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'};
+  setPS('info','📡 Fetching current file...');
+  fetch(apiUrl+'?ref='+GH_BRANCH,{headers:headers})
+  .then(function(r){if(r.status===404)return{sha:null};if(!r.ok)return r.json().then(function(d){throw new Error(d.message||('HTTP '+r.status));});return r.json();})
+  .then(function(data){
+    setPS('info','📡 Uploading '+clean.length+' products...');
+    var body={message:'🛍️ Update products ('+clean.length+' items) — '+new Date().toLocaleDateString('en-IN'),content:encoded,branch:GH_BRANCH};
+    if(data.sha)body.sha=data.sha;
+    return fetch(apiUrl,{method:'PUT',headers:headers,body:JSON.stringify(body)});
+  })
+  .then(function(r){
+    if(r.ok||r.status===200||r.status===201){
+      return r.json().then(function(){
+        localStorage.setItem('smw_last_pub_count',clean.length);
+        if(btn){btn.disabled=false;btn.textContent='✅ Published!';}
+        setPS('ok','✅ '+clean.length+' products published!\n\n⏳ Vercel updates in ~30 seconds.\n👉 Visit: '+VERCEL_URL);
+        toast('🎉 '+clean.length+' products live!','success');
+        logAct('Published '+clean.length+' products','var(--green)');
+        addPubLog(clean.length);checkUnpublished();
+      });
+    }else{return r.json().then(function(d){throw new Error(d.message||('HTTP '+r.status));});}
+  })
+  .catch(function(err){
+    if(btn){btn.disabled=false;btn.textContent='🚀 Publish to Website Now';}
+    var msg=err.message||'Unknown error';
+    if(msg.indexOf('Bad credentials')>=0)msg='Token invalid. Generate a new one.';
+    else if(msg.indexOf('Not Found')>=0)msg='Repo not found. Check username and repo name.';
+    setPS('err','❌ Publish failed: '+msg);toast('Publish failed: '+msg,'error');
+  });
+}
+function setPS(type,msg){
+  var el=document.getElementById('publishStatus');if(!el)return;el.style.display='block';
+  var bg={ok:'var(--green-bg)',err:'var(--red-bg)',info:'var(--blue-bg)'};var tc={ok:'var(--green)',err:'var(--red)',info:'var(--blue)'};
+  el.style.background=bg[type];el.style.color=tc[type];el.style.borderRadius='8px';el.style.padding='12px 16px';el.style.fontSize='13px';el.style.fontWeight='600';el.textContent=msg;
+}
+function addPubLog(count){
+  var log=document.getElementById('publishLog');if(!log)return;var empty=log.querySelector('p');if(empty)empty.remove();
+  var w=document.createElement('div');w.className='log-item';w.innerHTML='<div class="log-dot" style="background:var(--green)"></div><div><div class="log-text">Published '+count+' products → '+VERCEL_URL+'</div><div class="log-time">'+new Date().toLocaleString('en-IN')+'</div></div>';
+  log.insertBefore(w,log.firstChild);
+}
+
+// ── LOGIN ──
+document.getElementById('lu').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+document.getElementById('lp').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+var loginAttempts=0,loginLockedUntil=parseInt(localStorage.getItem('smw_locked_until')||'0');
+function doLogin(){
+  var now=Date.now();
+  if(loginLockedUntil>now){var mins=Math.ceil((loginLockedUntil-now)/60000);showErr('🔒 Locked. Try in '+mins+' min.');return;}
+  var u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value;
+  if(u===ADMIN_USER&&p===ADMIN_PASS){
+    loginAttempts=0;localStorage.removeItem('smw_locked_until');
+    document.getElementById('loginErr').style.display='none';
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('app').style.display='block';
+    initApp();
+  }else{
+    loginAttempts++;
+    if(loginAttempts>=5){var lu2=Date.now()+10*60*1000;localStorage.setItem('smw_locked_until',lu2);loginLockedUntil=lu2;loginAttempts=0;showErr('🔒 Locked for 10 minutes.');}
+    else showErr('❌ Wrong credentials. '+(5-loginAttempts)+' left.');
+    document.getElementById('lp').value='';document.getElementById('lp').focus();
+  }
+}
+function showErr(msg){var el=document.getElementById('loginErr');el.textContent=msg;el.style.display='block';}
+function doLogout(){if(!confirm('Sign out?'))return;document.getElementById('app').style.display='none';document.getElementById('loginScreen').style.display='flex';document.getElementById('lu').value='';document.getElementById('lp').value='';}
+
+// ── INIT ──
+function initApp(){
+  syncFromPublished();
+  loadProds().forEach(function(p){if(p.id>=nextId)nextId=p.id+1;});
+  loadCloudConfig();loadGHConfig();
+  buildSizeChips();buildBadgeChips();
+  renderProds();renderCoupons();renderNotifs();renderRevs();updateExpCount();renderOrders();
+  checkUnpublished();startTimer();logAct('Admin logged in','var(--green)');
+  // Show orders badge if unread
+  var unread=parseInt(localStorage.getItem('smw_orders_unread')||'0');
+  var nb=document.getElementById('nb-orders');if(nb){nb.textContent=unread;nb.style.display=unread>0?'':'none';}
+  // Auto-open orders if there are new ones
+  if(unread>0){setTimeout(function(){toast('🛒 You have '+unread+' new order'+(unread>1?'s':'')+'! Click Orders to view.','success');},800);}
+}
+
+// ── IMAGE TABS ──
+function switchTab(t,btn){document.querySelectorAll('.mtab').forEach(function(b){b.classList.remove('on');});document.querySelectorAll('.mpanel').forEach(function(p){p.classList.remove('on');});btn.classList.add('on');document.getElementById('tab-'+t).classList.add('on');}
+
+// ── IMAGE UPLOAD ──
+function onDrop(e){e.preventDefault();document.getElementById('uploadZone').classList.remove('dragover');if(e.dataTransfer.files&&e.dataTransfer.files.length)processFiles(e.dataTransfer.files);}
+function handleFiles(inp){if(inp.files&&inp.files.length)processFiles(inp.files);inp.value='';}
+function processFiles(files){if(uploading){toast('Please wait...');return;}if(CL_CLOUD&&CL_PRESET)uploadToCloud(Array.from(files));else uploadLocally(Array.from(files));}
+function uploadToCloud(files){
+  uploading=true;var pw=document.getElementById('progressWrap');pw.classList.add('show');
+  document.getElementById('progressMsg').textContent='Uploading '+files.length+' photo(s)...';document.getElementById('progressBar').style.width='0%';document.getElementById('progressPct').textContent='0%';
+  var done=0,errs=0;
+  function next(i){
+    if(i>=files.length){uploading=false;pw.classList.remove('show');if(errs)toast(errs+' failed','error');else toast(files.length+' photo(s) uploaded!','success');return;}
+    var fd=new FormData();fd.append('file',files[i]);fd.append('upload_preset',CL_PRESET);
+    var xhr=new XMLHttpRequest();xhr.open('POST','https://api.cloudinary.com/v1_1/'+CL_CLOUD+'/image/upload');
+    xhr.onload=function(){done++;var pct=Math.round(done/files.length*100);document.getElementById('progressBar').style.width=pct+'%';document.getElementById('progressPct').textContent=pct+'%';if(xhr.status===200){var r=JSON.parse(xhr.responseText);currentImgs.push(r.secure_url);renderImgGrid();}else errs++;next(i+1);};
+    xhr.onerror=function(){done++;errs++;next(i+1);};xhr.send(fd);
+  }
+  next(0);
+}
+function uploadLocally(files){
+  var total=files.length,done=0;var pw=document.getElementById('progressWrap');pw.classList.add('show');
+  document.getElementById('progressMsg').textContent='Loading '+total+' photo(s)...';
+  Array.from(files).forEach(function(file){
+    var r=new FileReader();r.onload=function(e){currentImgs.push(e.target.result);done++;var pct=Math.round(done/total*100);document.getElementById('progressBar').style.width=pct+'%';document.getElementById('progressPct').textContent=pct+'%';renderImgGrid();if(done===total){pw.classList.remove('show');toast(total+' loaded. Set up Cloudinary for live site!');}};r.readAsDataURL(file);
+  });
+}
+function addImgUrl(){var v=document.getElementById('newImgUrl').value.trim();if(!v||v.indexOf('http')!==0){toast('Enter a valid URL','error');return;}currentImgs.push(v);document.getElementById('newImgUrl').value='';renderImgGrid();toast('Image URL added!','success');}
+function removeImg(i){currentImgs.splice(i,1);renderImgGrid();}
+function renderImgGrid(){
+  var g=document.getElementById('imgGrid'),c=document.getElementById('imgCount');
+  if(!currentImgs.length){g.innerHTML='';if(c)c.textContent='';return;}
+  g.innerHTML=currentImgs.map(function(u,i){return'<div class="img-thumb'+(i===0?' main-img':'')+'"><img src="'+escHTML(u)+'" onerror="this.style.opacity=\'0.3\'">'+(i===0?'<span class="main-lbl">MAIN</span>':'')+'<button class="del-btn" onclick="removeImg('+i+')">×</button></div>';}).join('');
+  if(c)c.textContent=currentImgs.length+' image(s) — first is main';
+}
+
+// ── SIZE & BADGE CHIPS ──
+function buildSizeChips(){var el=document.getElementById('sizeChips');if(!el)return;el.innerHTML=ALL_SIZES.map(function(sz){return'<button class="s-chip" onclick="toggleSz(this,\''+sz+'\')">'+sz+'</button>';}).join('');}
+function toggleSz(btn,size){var i=selSizes.indexOf(size);if(i>=0){selSizes.splice(i,1);btn.classList.remove('on');}else{selSizes.push(size);btn.classList.add('on');}}
+function resetSzChips(){selSizes=[];document.querySelectorAll('.s-chip').forEach(function(c){c.classList.remove('on');});}
+function applySz(){document.querySelectorAll('.s-chip').forEach(function(c){if(selSizes.indexOf(c.textContent.trim())>=0)c.classList.add('on');else c.classList.remove('on');});}
+function buildBadgeChips(){var el=document.getElementById('badgeChips');if(!el)return;el.innerHTML=ALL_BADGES.map(function(b){return'<button class="b-chip" onclick="pickBadge(this,\''+b.val+'\')">'+b.label+'</button>';}).join('');var first=el.querySelector('.b-chip');if(first)first.classList.add('sel-none');}
+function pickBadge(btn,val){selBadge=val;document.getElementById('f-badge').value=val;document.querySelectorAll('.b-chip').forEach(function(c){c.className='b-chip';});var m={'':'sel-none','new':'sel-new','sale':'sel-sale','offer':'sel-offer'};btn.classList.add(m[val]||'sel-none');}
+function resetBadgeChips(){selBadge='';document.getElementById('f-badge').value='';document.querySelectorAll('.b-chip').forEach(function(c){c.className='b-chip';});var first=document.querySelector('#badgeChips .b-chip');if(first)first.classList.add('sel-none');}
+function applyBadge(){document.querySelectorAll('.b-chip').forEach(function(c){c.className='b-chip';});var m={'':'sel-none','new':'sel-new','sale':'sel-sale','offer':'sel-offer'};ALL_BADGES.forEach(function(b){if(b.val===selBadge){document.querySelectorAll('#badgeChips .b-chip').forEach(function(c){if(c.textContent.trim()===b.label)c.classList.add(m[b.val]||'sel-none');});}});}
+
+// ── PRODUCTS RENDER ──
+function renderProds(){
+  var prods=loadProds();
+  var q=(document.getElementById('prodSearch')||{value:''}).value.toLowerCase();
+  var cf=(document.getElementById('prodCat')||{value:''}).value;
+  var sh=0,ts=0,pa=0;
+  prods.forEach(function(p){if(p.cat==='shirts')sh++;else if(p.cat==='tshirts')ts++;else if(p.cat==='pants')pa++;});
+  document.getElementById('s-total').textContent=prods.length;
+  document.getElementById('s-shirts').textContent=sh;
+  document.getElementById('s-tshirts').textContent=ts;
+  document.getElementById('s-pants').textContent=pa;
+  var sub=document.getElementById('prodSub');if(sub)sub.textContent=prods.length+' product'+(prods.length!==1?'s':'')+' in catalogue';
+  var rows=prods.filter(function(p){if(q&&p.name.toLowerCase().indexOf(q)<0)return false;if(cf&&p.cat!==cf)return false;return true;});
+  var tb=document.getElementById('prodTbody');
+  if(!rows.length){
+    tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text2)">'+(prods.length===0?'No products yet. <a href="#" onclick="gotoAdd()" style="color:var(--accent);font-weight:700;text-decoration:underline">Add your first product →</a>':'No products match your search.')+'</td></tr>';return;
+  }
+  tb.innerHTML=rows.map(function(p,i){
+    var img=(p.photos&&p.photos.length)?p.photos[0]:'';
+    var hasSale=p.sale&&parseFloat(p.sale)<parseFloat(p.orig);
+    var priceH=hasSale?'<strong style="color:var(--red)">'+fmtRs(p.sale)+'</strong> <span style="text-decoration:line-through;color:var(--text2);font-size:11px">'+fmtRs(p.orig)+'</span>':'<strong>'+fmtRs(p.orig)+'</strong>';
+    var imgH=img?'<img src="'+escHTML(img)+'" style="width:50px;height:62px;object-fit:cover;border-radius:5px;border:1px solid var(--border)" onerror="this.style.opacity=\'0.2\'">':'<div style="width:50px;height:62px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px">👕</div>';
+    return'<tr><td style="font-weight:800;color:var(--text2)">'+(i+1)+'</td><td>'+imgH+'</td><td><strong>'+escHTML(p.name)+'</strong>'+(p.tagline?'<div style="font-size:11px;color:var(--text2)">'+escHTML(p.tagline)+'</div>':'')+'</td><td><span class="tag '+catTagClass(p.cat)+'">'+catLabel(p.cat)+'</span></td><td>'+priceH+'</td><td>'+stockHTML(p)+'<div style="font-size:11px;color:var(--text2)">'+(parseInt(p.stock)||0)+' units</div></td><td>'+(badgeHTML(p.badge)||'<span style="color:var(--text2);font-size:12px">—</span>')+'</td><td style="font-size:12px;color:var(--text2)">'+((p.sizes&&p.sizes.length)?p.sizes.join(', '):'—')+'</td><td><div style="display:flex;gap:5px"><button class="btn btn-outline btn-xs" onclick="viewProd('+p.id+')">View</button><button class="btn btn-warning btn-xs" onclick="startEdit('+p.id+')">Edit</button><button class="btn btn-danger btn-xs" onclick="delProd('+p.id+')">Del</button></div></td></tr>';
+  }).join('');
+}
+
+function viewProd(id){
+  var prods=loadProds(),p=prods.find(function(x){return x.id===id;});
+  if(!p){toast('Not found','error');return;}
+  viewingId=id;document.getElementById('viewSub').textContent=p.name;
+  var imgs=(p.photos&&p.photos.length)?p.photos:[];
+  var hasSale=p.sale&&parseFloat(p.sale)<parseFloat(p.orig);
+  var prH=hasSale?'<span class="pv-sale">'+fmtRs(p.sale)+'</span><span class="pv-orig">'+fmtRs(p.orig)+'</span>':'<span class="pv-reg">'+fmtRs(p.orig)+'</span>';
+  var galH='';
+  if(imgs.length){galH='<div class="pv-gallery"><img class="pv-main" id="pvMain" src="'+escHTML(imgs[0])+'" alt="">';if(imgs.length>1)galH+='<div class="pv-thumbs">'+imgs.map(function(s,i){return'<img class="pv-thumb'+(i===0?' active':'')+'" src="'+escHTML(s)+'" onclick="switchPvImg(this,\''+escHTML(s)+'\')">';}).join('')+'</div>';galH+='</div>';}
+  var sizH=(p.sizes&&p.sizes.length)?p.sizes.map(function(s){return'<span class="pv-sz">'+escHTML(s)+'</span>';}).join(''):'';
+  document.getElementById('viewContent').innerHTML='<div class="pv-wrap">'+galH+'<div class="pv-body"><div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px"><div><div class="pv-name">'+escHTML(p.name)+'</div>'+(p.tagline?'<div style="font-size:13px;color:var(--text2);font-style:italic">'+escHTML(p.tagline)+'</div>':'')+'</div><div style="display:flex;gap:6px">'+stockHTML(p)+(badgeHTML(p.badge)||'')+'</div></div><div class="pv-price">'+prH+'</div>'+(sizH?'<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:5px">Sizes</div><div class="pv-sizes">'+sizH+'</div></div>':'')+(p.description?'<div style="font-size:13px;color:var(--text2);line-height:1.65;margin-top:10px">'+escHTML(p.description)+'</div>':'')+'</div></div>';
+  goto('view');
+}
+function switchPvImg(el,src){document.getElementById('pvMain').src=src;document.querySelectorAll('.pv-thumb').forEach(function(t){t.classList.remove('active');});el.classList.add('active');}
+function editViewProd(){startEdit(viewingId);}
+function deleteViewProd(){var prods=loadProds(),p=prods.find(function(x){return x.id===viewingId;});if(!p||!confirm('Delete "'+p.name+'"?'))return;saveProds(prods.filter(function(x){return x.id!==viewingId;}));goto('products');checkUnpublished();toast('Deleted','success');logAct('Deleted: '+p.name,'var(--red)');}
+
+// ── FORM ──
+function resetForm(){
+  ['f-editId','f-name','f-tagline','f-desc','f-fabric','f-fit','f-sale','f-orig','f-stock'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('f-threshold').value='5';document.getElementById('f-status').value='instock';
+  document.getElementById('f-visible').checked=true;document.getElementById('f-lowstock').checked=false;
+  currentImgs=[];selSizes=[];selBadge='';renderImgGrid();resetSzChips();resetBadgeChips();
+  var urlInp=document.getElementById('newImgUrl');if(urlInp)urlInp.value='';
+  document.querySelectorAll('.mtab').forEach(function(b){b.classList.remove('on');});document.querySelectorAll('.mpanel').forEach(function(p){p.classList.remove('on');});
+  var ft=document.getElementById('tab-upload-btn');if(ft)ft.classList.add('on');var fp=document.getElementById('tab-upload');if(fp)fp.classList.add('on');
+}
+function startEdit(id){
+  var prods=loadProds(),p=prods.find(function(x){return x.id===id;});
+  if(!p){toast('Not found','error');return;}
+  resetForm();
+  document.getElementById('f-editId').value=id;document.getElementById('f-name').value=p.name||'';document.getElementById('f-cat').value=p.cat||'';document.getElementById('f-tagline').value=p.tagline||'';document.getElementById('f-desc').value=p.description||'';document.getElementById('f-fabric').value=p.fabric||'';document.getElementById('f-fit').value=p.fit||'';document.getElementById('f-orig').value=p.orig||'';document.getElementById('f-sale').value=p.sale||'';document.getElementById('f-stock').value=p.stock||'';document.getElementById('f-threshold').value=p.threshold||5;document.getElementById('f-status').value=p.status||'instock';document.getElementById('f-visible').checked=p.visible!==false;document.getElementById('f-lowstock').checked=p.lowStock||false;
+  currentImgs=(p.photos&&p.photos.length)?p.photos.slice():[];selSizes=(p.sizes&&p.sizes.length)?p.sizes.slice():[];selBadge=p.badge||'';
+  renderImgGrid();applySz();applyBadge();goto('add');document.getElementById('addTitle').textContent='Edit Product';document.getElementById('addSub').textContent='Update product details';
+}
+function saveProduct(){
+  var name=document.getElementById('f-name').value.trim(),cat=document.getElementById('f-cat').value,orig=parseFloat(document.getElementById('f-orig').value)||0;
+  if(!name){toast('Enter product name','error');return;}if(!cat){toast('Select a category','error');return;}if(!orig){toast('Enter original price','error');return;}if(uploading){toast('Wait for upload to finish','error');return;}
+  var saleVal=parseFloat(document.getElementById('f-sale').value)||0;
+  var prods=loadProds();var eid=parseInt(document.getElementById('f-editId').value)||0;
+  var obj={id:eid>0?eid:nextId++,name:name,cat:cat,tagline:document.getElementById('f-tagline').value.trim(),description:document.getElementById('f-desc').value.trim(),fabric:document.getElementById('f-fabric').value.trim(),fit:document.getElementById('f-fit').value.trim(),orig:orig,sale:(saleVal>0&&saleVal<orig)?saleVal:null,stock:parseInt(document.getElementById('f-stock').value)||0,threshold:parseInt(document.getElementById('f-threshold').value)||5,status:document.getElementById('f-status').value,visible:document.getElementById('f-visible').checked,lowStock:document.getElementById('f-lowstock').checked,badge:selBadge,sizes:selSizes.slice(),photos:currentImgs.slice()};
+  if(eid>0){var idx=prods.findIndex(function(x){return x.id===eid;});if(idx>=0)prods[idx]=obj;else prods.push(obj);toast('Updated: '+name,'success');logAct('Updated: '+name,'var(--blue)');}
+  else{prods.push(obj);toast('Added: '+name,'success');logAct('Added: '+name,'var(--blue)');}
+  saveProds(prods);updateExpCount();checkUnpublished();resetForm();goto('products');
+  setTimeout(function(){toast('✅ Saved! Go to Publish to make it live.','success');},1200);
+}
+function delProd(id){
+  var prods=loadProds(),p=prods.find(function(x){return x.id===id;});
+  if(!p||!confirm('Delete "'+p.name+'"? Cannot be undone.'))return;
+  saveProds(prods.filter(function(x){return x.id!==id;}));renderProds();updateExpCount();checkUnpublished();toast('Deleted: '+p.name);logAct('Deleted: '+p.name,'var(--red)');
+}
+
+// ── EXPORT / IMPORT ──
+function doExport(){
+  var prods=loadProds();if(!prods.length){toast('No products','error');return;}
+  var clean=prods.map(function(p){var photos=(p.photos||[]).filter(function(u){return u&&u.indexOf('data:image')<0;});return Object.assign({},p,{photos:photos});});
+  var js='/* Shanmuga Mens Wear Products - '+new Date().toLocaleDateString('en-IN')+' */\n/* © 2026 Shanmuga Mens Wear. All rights reserved. */\n\nvar SMW_DEFAULT_PRODUCTS = '+JSON.stringify(clean,null,2)+';\n';
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([js],{type:'application/javascript'}));a.download='smw-products.js';document.body.appendChild(a);a.click();document.body.removeChild(a);toast('Downloaded!','success');
+}
+function doCopyJSON(){
+  var prods=loadProds();if(!prods.length){toast('No products','error');return;}
+  var clean=prods.map(function(p){var photos=(p.photos||[]).filter(function(u){return u&&u.indexOf('data:image')<0;});return Object.assign({},p,{photos:photos});});
+  navigator.clipboard.writeText(JSON.stringify(clean,null,2)).then(function(){toast('Copied!','success');}).catch(function(){toast('Copy failed','error');});
+}
+function doImport(input){
+  var file=input.files[0];if(!file)return;
+  var r=new FileReader();
+  r.onload=function(e){
+    try{var data=JSON.parse(e.target.result);if(!Array.isArray(data)){toast('Invalid file','error');return;}if(!confirm('Import '+data.length+' products? Replaces current.'))return;data.forEach(function(p,i){if(!p.id)p.id=200+i;if(p.id>=nextId)nextId=p.id+1;});saveProds(data);renderProds();updateExpCount();checkUnpublished();toast('Imported '+data.length+' products!','success');logAct('Imported '+data.length+' products','var(--green)');}
+    catch(err){toast('Error: '+err.message,'error');}
+  };r.readAsText(file);input.value='';
+}
+function clearProds(){if(!confirm('Delete ALL products? Cannot be undone!'))return;saveProds([]);renderProds();updateExpCount();checkUnpublished();toast('All cleared');logAct('All products cleared','var(--red)');}
+
+// ── COUPONS ──
+function renderCoupons(){
+  var active=coupons.filter(function(c){return c.active;}).length;
+  var cc=document.getElementById('couponCount');if(cc)cc.textContent=active+' active';
+  var el=document.getElementById('couponList');if(!el)return;
+  if(!coupons.length){el.innerHTML='<p style="color:var(--text2)">No coupons yet.</p>';return;}
+  el.innerHTML=coupons.map(function(c,i){var d=c.type==='percent'?c.val+'% off':'Rs.'+c.val+' off';return'<div class="coupon-card"'+(!c.active?' style="opacity:.6"':'')+'><div class="coupon-code">'+escHTML(c.code)+'</div><div class="coupon-meta">'+d+(c.min?' • Min Rs.'+c.min:'')+' • Expires '+c.expiry+'</div><div class="coupon-meta">Used: '+c.uses+'x</div><div style="position:absolute;top:12px;right:12px">'+(c.active?'<span class="tag tg">Active</span>':'<span class="tag tr">Inactive</span>')+'</div><div style="display:flex;gap:7px;margin-top:10px">'+(c.active?'<button class="btn btn-danger btn-sm" onclick="togCoupon('+i+')">Deactivate</button>':'<button class="btn btn-success btn-sm" onclick="togCoupon('+i+')">Activate</button>')+'<button class="btn btn-danger btn-sm" onclick="delCoupon('+i+')">Delete</button></div></div>';}).join('');
+}
+function togCoupon(i){coupons[i].active=!coupons[i].active;renderCoupons();toast(coupons[i].active?'Activated':'Deactivated');}
+function delCoupon(i){if(!confirm('Delete '+coupons[i].code+'?'))return;coupons.splice(i,1);renderCoupons();toast('Deleted');}
+function createCoupon(){
+  var code=document.getElementById('nc-code').value.trim().toUpperCase(),type=document.getElementById('nc-type').value,val=parseInt(document.getElementById('nc-val').value)||0,min=parseInt(document.getElementById('nc-min').value)||0,exp=document.getElementById('nc-exp').value;
+  if(!code){toast('Enter a code','error');return;}if(!val){toast('Enter a value','error');return;}
+  coupons.push({code:code,type:type,val:val,min:min,expiry:exp?new Date(exp).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'No expiry',uses:0,active:true});
+  renderCoupons();['nc-code','nc-val','nc-min','nc-exp'].forEach(function(id){document.getElementById(id).value='';});toast('Coupon '+code+' created!','success');
+}
+function createCouponMod(){
+  var code=document.getElementById('mc-code').value.trim().toUpperCase(),type=document.getElementById('mc-type').value,val=parseInt(document.getElementById('mc-val').value)||0,exp=document.getElementById('mc-exp').value;
+  if(!code){toast('Enter a code','error');return;}if(!val){toast('Enter a value','error');return;}
+  coupons.push({code:code,type:type,val:val,min:0,expiry:exp?new Date(exp).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'No expiry',uses:0,active:true});
+  renderCoupons();closeMod('couponMod');['mc-code','mc-val','mc-exp'].forEach(function(id){document.getElementById(id).value='';});toast('Coupon created!','success');
+}
+
+// ── REVIEWS ──
+function renderRevs(){
+  var pend=0,appr=0,html='';
+  reviews.forEach(function(r,i){if(r.status==='pending')pend++;else if(r.status==='approved')appr++;if(revFilter!=='all'&&r.status!==revFilter)return;html+='<div class="review-card"><div class="rev-head"><div class="rev-av">'+r.init+'</div><div style="flex:1"><div style="font-weight:700;font-size:13px">'+escHTML(r.name)+'</div><div style="font-size:11px;color:var(--text2)">'+escHTML(r.prod)+' • '+r.date+'</div></div><div class="stars">'+starsHTML(r.stars)+'</div>'+(r.status==='pending'?'<span class="tag to">Pending</span>':'<span class="tag tg">Approved</span>')+'</div><div class="rev-text">'+escHTML(r.text)+'</div><div style="display:flex;gap:7px;margin-top:10px">'+(r.status==='pending'?'<button class="btn btn-success btn-sm" onclick="appRev('+i+')">✓ Approve</button>':'')+'<button class="btn btn-danger btn-sm" onclick="delRev('+i+')">🗑 Delete</button></div></div>';});
+  if(!html)html='<p style="color:var(--text2)">No reviews.</p>';
+  var el=document.getElementById('revList');if(el)el.innerHTML=html;
+  document.getElementById('rv-total').textContent=reviews.length;document.getElementById('rv-pending').textContent=pend;document.getElementById('rv-approved').textContent=appr;
+}
+function appRev(i){reviews[i].status='approved';renderRevs();toast('Approved!','success');}
+function delRev(i){if(!confirm('Delete?'))return;reviews.splice(i,1);renderRevs();toast('Deleted');}
+function setRevF(f,btn){revFilter=f;document.querySelectorAll('#revFilters .btn').forEach(function(b){b.className='btn btn-sm btn-outline';b.style.borderRadius='20px';});btn.className='btn btn-sm btn-primary';btn.style.borderRadius='20px';renderRevs();}
+
+// ── NOTIFICATIONS ──
+function renderNotifs(){
+  var html=notifs.map(function(n,i){return'<div class="notif-item'+(n.unread?' unread':'')+'" onclick="readNotif('+i+')"><div class="notif-icon" style="background:'+n.bg+'">'+n.icon+'</div><div style="flex:1"><div class="notif-title">'+n.title+'</div><div class="notif-desc">'+n.desc+'</div><div class="notif-time">'+n.time+'</div></div>'+(n.unread?'<div class="unread-dot"></div>':'')+'</div>';}).join('');
+  var el=document.getElementById('notifList');if(el)el.innerHTML=html||'<p style="padding:14px;color:var(--text2)">No notifications.</p>';
+}
+function readNotif(i){notifs[i].unread=false;renderNotifs();}
+function markAllRead(){notifs.forEach(function(n){n.unread=false;});renderNotifs();toast('All read');}
+
+// ── SECURITY ──
+function changePw(){
+  var cur=document.getElementById('pw-cur').value,nw=document.getElementById('pw-new').value,cf=document.getElementById('pw-confirm').value;
+  var msg=document.getElementById('pwMsg');
+  if(cur!==ADMIN_PASS){msg.className='pw-msg err';msg.style.display='block';msg.textContent='❌ Wrong current password';return;}
+  if(nw.length<8){msg.className='pw-msg err';msg.style.display='block';msg.textContent='❌ Min 8 characters';return;}
+  if(nw!==cf){msg.className='pw-msg err';msg.style.display='block';msg.textContent='❌ Passwords do not match';return;}
+  ADMIN_PASS=nw;localStorage.setItem('smw_admin_pass',nw);
+  msg.className='pw-msg ok';msg.style.display='block';msg.textContent='✅ Password updated!';
+  ['pw-cur','pw-new','pw-confirm'].forEach(function(id){document.getElementById(id).value='';});
+  setTimeout(function(){msg.style.display='none';},3000);
+  toast('Password updated!','success');logAct('Password changed','var(--orange)');
+}
+
+// ── ACTIVITY LOG ──
+function logAct(text,color){
+  var log=document.getElementById('actLog');if(!log)return;var empty=log.querySelector('p');if(empty)empty.remove();
+  var w=document.createElement('div');w.className='log-item';var d=document.createElement('div');d.className='log-dot';d.style.background=color;var info=document.createElement('div');info.innerHTML='<div class="log-text">'+escHTML(text)+'</div><div class="log-time">'+nowTime()+'</div>';w.appendChild(d);w.appendChild(info);log.insertBefore(w,log.firstChild);
+}
+
+// ── SESSION TIMER ──
+function startTimer(){
+  var secs=1800,el=document.getElementById('stimer');
+  var iv=setInterval(function(){secs--;if(secs<=0){clearInterval(iv);doLogout();return;}var m=Math.floor(secs/60),s=secs%60;if(el)el.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;},1000);
+  document.addEventListener('click',function(){secs=1800;});document.addEventListener('keydown',function(){secs=1800;});
+}
+</script>
+</body>
+</html>
