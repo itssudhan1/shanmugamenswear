@@ -844,7 +844,10 @@ function onPaymentSuccess(response, customerInfo){
 }
 
 /* ── MAIN PAYMENT FUNCTION ── */
-function initiatePayment(){
+var RZP_KEY_ID = 'rzp_test_T5O92DKtyXXfIL'; // swap to rzp_live_... when going live
+
+/* ── MAIN PAYMENT FUNCTION (updated) ── */
+async function initiatePayment(){
   if (paymentInProgress) return;
 
   if (!cart.length) {
@@ -863,6 +866,194 @@ function initiatePayment(){
   if (typeof Razorpay === 'undefined') {
     showToast('Payment gateway not loaded. Check your internet and reload.', true); return;
   }
+
+  var fname   = document.getElementById('fname').value.trim();
+  var lname   = document.getElementById('lname').value.trim();
+  var email   = document.getElementById('email').value.trim();
+  var phone   = document.getElementById('phone').value.trim().replace(/\D/g,'');
+  var address = document.getElementById('address').value.trim();
+  var apt     = document.getElementById('apt').value.trim();
+  var city    = document.getElementById('city').value.trim();
+  var state   = document.getElementById('state').value;
+  var pincode = document.getElementById('pincode').value.trim();
+
+  var customerInfo = { fname:fname, lname:lname, email:email, phone:phone,
+    address:address, apt:apt, city:city, state:state, pincode:pincode };
+
+  var itemDesc = cart.map(function(x){
+    return x.name + (x.size ? ' (' + x.size + ')' : '') + ' x' + x.qty;
+  }).join(', ').substring(0, 255);
+
+  var btn = document.getElementById('payBtn');
+  btn.disabled = true; btn.classList.add('loading');
+  document.getElementById('payBtnText').textContent = 'Preparing payment…';
+  paymentInProgress = true;
+
+  var orderResp;
+  try {
+    var res = await fetch('/api/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: Math.round(total * 100),
+        currency: 'INR',
+        receipt: 'SMW' + Date.now(),
+        notes: {
+          address: [address, apt, city, state, pincode].filter(Boolean).join(', '),
+          items: itemDesc,
+          coupon: appliedCoupon || 'none',
+          customer_name: fname + ' ' + lname,
+          customer_phone: phone
+        }
+      })
+    });
+    orderResp = await res.json();
+    if (!res.ok || !orderResp.id) {
+      throw new Error(orderResp.error || 'Order creation failed');
+    }
+  } catch (e) {
+    console.error('create-order failed:', e);
+    btn.disabled = false; btn.classList.remove('loading');
+    document.getElementById('payBtnText').textContent = 'Pay ' + fmt(total) + ' Securely';
+    paymentInProgress = false;
+    showToast('Could not start payment. Please try again.', true);
+    return;
+  }
+
+  document.getElementById('payBtnText').textContent = 'Opening Payment…';
+
+  var options = {
+    key: RZP_KEY_ID,
+    amount: orderResp.amount,
+    currency: orderResp.currency,
+    order_id: orderResp.id,
+    name: 'Shanmuga Mens Wear',
+    description: itemDesc,
+    prefill: {
+      name:    fname + ' ' + lname,
+      email:   email,
+      contact: '91' + phone
+    },
+    notes: {
+      address: [address, apt, city, state, pincode].filter(Boolean).join(', '),
+      items:   itemDesc,
+      coupon:  appliedCoupon || 'none'
+    },
+    theme: { color: '#111110' },
+    modal: {
+      backdropclose: false,
+      escape: true,
+      ondismiss: function(){
+        btn.disabled = false; btn.classList.remove('loading');
+        document.getElementById('payBtnText').textContent = 'Pay ' + fmt(total) + ' Securely';
+        paymentInProgress = false;
+        showToast('Payment cancelled. Your cart is saved.', false);
+      }
+    },
+    handler: function(response){
+      onPaymentSuccess(response, customerInfo);
+    }
+  };
+
+  try {
+    var rzp = new Razorpay(options);
+    rzp.on('payment.failed', function(response){
+      btn.disabled = false; btn.classList.remove('loading');
+      document.getElementById('payBtnText').textContent = 'Pay ' + fmt(total) + ' Securely';
+      paymentInProgress = false;
+      var reason = (response.error && response.error.description) ? response.error.description : 'Payment failed';
+      showToast('❌ ' + reason + '. Please try again.', true);
+    });
+    rzp.open();
+  } catch (e) {
+    btn.disabled = false; btn.classList.remove('loading');
+    document.getElementById('payBtnText').textContent = 'Pay ' + fmt(total) + ' Securely';
+    paymentInProgress = false;
+    showToast('Could not open payment. Check your internet and try again.', true);
+    console.error('Razorpay init error:', e);
+  }
+}
+
+/* ── PAYMENT SUCCESS HANDLER (updated) ── */
+async function onPaymentSuccess(response, customerInfo){
+  document.getElementById('payBtnText').textContent = 'Confirming payment…';
+
+  var cartBackup = JSON.parse(JSON.stringify(cart));
+  var total = getTotal();
+  var totals = {
+    subtotal: getSubtotal(),
+    discount: discountAmount,
+    coupon: appliedCoupon,
+    shipping: shippingCost,
+    total: total
+  };
+
+  var verifyResp;
+  try {
+    var res = await fetch('/api/verify-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_signature: response.razorpay_signature,
+        cart: cartBackup,
+        customer: customerInfo,
+        totals: totals
+      })
+    });
+    verifyResp = await res.json();
+  } catch (e) {
+    console.error('verify-payment request failed:', e);
+    var btn = document.getElementById('payBtn');
+    btn.disabled = false; btn.classList.remove('loading');
+    paymentInProgress = false;
+    showToast('Payment received! Confirming your order — please check WhatsApp shortly, or contact us with payment ID ' + response.razorpay_payment_id, false);
+    return;
+  }
+
+  var btn = document.getElementById('payBtn');
+  btn.disabled = false; btn.classList.remove('loading');
+  paymentInProgress = false;
+
+  if (!verifyResp.verified) {
+    showToast('We could not verify this payment. Please contact support before retrying — do not pay again.', true);
+    console.error('Payment verification failed:', verifyResp);
+    return;
+  }
+
+  var orderId = verifyResp.order.id;
+  var paymentId = response.razorpay_payment_id;
+
+  lastOrderData = {
+    id: orderId,
+    paymentId: paymentId,
+    dateStr: verifyResp.order.dateStr,
+    customer: {
+      name: customerInfo.fname + ' ' + customerInfo.lname,
+      email: customerInfo.email, phone: customerInfo.phone,
+      address: [customerInfo.address, customerInfo.apt, customerInfo.city, customerInfo.state, customerInfo.pincode].filter(Boolean).join(', ')
+    },
+    items: cartBackup.map(function(x){ return {name:x.name,size:x.size||'',qty:x.qty,price:x.price,total:x.price*x.qty}; }),
+    subtotal: totals.subtotal, discount: totals.discount, coupon: totals.coupon,
+    shipping: totals.shipping, total: totals.total
+  };
+
+  try { localStorage.removeItem('smw_cart'); } catch(e){}
+  cart = [];
+
+  document.getElementById('successOrderId').textContent = 'Order ID: ' + orderId + '  |  Payment: ' + paymentId;
+  document.getElementById('successDetail').innerHTML =
+    '<strong>Customer:</strong> <span>' + esc(customerInfo.fname + ' ' + customerInfo.lname) + '</span><br>' +
+    '<strong>Phone:</strong> <span>+91' + esc(customerInfo.phone) + '</span><br>' +
+    '<strong>Address:</strong> <span>' + esc([customerInfo.address, customerInfo.city, customerInfo.state, customerInfo.pincode].filter(Boolean).join(', ')) + '</span><br>' +
+    '<strong>Items:</strong> <span>' + cartBackup.length + ' item(s)</span><br>' +
+    '<strong>Total Paid:</strong> <span style="color:var(--green);font-weight:700">' + fmt(total) + '</span>';
+
+  document.getElementById('successOverlay').classList.add('open');
+
+  setTimeout(function(){ sendWhatsApp(); }, 1500);
+}
 
   // Collect values
   var fname   = document.getElementById('fname').value.trim();
