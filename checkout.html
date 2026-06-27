@@ -537,24 +537,19 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
 <script>
 'use strict';
 
-/* ─────────────────────────────────────────────────────
-   YOUR RAZORPAY KEY — replace with your real key from
-   https://dashboard.razorpay.com/app/keys
-   ───────────────────────────────────────────────────── */
-var RZP_KEY = 'rzp_test_T6X7V2ebgHF5Zf';
-
-/* ── WhatsApp number (store owner) ── */
-var WA_NUMBER = '919442689858';
+/* ── CONFIG ── */
+var RZP_KEY_ID = 'rzp_test_T5O92DKtyXXfIL'; // swap to rzp_live_... when going live
+var WA_NUMBER  = '919442689858';
 
 /* ── STATE ── */
-var cart = [];
-var shippingCost = 0;
-var discountAmount = 0;
-var appliedCoupon = '';
+var cart             = [];
+var shippingCost     = 0;
+var discountAmount   = 0;
+var appliedCoupon    = '';
 var paymentInProgress = false;
-var lastOrderData = null; // stored for WhatsApp after success
+var lastOrderData    = null;
 
-/* ── LOAD CART FROM localStorage ── */
+/* ── LOAD CART ── */
 try {
   var raw = localStorage.getItem('smw_cart');
   if (raw) { cart = JSON.parse(raw); if (!Array.isArray(cart)) cart = []; }
@@ -566,7 +561,6 @@ function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
 function getSubtotal(){ return cart.reduce(function(s,x){ return s + (x.price * x.qty); }, 0); }
 function getTotal(){ return Math.max(0, getSubtotal() - discountAmount + shippingCost); }
 
-/* ── AUTO-COMPUTE standard shipping (free above 1999 after discount) ── */
 function calcStandardShipping(){
   var afterDiscount = getSubtotal() - discountAmount;
   return afterDiscount >= 1999 ? 0 : 99;
@@ -610,17 +604,13 @@ function renderSummary(){
 }
 
 function updateTotals(){
-  var sub = getSubtotal();
-  var total = getTotal();
-
-  // Auto-update standard shipping based on cart value
   var selectedShip = document.querySelector('input[name="shipping"]:checked');
   if (selectedShip && selectedShip.value === 'standard') {
     shippingCost = calcStandardShipping();
     document.getElementById('standardPrice').textContent = shippingCost === 0 ? 'Free' : fmt(shippingCost);
   }
 
-  document.getElementById('subtotalVal').textContent = fmt(sub);
+  document.getElementById('subtotalVal').textContent = fmt(getSubtotal());
   document.getElementById('shippingVal').textContent = shippingCost === 0 ? 'Free' : fmt(shippingCost);
 
   if (discountAmount > 0) {
@@ -639,28 +629,30 @@ function updateTotals(){
 function selectShipping(radio){
   document.querySelectorAll('.ship-opt').forEach(function(el){ el.classList.remove('selected'); });
   radio.closest('.ship-opt').classList.add('selected');
-  if (radio.value === 'express') {
-    shippingCost = 99;
-  } else {
-    shippingCost = calcStandardShipping();
-  }
+  shippingCost = radio.value === 'express' ? 99 : calcStandardShipping();
   updateTotals();
 }
 
 /* ── COUPON ── */
-var VALID_COUPONS = { 'SAVE10': {type:'percent',val:10}, 'WELCOME': {type:'percent',val:5}, 'SMW20': {type:'percent',val:20}, 'FLAT50': {type:'flat',val:50} };
+var VALID_COUPONS = {
+  'SAVE10':  { type:'percent', val:10 },
+  'WELCOME': { type:'percent', val:5  },
+  'SMW20':   { type:'percent', val:20 },
+  'FLAT50':  { type:'flat',    val:50 }
+};
+
 function applyCoupon(){
-  var code = document.getElementById('couponInput').value.trim().toUpperCase();
+  var code  = document.getElementById('couponInput').value.trim().toUpperCase();
   var msgEl = document.getElementById('couponMsg');
   if (!code) { msgEl.className = 'coupon-msg err'; msgEl.textContent = 'Please enter a coupon code.'; return; }
   if (appliedCoupon === code) { msgEl.className = 'coupon-msg ok'; msgEl.textContent = '✓ Coupon already applied!'; return; }
 
-  // Also check admin-created coupons stored in localStorage
+  // Check admin coupons first
   var adminCoupons = [];
   try { adminCoupons = JSON.parse(localStorage.getItem('smw_coupons') || '[]'); } catch(e){}
   var adminFound = adminCoupons.find(function(c){ return c.code === code && c.active !== false; });
   if (adminFound) {
-    appliedCoupon = code;
+    appliedCoupon  = code;
     discountAmount = adminFound.type === 'percent' ? Math.round(getSubtotal() * adminFound.val / 100) : Math.min(adminFound.val, getSubtotal());
     msgEl.className = 'coupon-msg ok';
     msgEl.textContent = '✓ Coupon applied! You save ' + fmt(discountAmount);
@@ -669,7 +661,7 @@ function applyCoupon(){
 
   if (VALID_COUPONS[code]) {
     var c = VALID_COUPONS[code];
-    appliedCoupon = code;
+    appliedCoupon  = code;
     discountAmount = c.type === 'percent' ? Math.round(getSubtotal() * c.val / 100) : Math.min(c.val, getSubtotal());
     msgEl.className = 'coupon-msg ok';
     msgEl.textContent = '✓ Coupon applied! You save ' + fmt(discountAmount);
@@ -683,32 +675,33 @@ function applyCoupon(){
 }
 
 /* ── VALIDATION ── */
-function setFieldError(fieldWrapperId, inputId, hasError){
-  var fw = document.getElementById(fieldWrapperId);
+function setFieldError(wrapperId, inputId, hasError){
+  var fw  = document.getElementById(wrapperId);
   var inp = document.getElementById(inputId);
-  if (fw) fw.classList.toggle('has-error', hasError);
+  if (fw)  fw.classList.toggle('has-error', hasError);
   if (inp) inp.classList.toggle('err-input', hasError);
   return !hasError;
 }
+
 function validateAll(){
-  var ok = true;
-  var fname = document.getElementById('fname').value.trim();
-  var lname = document.getElementById('lname').value.trim();
-  var email = document.getElementById('email').value.trim();
-  var phone = document.getElementById('phone').value.trim().replace(/\D/g,'');
+  var ok      = true;
+  var fname   = document.getElementById('fname').value.trim();
+  var lname   = document.getElementById('lname').value.trim();
+  var email   = document.getElementById('email').value.trim();
+  var phone   = document.getElementById('phone').value.trim().replace(/\D/g,'');
   var address = document.getElementById('address').value.trim();
-  var city = document.getElementById('city').value.trim();
-  var state = document.getElementById('state').value;
+  var city    = document.getElementById('city').value.trim();
+  var state   = document.getElementById('state').value;
   var pincode = document.getElementById('pincode').value.trim();
 
-  if (!setFieldError('f-fname','fname', fname.length === 0)) ok = false;
-  if (!setFieldError('f-lname','lname', lname.length === 0)) ok = false;
-  if (!setFieldError('f-email','email', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) ok = false;
-  if (!setFieldError('f-phone','phone', phone.length !== 10)) ok = false;
-  if (!setFieldError('f-address','address', address.length <= 4)) ok = false;
-  if (!setFieldError('f-city','city', city.length <= 1)) ok = false;
-  if (!setFieldError('f-state','state', state.length === 0)) ok = false;
-  if (!setFieldError('f-pincode','pincode', !/^\d{6}$/.test(pincode))) ok = false;
+  if (!setFieldError('f-fname',   'fname',   fname.length === 0))                          ok = false;
+  if (!setFieldError('f-lname',   'lname',   lname.length === 0))                          ok = false;
+  if (!setFieldError('f-email',   'email',   !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)))  ok = false;
+  if (!setFieldError('f-phone',   'phone',   phone.length !== 10))                         ok = false;
+  if (!setFieldError('f-address', 'address', address.length <= 4))                         ok = false;
+  if (!setFieldError('f-city',    'city',    city.length <= 1))                            ok = false;
+  if (!setFieldError('f-state',   'state',   state.length === 0))                          ok = false;
+  if (!setFieldError('f-pincode', 'pincode', !/^\d{6}$/.test(pincode)))                   ok = false;
 
   if (!document.getElementById('terms').checked) {
     showToast('Please accept the Terms & Conditions.', true); ok = false;
@@ -717,32 +710,36 @@ function validateAll(){
 }
 
 /* ── SAVE ORDER TO ADMIN localStorage ── */
-function saveOrderToAdmin(orderId, paymentId, cartItems, customerInfo, total){
+function saveOrderLocally(orderId, paymentId, cartItems, customerInfo, totals){
   try {
     var orders = [];
     try { orders = JSON.parse(localStorage.getItem('smw_orders') || '[]'); } catch(e){}
     if (!Array.isArray(orders)) orders = [];
 
+    var dateStr = new Date().toLocaleString('en-IN', {
+      day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'
+    });
+
     var order = {
-      id: orderId,
+      id:        orderId,
       paymentId: paymentId,
-      date: new Date().toISOString(),
-      dateStr: new Date().toLocaleString('en-IN', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),
+      date:      new Date().toISOString(),
+      dateStr:   dateStr,
       customer: {
-        name: customerInfo.fname + ' ' + customerInfo.lname,
-        email: customerInfo.email,
-        phone: customerInfo.phone,
+        name:    customerInfo.fname + ' ' + customerInfo.lname,
+        email:   customerInfo.email,
+        phone:   customerInfo.phone,
         address: [customerInfo.address, customerInfo.apt, customerInfo.city, customerInfo.state, customerInfo.pincode].filter(Boolean).join(', ')
       },
       items: cartItems.map(function(x){
-        return { name: x.name, size: x.size || '', qty: x.qty, price: x.price, total: x.price * x.qty, photo: x.photo || '' };
+        return { name:x.name, size:x.size||'', qty:x.qty, price:x.price, total:x.price*x.qty, photo:x.photo||'' };
       }),
-      subtotal: getSubtotal(),
-      discount: discountAmount,
-      coupon: appliedCoupon || '',
-      shipping: shippingCost,
-      total: total,
-      status: 'paid',
+      subtotal:       totals.subtotal,
+      discount:       totals.discount,
+      coupon:         totals.coupon || '',
+      shipping:       totals.shipping,
+      total:          totals.total,
+      status:         'paid',
       shippingStatus: 'pending'
     };
 
@@ -750,7 +747,7 @@ function saveOrderToAdmin(orderId, paymentId, cartItems, customerInfo, total){
     if (orders.length > 300) orders = orders.slice(0, 300);
     localStorage.setItem('smw_orders', JSON.stringify(orders));
 
-    var unread = parseInt(localStorage.getItem('smw_orders_unread') || '0');
+    var unread = parseInt(localStorage.getItem('smw_orders_unread') || '0', 10);
     localStorage.setItem('smw_orders_unread', String(unread + 1));
 
     return order;
@@ -766,16 +763,16 @@ function buildWhatsAppMsg(order){
   var itemLines = order.items.map(function(it){
     return '• ' + it.name + (it.size ? ' (Size: ' + it.size + ')' : '') + ' ×' + it.qty + ' — ' + fmt(it.total);
   });
-  return [
+  var lines = [
     '🛍️ *NEW ORDER — Shanmuga Mens Wear*', '',
-    '📦 *Order ID:* ' + order.id,
+    '📦 *Order ID:* '   + order.id,
     '💳 *Payment ID:* ' + order.paymentId,
-    '📅 *Date:* ' + order.dateStr,
+    '📅 *Date:* '       + order.dateStr,
     '',
     '👤 *Customer Details:*',
-    'Name: ' + c.name,
-    'Phone: +91' + c.phone,
-    'Email: ' + c.email,
+    'Name: '    + c.name,
+    'Phone: +91'+ c.phone,
+    'Email: '   + c.email,
     'Address: ' + c.address,
     '',
     '🧾 *Items Ordered:*'
@@ -788,7 +785,8 @@ function buildWhatsAppMsg(order){
     '*Total Paid: ' + fmt(order.total) + '*',
     '',
     '✅ Payment confirmed via Razorpay. Please dispatch soon!'
-  ]).filter(function(l){ return l !== null; }).join('\n');
+  ]).filter(function(l){ return l !== null; });
+  return lines.join('\n');
 }
 
 function sendWhatsApp(){
@@ -797,39 +795,11 @@ function sendWhatsApp(){
   window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
-/* ── PAYMENT SUCCESS HANDLER ── */
-function onPaymentSuccess(response, customerInfo){
-  var cartBackup = JSON.parse(JSON.stringify(cart));
-  var total = getTotal();
-  var orderId = 'ORD-' + Date.now();
-  var paymentId = response.razorpay_payment_id || orderId;
+/* ── SHOW SUCCESS MODAL ── */
+function showSuccessModal(order, customerInfo, cartBackup, total){
+  document.getElementById('successOrderId').textContent =
+    'Order ID: ' + order.id + '  |  Payment: ' + order.paymentId;
 
-  // Save to admin
-  var savedOrder = saveOrderToAdmin(orderId, paymentId, cartBackup, customerInfo, total);
-  lastOrderData = savedOrder || {
-    id: orderId, paymentId: paymentId,
-    dateStr: new Date().toLocaleString('en-IN'),
-    customer: {
-      name: customerInfo.fname + ' ' + customerInfo.lname,
-      email: customerInfo.email, phone: customerInfo.phone,
-      address: [customerInfo.address, customerInfo.apt, customerInfo.city, customerInfo.state, customerInfo.pincode].filter(Boolean).join(', ')
-    },
-    items: cartBackup.map(function(x){ return {name:x.name,size:x.size||'',qty:x.qty,price:x.price,total:x.price*x.qty}; }),
-    subtotal: getSubtotal(), discount: discountAmount, coupon: appliedCoupon,
-    shipping: shippingCost, total: total
-  };
-
-  // Clear cart
-  try { localStorage.removeItem('smw_cart'); } catch(e){}
-  cart = [];
-
-  // Reset button
-  var btn = document.getElementById('payBtn');
-  btn.disabled = false; btn.classList.remove('loading');
-  paymentInProgress = false;
-
-  // Fill success modal
-  document.getElementById('successOrderId').textContent = 'Order ID: ' + orderId + '  |  Payment: ' + paymentId;
   document.getElementById('successDetail').innerHTML =
     '<strong>Customer:</strong> <span>' + esc(customerInfo.fname + ' ' + customerInfo.lname) + '</span><br>' +
     '<strong>Phone:</strong> <span>+91' + esc(customerInfo.phone) + '</span><br>' +
@@ -838,15 +808,107 @@ function onPaymentSuccess(response, customerInfo){
     '<strong>Total Paid:</strong> <span style="color:var(--green);font-weight:700">' + fmt(total) + '</span>';
 
   document.getElementById('successOverlay').classList.add('open');
-
-  // Auto-trigger WhatsApp after 1.5s
   setTimeout(function(){ sendWhatsApp(); }, 1500);
 }
 
-/* ── MAIN PAYMENT FUNCTION ── */
-var RZP_KEY_ID = 'rzp_test_T5O92DKtyXXfIL'; // swap to rzp_live_... when going live
+/* ── PAYMENT SUCCESS HANDLER ── */
+async function onPaymentSuccess(response, customerInfo){
+  var btn = document.getElementById('payBtn');
+  document.getElementById('payBtnText').textContent = 'Confirming payment…';
 
-/* ── MAIN PAYMENT FUNCTION (updated) ── */
+  var cartBackup = JSON.parse(JSON.stringify(cart));
+  var totals = {
+    subtotal: getSubtotal(),
+    discount: discountAmount,
+    coupon:   appliedCoupon,
+    shipping: shippingCost,
+    total:    getTotal()
+  };
+
+  /* ── Try backend verification first ── */
+  var verifyResp;
+  try {
+    var res = await fetch('/api/verify-payment', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        razorpay_order_id:   response.razorpay_order_id,
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_signature:  response.razorpay_signature,
+        cart:     cartBackup,
+        customer: customerInfo,
+        totals:   totals
+      })
+    });
+    verifyResp = await res.json();
+  } catch(e) {
+    /* Network/server error — fall back to client-side save so order isn't lost */
+    console.warn('verify-payment unreachable, falling back to local save:', e);
+    verifyResp = null;
+  }
+
+  btn.disabled = false; btn.classList.remove('loading');
+  paymentInProgress = false;
+
+  var orderId, order;
+
+  if (verifyResp && verifyResp.verified && verifyResp.order) {
+    /* ── Backend confirmed ── */
+    orderId = verifyResp.order.id;
+    order   = {
+      id:        orderId,
+      paymentId: response.razorpay_payment_id,
+      dateStr:   verifyResp.order.dateStr,
+      customer: {
+        name:    customerInfo.fname + ' ' + customerInfo.lname,
+        email:   customerInfo.email,
+        phone:   customerInfo.phone,
+        address: [customerInfo.address, customerInfo.apt, customerInfo.city, customerInfo.state, customerInfo.pincode].filter(Boolean).join(', ')
+      },
+      items:    cartBackup.map(function(x){ return {name:x.name,size:x.size||'',qty:x.qty,price:x.price,total:x.price*x.qty}; }),
+      subtotal: totals.subtotal, discount: totals.discount, coupon: totals.coupon,
+      shipping: totals.shipping, total: totals.total
+    };
+    /* Also save locally so admin dashboard can see it */
+    saveOrderLocally(orderId, response.razorpay_payment_id, cartBackup, customerInfo, totals);
+
+  } else if (verifyResp && !verifyResp.verified) {
+    /* ── Backend explicitly rejected signature ── */
+    showToast('Payment could not be verified. Contact us with Payment ID: ' + response.razorpay_payment_id + '. Do not pay again.', true);
+    return;
+
+  } else {
+    /* ── Fallback: backend unreachable, save locally ── */
+    orderId = 'ORD-' + Date.now();
+    order   = saveOrderLocally(orderId, response.razorpay_payment_id, cartBackup, customerInfo, totals);
+    if (!order) {
+      /* Absolute last resort — build order object inline */
+      order = {
+        id:        orderId,
+        paymentId: response.razorpay_payment_id,
+        dateStr:   new Date().toLocaleString('en-IN'),
+        customer: {
+          name:    customerInfo.fname + ' ' + customerInfo.lname,
+          email:   customerInfo.email, phone: customerInfo.phone,
+          address: [customerInfo.address, customerInfo.apt, customerInfo.city, customerInfo.state, customerInfo.pincode].filter(Boolean).join(', ')
+        },
+        items:    cartBackup.map(function(x){ return {name:x.name,size:x.size||'',qty:x.qty,price:x.price,total:x.price*x.qty}; }),
+        subtotal: totals.subtotal, discount: totals.discount, coupon: totals.coupon,
+        shipping: totals.shipping, total: totals.total
+      };
+    }
+  }
+
+  lastOrderData = order;
+
+  /* Clear cart only after we have a confirmed/saved order */
+  try { localStorage.removeItem('smw_cart'); } catch(e){}
+  cart = [];
+
+  showSuccessModal(order, customerInfo, cartBackup, totals.total);
+}
+
+/* ── MAIN PAYMENT FUNCTION ── */
 async function initiatePayment(){
   if (paymentInProgress) return;
 
@@ -856,7 +918,7 @@ async function initiatePayment(){
   if (!validateAll()) {
     showToast('Please fill in all required fields correctly.', true);
     var firstErr = document.querySelector('.has-error');
-    if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (firstErr) firstErr.scrollIntoView({ behavior:'smooth', block:'center' });
     return;
   }
 
@@ -867,6 +929,7 @@ async function initiatePayment(){
     showToast('Payment gateway not loaded. Check your internet and reload.', true); return;
   }
 
+  /* Collect customer info */
   var fname   = document.getElementById('fname').value.trim();
   var lname   = document.getElementById('lname').value.trim();
   var email   = document.getElementById('email').value.trim();
@@ -878,7 +941,7 @@ async function initiatePayment(){
   var pincode = document.getElementById('pincode').value.trim();
 
   var customerInfo = { fname:fname, lname:lname, email:email, phone:phone,
-    address:address, apt:apt, city:city, state:state, pincode:pincode };
+                       address:address, apt:apt, city:city, state:state, pincode:pincode };
 
   var itemDesc = cart.map(function(x){
     return x.name + (x.size ? ' (' + x.size + ')' : '') + ' x' + x.qty;
@@ -889,29 +952,28 @@ async function initiatePayment(){
   document.getElementById('payBtnText').textContent = 'Preparing payment…';
   paymentInProgress = true;
 
+  /* Step 1 — create Razorpay order on backend */
   var orderResp;
   try {
     var res = await fetch('/api/create-order', {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        amount: Math.round(total * 100),
+      body:    JSON.stringify({
+        amount:   Math.round(total * 100), // paise
         currency: 'INR',
-        receipt: 'SMW' + Date.now(),
+        receipt:  'SMW' + Date.now(),
         notes: {
-          address: [address, apt, city, state, pincode].filter(Boolean).join(', '),
-          items: itemDesc,
-          coupon: appliedCoupon || 'none',
-          customer_name: fname + ' ' + lname,
+          address:        [address, apt, city, state, pincode].filter(Boolean).join(', '),
+          items:          itemDesc,
+          coupon:         appliedCoupon || 'none',
+          customer_name:  fname + ' ' + lname,
           customer_phone: phone
         }
       })
     });
     orderResp = await res.json();
-    if (!res.ok || !orderResp.id) {
-      throw new Error(orderResp.error || 'Order creation failed');
-    }
-  } catch (e) {
+    if (!res.ok || !orderResp.id) throw new Error(orderResp.error || 'Order creation failed');
+  } catch(e) {
     console.error('create-order failed:', e);
     btn.disabled = false; btn.classList.remove('loading');
     document.getElementById('payBtnText').textContent = 'Pay ' + fmt(total) + ' Securely';
@@ -922,12 +984,13 @@ async function initiatePayment(){
 
   document.getElementById('payBtnText').textContent = 'Opening Payment…';
 
+  /* Step 2 — open Razorpay checkout */
   var options = {
-    key: RZP_KEY_ID,
-    amount: orderResp.amount,
-    currency: orderResp.currency,
-    order_id: orderResp.id,
-    name: 'Shanmuga Mens Wear',
+    key:        RZP_KEY_ID,
+    amount:     orderResp.amount,   // from server
+    currency:   orderResp.currency,
+    order_id:   orderResp.id,       // ties checkout to server order
+    name:       'Shanmuga Mens Wear',
     description: itemDesc,
     prefill: {
       name:    fname + ' ' + lname,
@@ -952,162 +1015,6 @@ async function initiatePayment(){
     },
     handler: function(response){
       onPaymentSuccess(response, customerInfo);
-    }
-  };
-
-  try {
-    var rzp = new Razorpay(options);
-    rzp.on('payment.failed', function(response){
-      btn.disabled = false; btn.classList.remove('loading');
-      document.getElementById('payBtnText').textContent = 'Pay ' + fmt(total) + ' Securely';
-      paymentInProgress = false;
-      var reason = (response.error && response.error.description) ? response.error.description : 'Payment failed';
-      showToast('❌ ' + reason + '. Please try again.', true);
-    });
-    rzp.open();
-  } catch (e) {
-    btn.disabled = false; btn.classList.remove('loading');
-    document.getElementById('payBtnText').textContent = 'Pay ' + fmt(total) + ' Securely';
-    paymentInProgress = false;
-    showToast('Could not open payment. Check your internet and try again.', true);
-    console.error('Razorpay init error:', e);
-  }
-}
-
-/* ── PAYMENT SUCCESS HANDLER (updated) ── */
-async function onPaymentSuccess(response, customerInfo){
-  document.getElementById('payBtnText').textContent = 'Confirming payment…';
-
-  var cartBackup = JSON.parse(JSON.stringify(cart));
-  var total = getTotal();
-  var totals = {
-    subtotal: getSubtotal(),
-    discount: discountAmount,
-    coupon: appliedCoupon,
-    shipping: shippingCost,
-    total: total
-  };
-
-  var verifyResp;
-  try {
-    var res = await fetch('/api/verify-payment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        razorpay_order_id: response.razorpay_order_id,
-        razorpay_payment_id: response.razorpay_payment_id,
-        razorpay_signature: response.razorpay_signature,
-        cart: cartBackup,
-        customer: customerInfo,
-        totals: totals
-      })
-    });
-    verifyResp = await res.json();
-  } catch (e) {
-    console.error('verify-payment request failed:', e);
-    var btn = document.getElementById('payBtn');
-    btn.disabled = false; btn.classList.remove('loading');
-    paymentInProgress = false;
-    showToast('Payment received! Confirming your order — please check WhatsApp shortly, or contact us with payment ID ' + response.razorpay_payment_id, false);
-    return;
-  }
-
-  var btn = document.getElementById('payBtn');
-  btn.disabled = false; btn.classList.remove('loading');
-  paymentInProgress = false;
-
-  if (!verifyResp.verified) {
-    showToast('We could not verify this payment. Please contact support before retrying — do not pay again.', true);
-    console.error('Payment verification failed:', verifyResp);
-    return;
-  }
-
-  var orderId = verifyResp.order.id;
-  var paymentId = response.razorpay_payment_id;
-
-  lastOrderData = {
-    id: orderId,
-    paymentId: paymentId,
-    dateStr: verifyResp.order.dateStr,
-    customer: {
-      name: customerInfo.fname + ' ' + customerInfo.lname,
-      email: customerInfo.email, phone: customerInfo.phone,
-      address: [customerInfo.address, customerInfo.apt, customerInfo.city, customerInfo.state, customerInfo.pincode].filter(Boolean).join(', ')
-    },
-    items: cartBackup.map(function(x){ return {name:x.name,size:x.size||'',qty:x.qty,price:x.price,total:x.price*x.qty}; }),
-    subtotal: totals.subtotal, discount: totals.discount, coupon: totals.coupon,
-    shipping: totals.shipping, total: totals.total
-  };
-
-  try { localStorage.removeItem('smw_cart'); } catch(e){}
-  cart = [];
-
-  document.getElementById('successOrderId').textContent = 'Order ID: ' + orderId + '  |  Payment: ' + paymentId;
-  document.getElementById('successDetail').innerHTML =
-    '<strong>Customer:</strong> <span>' + esc(customerInfo.fname + ' ' + customerInfo.lname) + '</span><br>' +
-    '<strong>Phone:</strong> <span>+91' + esc(customerInfo.phone) + '</span><br>' +
-    '<strong>Address:</strong> <span>' + esc([customerInfo.address, customerInfo.city, customerInfo.state, customerInfo.pincode].filter(Boolean).join(', ')) + '</span><br>' +
-    '<strong>Items:</strong> <span>' + cartBackup.length + ' item(s)</span><br>' +
-    '<strong>Total Paid:</strong> <span style="color:var(--green);font-weight:700">' + fmt(total) + '</span>';
-
-  document.getElementById('successOverlay').classList.add('open');
-
-  setTimeout(function(){ sendWhatsApp(); }, 1500);
-}
-
-  // Collect values
-  var fname   = document.getElementById('fname').value.trim();
-  var lname   = document.getElementById('lname').value.trim();
-  var email   = document.getElementById('email').value.trim();
-  var phone   = document.getElementById('phone').value.trim().replace(/\D/g,'');
-  var address = document.getElementById('address').value.trim();
-  var apt     = document.getElementById('apt').value.trim();
-  var city    = document.getElementById('city').value.trim();
-  var state   = document.getElementById('state').value;
-  var pincode = document.getElementById('pincode').value.trim();
-
-  var itemDesc = cart.map(function(x){
-    return x.name + (x.size ? ' (' + x.size + ')' : '') + ' x' + x.qty;
-  }).join(', ').substring(0, 255);
-
-  // Loading state
-  var btn = document.getElementById('payBtn');
-  btn.disabled = true; btn.classList.add('loading');
-  document.getElementById('payBtnText').textContent = 'Opening Payment…';
-  paymentInProgress = true;
-
-  var options = {
-    key: RZP_KEY,
-    amount: Math.round(total * 100),  // paise
-    currency: 'INR',
-    name: 'Shanmuga Mens Wear',
-    description: itemDesc,
-    prefill: {
-      name:    fname + ' ' + lname,
-      email:   email,
-      contact: '91' + phone
-    },
-    notes: {
-      address: [address, apt, city, state, pincode].filter(Boolean).join(', '),
-      items:   itemDesc,
-      coupon:  appliedCoupon || 'none'
-    },
-    theme: { color: '#111110' },
-    modal: {
-      backdropclose: false,
-      escape: true,
-      ondismiss: function(){
-        btn.disabled = false; btn.classList.remove('loading');
-        document.getElementById('payBtnText').textContent = 'Pay ' + fmt(total) + ' Securely';
-        paymentInProgress = false;
-        showToast('Payment cancelled. Your cart is saved.', false);
-      }
-    },
-    handler: function(response){
-      onPaymentSuccess(response, {
-        fname:fname, lname:lname, email:email, phone:phone,
-        address:address, apt:apt, city:city, state:state, pincode:pincode
-      });
     }
   };
 
