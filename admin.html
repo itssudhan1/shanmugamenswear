@@ -7,12 +7,7 @@
 <title>Shanmuga Mens Wear — Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#f2efe9;--surface:#fff;--surface2:#f8f6f2;--border:#e4dfd8;--text:#1c1713;--text2:#7a746e;
-  --accent:#1c1713;--gold:#c9a96e;--gold-light:#f5ecd8;--green:#1e6b44;--green-bg:#d4f0e2;
-  --red:#b83232;--red-bg:#fde8e8;--orange:#c26b1a;--orange-bg:#fdecd9;--blue:#1d52a8;--blue-bg:#dce9fb;
-  --sidebar-w:230px;--topbar-h:58px;--r:10px;--shadow:0 1px 12px rgba(0,0,0,.07)
-}
+:root{--bg:#f2efe9;--surface:#fff;--surface2:#f8f6f2;--border:#e4dfd8;--text:#1c1713;--text2:#7a746e;--accent:#1c1713;--gold:#c9a96e;--gold-light:#f5ecd8;--green:#1e6b44;--green-bg:#d4f0e2;--red:#b83232;--red-bg:#fde8e8;--orange:#c26b1a;--orange-bg:#fdecd9;--blue:#1d52a8;--blue-bg:#dce9fb;--sidebar-w:230px;--topbar-h:58px;--r:10px;--shadow:0 1px 12px rgba(0,0,0,.07)}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
 a{color:inherit;text-decoration:none}
@@ -186,8 +181,6 @@ input:checked+.slider::before{transform:translateX(18px)}
 .site-bar{display:flex;align-items:center;gap:10px;background:var(--green-bg);border:1.5px solid #86efac;border-radius:10px;padding:13px 16px;margin-bottom:18px;flex-wrap:wrap}
 .site-bar a{font-size:13px;font-weight:700;color:var(--green);text-decoration:underline;flex:1;word-break:break-all}
 .unpub-bar{background:#fef3c7;border:1px solid #fcd34d;color:#78350f;border-radius:9px;padding:11px 16px;margin-bottom:16px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-
-/* ── ORDER STYLES ── */
 .order-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow)}
 .order-card-head{padding:14px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:var(--surface2)}
 .order-id{font-family:'Syne',sans-serif;font-weight:800;font-size:13px;letter-spacing:.04em}
@@ -214,70 +207,58 @@ input:checked+.slider::before{transform:translateX(18px)}
 </style>
 </head>
 <body>
-
-<!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-brand">SHANMUGA <em>ADMIN</em></div>
     <div class="login-sub">Sign in to manage your store</div>
-    <div id="loginErr">❌ Incorrect credentials.</div>
+    <div id="loginErr">Incorrect credentials.</div>
     <div class="lf-group"><label>Username</label><input type="text" id="lu" placeholder="admin" autocomplete="off"></div>
-    <div class="lf-group"><label>Password</label><input type="password" id="lp" placeholder="••••••••"></div>
-    <button class="btn-login" onclick="doLogin()">Sign In →</button>
+    <div class="lf-group"><label>Password</label><input type="password" id="lp" placeholder=""></div>
+    <button class="btn-login" onclick="doLogin()">Sign In</button>
   </div>
 </div>
-
-<!-- APP -->
 <div id="app">
 <aside class="sidebar">
   <div class="s-brand"><span class="name">SHANMUGA</span><span class="badge">ADMIN</span></div>
   <div class="s-section">Orders</div>
-  <button class="nav-btn" id="nav-orders" onclick="goto('orders')">🛒 Orders <span class="nbadge" id="nb-orders" style="display:none">0</span></button>
+  <button class="nav-btn" id="nav-orders" onclick="goto('orders')">Orders <span class="nbadge" id="nb-orders" style="display:none">0</span></button>
   <div class="s-section">Catalogue</div>
-  <button class="nav-btn active" id="nav-products" onclick="goto('products')">📦 Products</button>
-  <button class="nav-btn" id="nav-add" onclick="gotoAdd()">➕ Add Product</button>
+  <button class="nav-btn active" id="nav-products" onclick="goto('products')">Products</button>
+  <button class="nav-btn" id="nav-add" onclick="gotoAdd()">Add Product</button>
   <div class="s-section">Marketing</div>
-  <button class="nav-btn" id="nav-offers" onclick="goto('offers')">🏷️ Offers &amp; Coupons</button>
-  <button class="nav-btn" id="nav-reviews" onclick="goto('reviews')">⭐ Reviews</button>
+  <button class="nav-btn" id="nav-offers" onclick="goto('offers')">Offers &amp; Coupons</button>
+  <button class="nav-btn" id="nav-reviews" onclick="goto('reviews')">Reviews</button>
   <div class="s-section">System</div>
-  <button class="nav-btn" id="nav-deploy" onclick="goto('deploy')">🚀 Publish to Website</button>
-  <button class="nav-btn" id="nav-notifications" onclick="goto('notifications')">🔔 Notifications</button>
-  <button class="nav-btn" id="nav-security" onclick="goto('security')">🔒 Security</button>
-  <div class="s-foot"><strong>Admin</strong>Session: <span id="stimer">30:00</span><br><span style="font-size:9px;color:rgba(255,255,255,.2)">© 2026 Shanmuga Mens Wear</span></div>
+  <button class="nav-btn" id="nav-deploy" onclick="goto('deploy')">Publish to Website</button>
+  <button class="nav-btn" id="nav-notifications" onclick="goto('notifications')">Notifications</button>
+  <button class="nav-btn" id="nav-security" onclick="goto('security')">Security</button>
+  <div class="s-foot"><strong>Admin</strong>Session: <span id="stimer">30:00</span><br><span style="font-size:9px;color:rgba(255,255,255,.2)">2026 Shanmuga Mens Wear</span></div>
 </aside>
-
 <div class="topbar">
   <div class="topbar-title" id="topTitle">Products</div>
-  <button class="btn btn-success btn-sm" onclick="goto('deploy')">🚀 Publish</button>
-  <button class="btn btn-info btn-sm" onclick="goto('orders')">🛒 Orders</button>
+  <button class="btn btn-success btn-sm" onclick="goto('deploy')">Publish</button>
+  <button class="btn btn-info btn-sm" onclick="goto('orders')">Orders</button>
   <button class="btn btn-primary btn-sm" onclick="gotoAdd()">+ Add Product</button>
   <button class="btn btn-outline btn-sm" onclick="doLogout()">Logout</button>
 </div>
-
 <main class="main">
-
-<!-- ══════════════════════════════════════════
-     ORDERS PAGE
-══════════════════════════════════════════ -->
 <div class="page" id="page-orders">
   <div class="ph">
     <div class="ph-left"><h1>Orders</h1><div class="sub" id="orderSub">Loading...</div></div>
     <div class="ph-right">
-      <button class="btn btn-outline btn-sm" onclick="renderOrders()">↻ Refresh</button>
-      <button class="btn btn-danger btn-sm" onclick="clearOrders()">🗑 Clear All</button>
+      <button class="btn btn-outline btn-sm" onclick="renderOrders()">Refresh</button>
+      <button class="btn btn-danger btn-sm" onclick="clearOrders()">Clear All</button>
     </div>
   </div>
-
   <div class="stat-grid" style="grid-template-columns:repeat(4,1fr)">
     <div class="stat-card dark"><div class="s-lbl">Total Orders</div><div class="s-val" id="o-total">0</div></div>
     <div class="stat-card"><div class="s-lbl">Revenue</div><div class="s-val" id="o-revenue" style="color:var(--green);font-size:20px">Rs.0</div></div>
     <div class="stat-card"><div class="s-lbl">Pending Dispatch</div><div class="s-val" id="o-pending" style="color:var(--orange)">0</div></div>
     <div class="stat-card"><div class="s-lbl">Delivered</div><div class="s-val" id="o-delivered" style="color:var(--green)">0</div></div>
   </div>
-
   <div class="search-bar">
-    <input type="text" id="orderSearch" placeholder="🔍 Search by name, phone, order ID…" oninput="renderOrders()">
-    <select id="orderStatusFilter" onchange="renderOrders()">
+    <input type="text" id="orderSearch" placeholder="Search by name, phone, order ID" oninput="renderOrdersFromCache()">
+    <select id="orderStatusFilter" onchange="renderOrdersFromCache()">
       <option value="">All Shipping Status</option>
       <option value="pending">Pending</option>
       <option value="dispatched">Dispatched</option>
@@ -285,18 +266,13 @@ input:checked+.slider::before{transform:translateX(18px)}
       <option value="cancelled">Cancelled</option>
     </select>
   </div>
-
   <div id="ordersList"></div>
 </div>
-
-<!-- ══════════════════════════════════════════
-     PRODUCTS PAGE
-══════════════════════════════════════════ -->
 <div class="page active" id="page-products">
   <div class="ph">
     <div class="ph-left"><h1>Products</h1><div class="sub" id="prodSub">Loading...</div></div>
     <div class="ph-right">
-      <button class="btn btn-success btn-sm" onclick="goto('deploy')">🚀 Publish to Site</button>
+      <button class="btn btn-success btn-sm" onclick="goto('deploy')">Publish to Site</button>
       <button class="btn btn-primary btn-sm" onclick="gotoAdd()">+ Add Product</button>
     </div>
   </div>
@@ -307,11 +283,11 @@ input:checked+.slider::before{transform:translateX(18px)}
     <div class="stat-card"><div class="s-lbl">Pants</div><div class="s-val" id="s-pants" style="color:var(--green)">0</div></div>
   </div>
   <div id="unpubBar" class="unpub-bar" style="display:none">
-    ⚠️ You have unpublished changes — your live site is out of date.
-    <button class="btn btn-sm" style="background:#78350f;color:#fff;white-space:nowrap" onclick="goto('deploy')">Publish Now →</button>
+    You have unpublished changes.
+    <button class="btn btn-sm" style="background:#78350f;color:#fff;white-space:nowrap" onclick="goto('deploy')">Publish Now</button>
   </div>
   <div class="search-bar">
-    <input type="text" id="prodSearch" placeholder="🔍 Search by name..." oninput="renderProds()">
+    <input type="text" id="prodSearch" placeholder="Search by name..." oninput="renderProds()">
     <select id="prodCat" onchange="renderProds()">
       <option value="">All Categories</option>
       <option value="shirts">Shirts</option>
@@ -326,65 +302,58 @@ input:checked+.slider::before{transform:translateX(18px)}
     </table>
   </div>
 </div>
-
-<!-- ADD/EDIT -->
 <div class="page" id="page-add">
   <div class="ph">
     <div class="ph-left"><h1 id="addTitle">Add New Product</h1><div class="sub" id="addSub">Fill in details below</div></div>
     <div class="ph-right">
       <button class="btn btn-outline btn-sm" onclick="goto('products')">Cancel</button>
-      <button class="btn btn-primary btn-sm" onclick="saveProduct()">💾 Save Product</button>
+      <button class="btn btn-primary btn-sm" onclick="saveProduct()">Save Product</button>
     </div>
   </div>
   <div style="display:grid;grid-template-columns:1.1fr .9fr;gap:22px">
     <div>
       <div class="card" style="margin-bottom:18px">
-        <div class="card-title">📷 Product Images</div>
+        <div class="card-title">Product Images</div>
         <div class="cloud-setup" id="cloudSetup">
-          <h3>⚙️ One-Time: Connect Cloudinary for Photos</h3>
-          <p><strong>① Go to</strong> <a href="https://cloudinary.com/users/register_free" target="_blank" style="color:var(--gold);font-weight:700">cloudinary.com</a> → Sign up FREE<br>
-          <strong>② Dashboard</strong> → Copy <strong>Cloud Name</strong><br>
-          <strong>③ Settings → Upload → Add preset → Unsigned</strong> → Copy preset name<br>
-          <strong>④ Paste below and Save</strong></p>
+          <h3>Connect Cloudinary for Photos</h3>
+          <p><strong>Go to</strong> <a href="https://cloudinary.com/users/register_free" target="_blank" style="color:var(--gold);font-weight:700">cloudinary.com</a> Sign up FREE, copy Cloud Name, add unsigned upload preset, paste below.</p>
           <div class="cloud-fields">
             <input type="text" id="cl-cloud" placeholder="Cloud Name">
             <input type="text" id="cl-preset" placeholder="Upload Preset">
           </div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-            <button class="btn btn-gold btn-sm" onclick="saveCloudConfig()">💾 Save Config</button>
-            <span id="cloudStatus" class="cloud-status bad">⚠ Not configured</span>
-            <button class="btn btn-sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:11px" onclick="document.getElementById('cloudSetup').style.display='none'">Hide ↑</button>
+            <button class="btn btn-gold btn-sm" onclick="saveCloudConfig()">Save Config</button>
+            <span id="cloudStatus" class="cloud-status bad">Not configured</span>
+            <button class="btn btn-sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:11px" onclick="document.getElementById('cloudSetup').style.display='none'">Hide</button>
           </div>
         </div>
         <div class="mtabs">
-          <button class="mtab on" id="tab-upload-btn" onclick="switchTab('upload',this)">📷 Upload Photo</button>
-          <button class="mtab" id="tab-url-btn" onclick="switchTab('url',this)">🔗 Paste URL</button>
+          <button class="mtab on" id="tab-upload-btn" onclick="switchTab('upload',this)">Upload Photo</button>
+          <button class="mtab" id="tab-url-btn" onclick="switchTab('url',this)">Paste URL</button>
         </div>
         <div class="mpanel on" id="tab-upload">
           <div class="upload-zone" id="uploadZone" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="onDrop(event)">
             <input type="file" id="imgFiles" accept="image/*" multiple onchange="handleFiles(this)">
             <span class="upload-icon">📷</span>
-            <div class="upload-title">Click or Drag &amp; Drop Photos</div>
-            <div class="upload-sub">JPG, PNG, WEBP • Multiple allowed</div>
+            <div class="upload-title">Click or Drag Photos</div>
+            <div class="upload-sub">JPG, PNG, WEBP</div>
           </div>
           <div class="progress-wrap" id="progressWrap">
             <div style="display:flex;justify-content:space-between"><span style="font-size:12px;font-weight:700" id="progressMsg">Uploading...</span><span style="font-size:11px;color:var(--text2)" id="progressPct">0%</span></div>
             <div class="progress-bar-bg"><div class="progress-bar" id="progressBar"></div></div>
           </div>
-          <div style="font-size:11px;color:var(--text2);margin-top:10px;padding:9px 12px;background:var(--surface2);border-radius:7px;border:1px solid var(--border)">💡 Set up Cloudinary above so photos work on your live website.</div>
         </div>
         <div class="mpanel" id="tab-url">
           <div style="display:flex;gap:8px;margin-bottom:8px">
-            <input type="text" id="newImgUrl" placeholder="https://i.ibb.co/xxx/photo.jpg" style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface2)">
+            <input type="text" id="newImgUrl" placeholder="https://..." style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface2)">
             <button class="btn btn-primary btn-sm" onclick="addImgUrl()">+ Add</button>
           </div>
-          <div style="font-size:11px;color:var(--text2)">Free hosts: <a href="https://imgbb.com" target="_blank" style="color:var(--blue);font-weight:700">imgbb.com</a> • <a href="https://postimages.org" target="_blank" style="color:var(--blue);font-weight:700">postimages.org</a></div>
         </div>
         <div class="img-grid" id="imgGrid"></div>
         <div id="imgCount" style="font-size:11px;color:var(--text2);margin-top:8px"></div>
       </div>
       <div class="card">
-        <div class="card-title">📋 Product Information</div>
+        <div class="card-title">Product Information</div>
         <div class="fg"><label>Product Name *</label><input type="text" id="f-name" placeholder="e.g. Classic White Oxford Shirt"></div>
         <div class="fg"><label>Category *</label>
           <select id="f-cat"><option value="">Select category...</option><option value="shirts">Shirts</option><option value="tshirts">T-Shirts</option><option value="pants">Pants</option></select>
@@ -399,14 +368,14 @@ input:checked+.slider::before{transform:translateX(18px)}
     </div>
     <div>
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title">💰 Pricing</div>
+        <div class="card-title">Pricing</div>
         <div class="g2">
           <div class="fg"><label>Original Price (Rs.) *</label><input type="number" id="f-orig" placeholder="999" min="0"></div>
           <div class="fg"><label>Sale Price (Rs.)</label><input type="number" id="f-sale" placeholder="Leave blank if no sale" min="0"><div class="hint">Leave blank if no discount</div></div>
         </div>
       </div>
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title">📊 Stock</div>
+        <div class="card-title">Stock</div>
         <div class="g2">
           <div class="fg"><label>Quantity *</label><input type="number" id="f-stock" placeholder="20" min="0"></div>
           <div class="fg"><label>Low Stock Alert At</label><input type="number" id="f-threshold" placeholder="5" min="0"></div>
@@ -416,16 +385,16 @@ input:checked+.slider::before{transform:translateX(18px)}
         </div>
       </div>
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title">📐 Available Sizes</div>
+        <div class="card-title">Available Sizes</div>
         <div class="size-chips" id="sizeChips"></div>
       </div>
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title">🏷️ Product Badge</div>
+        <div class="card-title">Product Badge</div>
         <div class="b-chips" id="badgeChips"></div>
         <input type="hidden" id="f-badge" value="">
       </div>
       <div class="card">
-        <div class="card-title">👁️ Visibility</div>
+        <div class="card-title">Visibility</div>
         <div class="toggle-row">
           <div><div class="toggle-label">Show in Store</div><div class="toggle-desc">Visible on product pages</div></div>
           <label class="toggle"><input type="checkbox" id="f-visible" checked><span class="slider"></span></label>
@@ -439,53 +408,49 @@ input:checked+.slider::before{transform:translateX(18px)}
   </div>
   <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px">
     <button class="btn btn-outline" onclick="goto('products')">Cancel</button>
-    <button class="btn btn-primary" style="padding:10px 28px;font-size:14px" onclick="saveProduct()">💾 Save &amp; Publish</button>
+    <button class="btn btn-primary" style="padding:10px 28px;font-size:14px" onclick="saveProduct()">Save &amp; Publish</button>
   </div>
   <input type="hidden" id="f-editId" value="">
 </div>
-
-<!-- VIEW -->
 <div class="page" id="page-view">
   <div class="ph">
     <div class="ph-left"><h1>Product Details</h1><div class="sub" id="viewSub"></div></div>
     <div class="ph-right">
-      <button class="btn btn-outline btn-sm" onclick="goto('products')">← Back</button>
-      <button class="btn btn-warning btn-sm" onclick="editViewProd()">✏️ Edit</button>
-      <button class="btn btn-danger btn-sm" onclick="deleteViewProd()">🗑️ Delete</button>
+      <button class="btn btn-outline btn-sm" onclick="goto('products')">Back</button>
+      <button class="btn btn-warning btn-sm" onclick="editViewProd()">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteViewProd()">Delete</button>
     </div>
   </div>
   <div id="viewContent"></div>
 </div>
-
-<!-- PUBLISH -->
 <div class="page" id="page-deploy">
   <div class="ph">
-    <div class="ph-left"><h1>🚀 Publish to Website</h1><div class="sub">One click — no coding needed</div></div>
+    <div class="ph-left"><h1>Publish to Website</h1><div class="sub">One click - no coding needed</div></div>
     <div class="ph-right">
-      <a href="https://shanmugamenswear.vercel.app" target="_blank" class="btn btn-success btn-sm">🌐 Visit Live Site</a>
+      <a href="https://shanmugamenswear.vercel.app" target="_blank" class="btn btn-success btn-sm">Visit Live Site</a>
     </div>
   </div>
   <div class="site-bar">
-    <span>🌐 Your live site:</span>
+    <span>Your live site:</span>
     <a href="https://shanmugamenswear.vercel.app" target="_blank">https://shanmugamenswear.vercel.app</a>
-    <button class="btn btn-sm" style="background:var(--green);color:#fff" onclick="window.open('https://shanmugamenswear.vercel.app','_blank')">Open →</button>
+    <button class="btn btn-sm" style="background:var(--green);color:#fff" onclick="window.open('https://shanmugamenswear.vercel.app','_blank')">Open</button>
   </div>
   <div class="gh-dark" id="ghSetupCard">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
       <div>
-        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--gold)">⚙️ One-Time GitHub Setup</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:3px">Do this once. After that, just click Publish every time.</div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--gold)">One-Time GitHub Setup</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:3px">Do this once. Then just click Publish every time.</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        <span id="ghStatus" class="cloud-status bad">⚠ Not connected</span>
-        <button class="btn btn-sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:11px" onclick="toggleGHSetup()">Hide ↑</button>
+        <span id="ghStatus" class="cloud-status bad">Not connected</span>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:11px" onclick="toggleGHSetup()">Hide</button>
       </div>
     </div>
     <div id="ghSetupBody">
       <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:14px;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,.65);line-height:2.1">
-        <strong style="color:var(--gold)">Step 1 —</strong> <a href="https://github.com/settings/tokens/new" target="_blank" style="color:#7dd3fc;font-weight:700">github.com/settings/tokens/new</a> → Give a name → <strong style="color:#fff">No expiration</strong> → Tick <strong style="color:#fff">repo</strong> only → Generate token<br>
-        <strong style="color:var(--gold)">Step 2 —</strong> Copy the token (starts with <code style="background:rgba(255,255,255,.12);padding:1px 6px;border-radius:3px">ghp_</code>)<br>
-        <strong style="color:var(--gold)">Step 3 —</strong> Fill below → <strong style="color:#fff">Save &amp; Test</strong>
+        <strong style="color:var(--gold)">Step 1</strong> <a href="https://github.com/settings/tokens/new" target="_blank" style="color:#7dd3fc;font-weight:700">github.com/settings/tokens/new</a> - Give a name - No expiration - Tick repo only - Generate token<br>
+        <strong style="color:var(--gold)">Step 2</strong> Copy token (starts with ghp_)<br>
+        <strong style="color:var(--gold)">Step 3</strong> Fill below and Save &amp; Test
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
         <input type="password" id="gh-token" class="gh-input" placeholder="GitHub Token (ghp_...)">
@@ -493,43 +458,41 @@ input:checked+.slider::before{transform:translateX(18px)}
         <input type="text" id="gh-repo" class="gh-input" placeholder="Repo name (shanmugamenswear)">
         <input type="text" id="gh-branch" class="gh-input" placeholder="Branch (default: main)">
       </div>
-      <button class="btn btn-gold btn-sm" onclick="saveGHConfig()">💾 Save &amp; Test Connection</button>
+      <button class="btn btn-gold btn-sm" onclick="saveGHConfig()">Save &amp; Test Connection</button>
     </div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
     <div class="card">
-      <div class="card-title">🌐 Publish to Live Website</div>
+      <div class="card-title">Publish to Live Website</div>
       <div class="alert alert-success" style="margin-bottom:16px"><strong>One click updates your store.</strong> No VS Code, no terminal needed.</div>
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;text-align:center">
         <div style="font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);margin-bottom:6px">Products ready to publish</div>
         <div style="font-family:'Syne',sans-serif;font-size:44px;font-weight:800" id="expCount">0</div>
       </div>
-      <button class="pub-btn" id="publishBtn" onclick="publishToGitHub()">🚀 Publish to Website Now</button>
+      <button class="pub-btn" id="publishBtn" onclick="publishToGitHub()">Publish to Website Now</button>
       <div id="publishStatus" style="display:none;border-radius:8px;padding:12px 16px;font-size:13px;font-weight:600;margin-top:12px;white-space:pre-line"></div>
-      <div style="margin-top:12px;font-size:11px;color:var(--text2);text-align:center">⏱ Vercel updates in ~30 seconds after publish</div>
+      <div style="margin-top:12px;font-size:11px;color:var(--text2);text-align:center">Vercel updates in ~30 seconds after publish</div>
     </div>
     <div class="card">
-      <div class="card-title">💾 Backup &amp; Restore</div>
+      <div class="card-title">Backup &amp; Restore</div>
       <div class="alert alert-info" style="margin-bottom:14px">Download backup or restore from a previous file.</div>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <button class="btn btn-primary" onclick="doExport()" style="padding:12px">📥 Download Backup (.js file)</button>
-        <button class="btn btn-outline btn-sm" onclick="doCopyJSON()">📋 Copy JSON to Clipboard</button>
+        <button class="btn btn-primary" onclick="doExport()" style="padding:12px">Download Backup (.js file)</button>
+        <button class="btn btn-outline btn-sm" onclick="doCopyJSON()">Copy JSON to Clipboard</button>
         <div class="upload-zone" style="padding:18px">
           <input type="file" id="importFile" accept=".json" onchange="doImport(this)">
           <div style="font-size:26px;margin-bottom:6px">📤</div>
           <div style="font-size:12px;color:var(--text2);font-weight:600">Click to restore from backup</div>
         </div>
-        <button class="btn btn-danger btn-sm" onclick="clearProds()">🗑️ Clear All Products</button>
+        <button class="btn btn-danger btn-sm" onclick="clearProds()">Clear All Products</button>
       </div>
     </div>
   </div>
   <div class="card">
-    <div class="card-title">📋 Publish History</div>
+    <div class="card-title">Publish History</div>
     <div id="publishLog" style="max-height:220px;overflow-y:auto"><p style="color:var(--text2);font-size:12px">No publishes yet.</p></div>
   </div>
 </div>
-
-<!-- OFFERS -->
 <div class="page" id="page-offers">
   <div class="ph"><div class="ph-left"><h1>Offers &amp; Coupons</h1></div><button class="btn btn-primary btn-sm" onclick="openMod('couponMod')">+ Create Coupon</button></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
@@ -549,13 +512,11 @@ input:checked+.slider::before{transform:translateX(18px)}
           <div class="fg"><label>Min Order (Rs.)</label><input type="number" id="nc-min" placeholder="499" min="0"></div>
           <div class="fg"><label>Expiry Date</label><input type="date" id="nc-exp"></div>
         </div>
-        <button class="btn btn-primary" style="width:100%" onclick="createCoupon()">✅ Create Coupon</button>
+        <button class="btn btn-primary" style="width:100%" onclick="createCoupon()">Create Coupon</button>
       </div>
     </div>
   </div>
 </div>
-
-<!-- REVIEWS -->
 <div class="page" id="page-reviews">
   <div class="ph"><div class="ph-left"><h1>Reviews &amp; Ratings</h1></div></div>
   <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">
@@ -570,10 +531,8 @@ input:checked+.slider::before{transform:translateX(18px)}
   </div>
   <div id="revList"></div>
 </div>
-
-<!-- NOTIFICATIONS -->
 <div class="page" id="page-notifications">
-  <div class="ph"><div class="ph-left"><h1>Notifications</h1></div><button class="btn btn-outline btn-sm" onclick="markAllRead()">✓ Mark All Read</button></div>
+  <div class="ph"><div class="ph-left"><h1>Notifications</h1></div><button class="btn btn-outline btn-sm" onclick="markAllRead()">Mark All Read</button></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
     <div><div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:12px">All Notifications</div><div class="table-wrap" id="notifList"></div></div>
     <div><div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:12px">Alert Settings</div>
@@ -584,10 +543,8 @@ input:checked+.slider::before{transform:translateX(18px)}
     </div>
   </div>
 </div>
-
-<!-- SECURITY -->
 <div class="page" id="page-security">
-  <div class="ph"><div class="ph-left"><h1>Security</h1></div><span class="tag tg" style="padding:5px 12px;font-size:12px">🔒 Secure</span></div>
+  <div class="ph"><div class="ph-left"><h1>Security</h1></div><span class="tag tg" style="padding:5px 12px;font-size:12px">Secure</span></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
     <div><div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:12px">Change Password</div>
       <div class="card">
@@ -595,7 +552,7 @@ input:checked+.slider::before{transform:translateX(18px)}
         <div class="fg"><label>Current Password</label><input type="password" id="pw-cur"></div>
         <div class="fg"><label>New Password</label><input type="password" id="pw-new" placeholder="Min 8 characters"></div>
         <div class="fg"><label>Confirm New Password</label><input type="password" id="pw-confirm"></div>
-        <button class="btn btn-primary btn-sm" onclick="changePw()">🔑 Update Password</button>
+        <button class="btn btn-primary btn-sm" onclick="changePw()">Update Password</button>
       </div>
     </div>
     <div><div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:12px">Activity Log</div>
@@ -603,22 +560,15 @@ input:checked+.slider::before{transform:translateX(18px)}
     </div>
   </div>
 </div>
-
 </main>
 </div>
-
-<!-- ORDER DETAIL MODAL -->
 <div class="modal-overlay" id="orderDetailMod">
   <div class="modal-box">
     <h3>Order Details</h3>
     <div id="orderDetailContent"></div>
-    <div class="modal-foot">
-      <button class="btn btn-outline" onclick="closeMod('orderDetailMod')">Close</button>
-    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeMod('orderDetailMod')">Close</button></div>
   </div>
 </div>
-
-<!-- COUPON MODAL -->
 <div class="modal-overlay" id="couponMod">
   <div class="modal-box">
     <h3>Create Coupon</h3>
@@ -628,22 +578,27 @@ input:checked+.slider::before{transform:translateX(18px)}
     <div class="fg"><label>Expiry Date</label><input type="date" id="mc-exp"></div>
     <div class="modal-foot">
       <button class="btn btn-outline" onclick="closeMod('couponMod')">Cancel</button>
-      <button class="btn btn-primary" onclick="createCouponMod()">✅ Create</button>
+      <button class="btn btn-primary" onclick="createCouponMod()">Create</button>
     </div>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
-
 <script>
-// ── CREDENTIALS ──
+'use strict';
+// CREDENTIALS
 var DEFAULT_USER='admin',DEFAULT_PASS='shanmuga2026';
 var ADMIN_USER=localStorage.getItem('smw_admin_user')||DEFAULT_USER;
 var ADMIN_PASS=localStorage.getItem('smw_admin_pass')||DEFAULT_PASS;
 if(!localStorage.getItem('smw_admin_user'))localStorage.setItem('smw_admin_user',DEFAULT_USER);
 if(!localStorage.getItem('smw_admin_pass'))localStorage.setItem('smw_admin_pass',DEFAULT_PASS);
 
-// ── STATE ──
+// ORDERS API CONFIG
+var ADMIN_API_KEY='admin_5fT8qWzN2pXc';
+var ORDERS_API_BASE='https://shanmugamenswear.vercel.app/api';
+var cachedOrders=[];
+var ordersLoading=false;
+
+// STATE
 var CL_CLOUD='',CL_PRESET='';
 var GH_TOKEN='',GH_USER_V='',GH_REPO='',GH_BRANCH='main';
 var ghSetupOpen=true;
@@ -659,11 +614,9 @@ var reviews=[
 ];
 var VERCEL_URL='https://shanmugamenswear.vercel.app';
 
-// ── HELPERS ──
+// HELPERS
 function loadProds(){try{var r=localStorage.getItem('smw_products');if(!r||r==='null'||r==='[]')return[];var a=JSON.parse(r);return Array.isArray(a)?a:[];}catch(e){return[];}}
 function saveProds(arr){try{localStorage.setItem('smw_products',JSON.stringify(arr));}catch(e){toast('Storage error: '+e.message,'error');}}
-function loadOrders(){try{var r=localStorage.getItem('smw_orders');if(!r)return[];var a=JSON.parse(r);return Array.isArray(a)?a:[];}catch(e){return[];}}
-function saveOrders(arr){try{localStorage.setItem('smw_orders',JSON.stringify(arr));}catch(e){toast('Storage error','error');}}
 function catLabel(c){return{shirts:'Shirts',tshirts:'T-Shirts',pants:'Pants'}[c]||c;}
 function catTagClass(c){return{shirts:'to',tshirts:'tb',pants:'tg'}[c]||'ty';}
 function badgeHTML(b){if(!b)return'';return{new:'<span class="tag tb">New</span>',sale:'<span class="tag tr">Sale</span>',offer:'<span class="tag to">Offer</span>'}[b]||'';}
@@ -672,21 +625,42 @@ function fmtRs(n){return'Rs.'+Number(n).toLocaleString('en-IN');}
 function starsHTML(n){var s='';for(var i=0;i<5;i++)s+=i<n?'★':'☆';return s;}
 function nowTime(){var d=new Date(),h=d.getHours(),m=d.getMinutes(),ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+(m<10?'0'+m:m)+' '+ap;}
 function escHTML(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-// ── SHIPPING STATUS COLOR ──
 function shipTagClass(s){return{pending:'to',dispatched:'tb',delivered:'tg',cancelled:'tr'}[s]||'ty';}
-function shipTagLabel(s){return{pending:'⏳ Pending',dispatched:'📦 Dispatched',delivered:'✅ Delivered',cancelled:'❌ Cancelled'}[s]||s;}
+function shipTagLabel(s){return{pending:'Pending',dispatched:'Dispatched',delivered:'Delivered',cancelled:'Cancelled'}[s]||s;}
 
-// ── ORDERS ──
+// ORDERS - reads from real backend API
+function fetchOrdersFromServer(){
+  return fetch(ORDERS_API_BASE+'/orders',{headers:{'x-admin-key':ADMIN_API_KEY}})
+    .then(function(res){
+      if(!res.ok)return res.json().then(function(d){throw new Error(d.error||('HTTP '+res.status));});
+      return res.json();
+    })
+    .then(function(data){cachedOrders=data.orders||[];return cachedOrders;});
+}
+
 function renderOrders(){
-  var orders=loadOrders();
+  var sub=document.getElementById('orderSub');
+  if(ordersLoading)return;
+  ordersLoading=true;
+  if(sub)sub.textContent='Loading...';
+  fetchOrdersFromServer()
+    .then(function(orders){ordersLoading=false;renderOrdersFromCache(orders);})
+    .catch(function(err){
+      ordersLoading=false;
+      if(sub)sub.textContent='Could not load orders';
+      var el=document.getElementById('ordersList');
+      if(el)el.innerHTML='<div class="no-orders"><h3>Could not load orders</h3><p>'+escHTML(err.message)+'<br><br><button class="btn btn-outline btn-sm" onclick="renderOrders()">Try again</button></p></div>';
+    });
+}
+
+function renderOrdersFromCache(orders){
+  orders=orders||cachedOrders;
   var q=(document.getElementById('orderSearch')||{value:''}).value.toLowerCase();
   var sf=(document.getElementById('orderStatusFilter')||{value:''}).value;
-
-  // Stats
   var totalRev=0,pending=0,delivered=0;
   orders.forEach(function(o){
-    totalRev+=o.total||0;
+    var t=o.totals||o;
+    totalRev+=(t.total!=null?t.total:(o.total||0));
     if(o.shippingStatus==='delivered')delivered++;
     else if(o.shippingStatus==='pending'||!o.shippingStatus)pending++;
   });
@@ -694,43 +668,38 @@ function renderOrders(){
   document.getElementById('o-revenue').textContent='Rs.'+Number(totalRev).toLocaleString('en-IN');
   document.getElementById('o-pending').textContent=pending;
   document.getElementById('o-delivered').textContent=delivered;
-
   var sub=document.getElementById('orderSub');
   if(sub)sub.textContent=orders.length+' order'+(orders.length!==1?'s':'')+' received';
-
-  // Filter
   var filtered=orders.filter(function(o){
     if(sf&&(o.shippingStatus||'pending')!==sf)return false;
     if(q){
-      var hay=(o.customer&&(o.customer.name+' '+o.customer.phone+' '+o.customer.email)||'')+' '+o.id+' '+(o.paymentId||'');
+      var c=o.customer||{};
+      var hay=(c.name||(c.fname?(c.fname+' '+(c.lname||'')):''))+' '+(c.phone||'')+' '+(c.email||'')+' '+o.id+' '+(o.paymentId||'');
       if(hay.toLowerCase().indexOf(q)<0)return false;
     }
     return true;
   });
-
   var el=document.getElementById('ordersList');
   if(!filtered.length){
-    el.innerHTML='<div class="no-orders"><h3>'+(orders.length===0?'No orders yet':'No matching orders')+'</h3><p>'+(orders.length===0?'Orders placed through checkout will appear here automatically.<br>Share your store and start selling!':'Try a different search or filter.')+'</p></div>';
+    el.innerHTML='<div class="no-orders"><h3>'+(orders.length===0?'No orders yet':'No matching orders')+'</h3><p>'+(orders.length===0?'Orders placed through checkout will appear here automatically.':'Try a different search or filter.')+'</p></div>';
     return;
   }
-
-  el.innerHTML=filtered.map(function(o,idx){
+  el.innerHTML=filtered.map(function(o){
     var c=o.customer||{};
+    var custName=c.name||(c.fname?(c.fname+' '+(c.lname||'')):'—');
+    var t=o.totals||o;
+    var total=t.total!=null?t.total:(o.total||0);
+    var coupon=t.coupon!=null?t.coupon:(o.coupon||'');
+    var shipping=t.shipping!=null?t.shipping:(o.shipping||0);
     var itemsHTML=(o.items||[]).map(function(it){
-      return '<div class="order-item-row">'+
-        '<div><div class="order-item-name">'+escHTML(it.name)+'</div><div class="order-item-meta">Size: '+escHTML(it.size||'—')+' &nbsp;•&nbsp; Qty: '+it.qty+'</div></div>'+
-        '<div style="font-weight:700">'+fmtRs(it.total||it.price*it.qty)+'</div>'+
-      '</div>';
+      return '<div class="order-item-row"><div><div class="order-item-name">'+escHTML(it.name)+'</div><div class="order-item-meta">Size: '+escHTML(it.size||'—')+' &nbsp;•&nbsp; Qty: '+it.qty+'</div></div><div style="font-weight:700">'+fmtRs(it.total||(it.price*it.qty))+'</div></div>';
     }).join('');
     var curStatus=o.shippingStatus||'pending';
+    var srcTag=o.source==='webhook-recovery'?'<span class="tag to">Recovered</span>':'<span class="tag tg">Paid</span>';
     return '<div class="order-card">'+
       '<div class="order-card-head">'+
-        '<div>'+
-          '<div class="order-id">'+escHTML(o.id)+'</div>'+
-          '<div class="order-date">'+escHTML(o.dateStr||o.date||'')+'</div>'+
-        '</div>'+
-        '<span class="tag '+shipTagClass(curStatus)+'">'+shipTagLabel(curStatus)+'</span>'+
-        '<span class="tag tg" style="margin-left:4px">💳 Paid</span>'+
+        '<div><div class="order-id">'+escHTML(o.id)+'</div><div class="order-date">'+escHTML(o.dateStr||o.date||'')+'</div></div>'+
+        '<span class="tag '+shipTagClass(curStatus)+'">'+shipTagLabel(curStatus)+'</span>'+srcTag+
         '<div style="margin-left:auto;display:flex;gap:8px">'+
           '<button class="btn btn-outline btn-xs" onclick="showOrderDetail(\''+escHTML(o.id)+'\')">View Details</button>'+
           '<button class="btn btn-danger btn-xs" onclick="deleteOrder(\''+escHTML(o.id)+'\')">Delete</button>'+
@@ -738,54 +707,61 @@ function renderOrders(){
       '</div>'+
       '<div class="order-card-body">'+
         '<div class="order-customer">'+
-          '<div class="order-customer-item"><div class="order-customer-label">Customer</div><div class="order-customer-val">'+escHTML(c.name||'—')+'</div></div>'+
+          '<div class="order-customer-item"><div class="order-customer-label">Customer</div><div class="order-customer-val">'+escHTML(custName)+'</div></div>'+
           '<div class="order-customer-item"><div class="order-customer-label">Phone</div><div class="order-customer-val">'+escHTML(c.phone||'—')+'</div></div>'+
           '<div class="order-customer-item"><div class="order-customer-label">Email</div><div class="order-customer-val" style="font-size:12px">'+escHTML(c.email||'—')+'</div></div>'+
           '<div class="order-customer-item"><div class="order-customer-label">Address</div><div class="order-customer-val" style="font-size:12px;max-width:220px">'+escHTML(c.address||'—')+'</div></div>'+
         '</div>'+
-        '<div class="order-items-list">'+itemsHTML+'</div>'+
+        '<div class="order-items-list">'+(itemsHTML||'<p style="font-size:12px;color:var(--text2)">No item details.</p>')+'</div>'+
         '<div class="order-totals">'+
-          '<div class="order-total-chip">Total: '+fmtRs(o.total)+'</div>'+
-          (o.coupon&&o.coupon!=='none'?'<span class="tag tg">🏷 '+escHTML(o.coupon)+'</span>':'')+
-          (o.shipping>0?'<span class="tag ty">Express Shipping</span>':'<span class="tag tg">Free Shipping</span>')+
+          '<div class="order-total-chip">Total: '+fmtRs(total)+'</div>'+
+          (coupon&&coupon!=='none'?'<span class="tag tg">'+escHTML(coupon)+'</span>':'')+
+          (shipping>0?'<span class="tag ty">Express Shipping</span>':'<span class="tag tg">Free Shipping</span>')+
           '<div class="order-ship-status">'+
             '<span style="font-size:11px;color:var(--text2);font-weight:600">Update Status:</span>'+
             '<select class="ship-select" onchange="updateShipStatus(\''+escHTML(o.id)+'\',this.value)">'+
-              '<option value="pending"'+(curStatus==='pending'?' selected':'')+'>⏳ Pending</option>'+
-              '<option value="dispatched"'+(curStatus==='dispatched'?' selected':'')+'>📦 Dispatched</option>'+
-              '<option value="delivered"'+(curStatus==='delivered'?' selected':'')+'>✅ Delivered</option>'+
-              '<option value="cancelled"'+(curStatus==='cancelled'?' selected':'')+'>❌ Cancelled</option>'+
+              '<option value="pending"'+(curStatus==='pending'?' selected':'')+'>Pending</option>'+
+              '<option value="dispatched"'+(curStatus==='dispatched'?' selected':'')+'>Dispatched</option>'+
+              '<option value="delivered"'+(curStatus==='delivered'?' selected':'')+'>Delivered</option>'+
+              '<option value="cancelled"'+(curStatus==='cancelled'?' selected':'')+'>Cancelled</option>'+
             '</select>'+
           '</div>'+
         '</div>'+
       '</div>'+
     '</div>';
   }).join('');
-
-  // Update sidebar badge
-  var unread=parseInt(localStorage.getItem('smw_orders_unread')||'0');
+  var seen=parseInt(localStorage.getItem('smw_orders_seen_count')||'0');
+  var unread=Math.max(0,orders.length-seen);
   var nb=document.getElementById('nb-orders');
   if(nb){nb.textContent=unread;nb.style.display=unread>0?'':'none';}
 }
 
-function updateShipStatus(orderId, status){
-  var orders=loadOrders();
-  var o=orders.find(function(x){return x.id===orderId;});
-  if(!o)return;
-  o.shippingStatus=status;
-  saveOrders(orders);
-  renderOrders();
-  toast('Shipping status updated to: '+status,'success');
-  logAct('Order '+orderId+' → '+status,'var(--green)');
+function updateShipStatus(orderId,status){
+  fetch(ORDERS_API_BASE+'/order-update',{method:'PATCH',headers:{'Content-Type':'application/json','x-admin-key':ADMIN_API_KEY},body:JSON.stringify({id:orderId,shippingStatus:status})})
+    .then(function(res){if(!res.ok)return res.json().then(function(d){throw new Error(d.error||('HTTP '+res.status));});return res.json();})
+    .then(function(){
+      var o=cachedOrders.find(function(x){return x.id===orderId;});
+      if(o)o.shippingStatus=status;
+      renderOrdersFromCache();
+      toast('Status updated: '+status,'success');
+      logAct('Order '+orderId+' → '+status,'var(--green)');
+    })
+    .catch(function(err){toast('Could not update: '+err.message,'error');renderOrders();});
 }
 
 function showOrderDetail(orderId){
-  var orders=loadOrders();
-  var o=orders.find(function(x){return x.id===orderId;});
-  if(!o)return;
+  var o=cachedOrders.find(function(x){return x.id===orderId;});
+  if(!o){toast('Order not found','error');return;}
   var c=o.customer||{};
+  var custName=c.name||(c.fname?(c.fname+' '+(c.lname||'')):'—');
+  var t=o.totals||o;
+  var subtotal=t.subtotal!=null?t.subtotal:(o.subtotal||0);
+  var discount=t.discount!=null?t.discount:(o.discount||0);
+  var shipping=t.shipping!=null?t.shipping:(o.shipping||0);
+  var total=t.total!=null?t.total:(o.total||0);
+  var coupon=t.coupon!=null?t.coupon:(o.coupon||'');
   var itemsHTML=(o.items||[]).map(function(it){
-    return '<tr><td>'+escHTML(it.name)+'</td><td>'+escHTML(it.size||'—')+'</td><td>'+it.qty+'</td><td>'+fmtRs(it.price)+'</td><td><strong>'+fmtRs(it.total||it.price*it.qty)+'</strong></td></tr>';
+    return '<tr><td>'+escHTML(it.name)+'</td><td>'+escHTML(it.size||'—')+'</td><td>'+it.qty+'</td><td>'+fmtRs(it.price)+'</td><td><strong>'+fmtRs(it.total||(it.price*it.qty))+'</strong></td></tr>';
   }).join('');
   document.getElementById('orderDetailContent').innerHTML=
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">'+
@@ -795,37 +771,33 @@ function showOrderDetail(orderId){
       '<div><div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:5px">Status</div><span class="tag '+shipTagClass(o.shippingStatus||'pending')+'">'+shipTagLabel(o.shippingStatus||'pending')+'</span></div>'+
     '</div>'+
     '<div style="background:var(--surface2);border-radius:8px;padding:14px;margin-bottom:16px">'+
-      '<div style="font-family:\'Syne\',sans-serif;font-weight:800;font-size:13px;margin-bottom:10px">👤 Customer</div>'+
-      '<div style="font-size:13px;line-height:1.9"><strong>'+escHTML(c.name||'—')+'</strong><br>📱 '+escHTML(c.phone||'—')+'<br>✉️ '+escHTML(c.email||'—')+'<br>📍 '+escHTML(c.address||'—')+'</div>'+
+      '<div style="font-family:\'Syne\',sans-serif;font-weight:800;font-size:13px;margin-bottom:10px">Customer</div>'+
+      '<div style="font-size:13px;line-height:1.9"><strong>'+escHTML(custName)+'</strong><br>'+escHTML(c.phone||'—')+'<br>'+escHTML(c.email||'—')+'<br>'+escHTML(c.address||'—')+'</div>'+
     '</div>'+
-    '<div style="font-family:\'Syne\',sans-serif;font-weight:800;font-size:13px;margin-bottom:10px">🛍️ Items Ordered</div>'+
+    '<div style="font-family:\'Syne\',sans-serif;font-weight:800;font-size:13px;margin-bottom:10px">Items Ordered</div>'+
     '<div class="table-wrap" style="margin-bottom:14px"><table><thead><tr><th>Product</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>'+itemsHTML+'</tbody></table></div>'+
     '<div style="background:var(--surface2);border-radius:8px;padding:12px;display:flex;gap:18px;flex-wrap:wrap">'+
-      '<div><div style="font-size:10px;text-transform:uppercase;color:var(--text2);font-weight:700">Subtotal</div><div style="font-weight:700">'+fmtRs(o.subtotal||0)+'</div></div>'+
-      (o.discount>0?'<div><div style="font-size:10px;text-transform:uppercase;color:var(--text2);font-weight:700">Discount'+(o.coupon&&o.coupon!=='none'?' ('+o.coupon+')':'')+'</div><div style="font-weight:700;color:var(--green)">−'+fmtRs(o.discount)+'</div></div>':'')+
-      '<div><div style="font-size:10px;text-transform:uppercase;color:var(--text2);font-weight:700">Shipping</div><div style="font-weight:700">'+(o.shipping>0?fmtRs(o.shipping):'Free')+'</div></div>'+
-      '<div><div style="font-size:10px;text-transform:uppercase;color:var(--text2);font-weight:700">Total Paid</div><div style="font-family:\'Syne\',sans-serif;font-size:20px;font-weight:800;color:var(--green)">'+fmtRs(o.total)+'</div></div>'+
+      '<div><div style="font-size:10px;text-transform:uppercase;color:var(--text2);font-weight:700">Subtotal</div><div style="font-weight:700">'+fmtRs(subtotal)+'</div></div>'+
+      (discount>0?'<div><div style="font-size:10px;text-transform:uppercase;color:var(--text2);font-weight:700">Discount'+(coupon&&coupon!=='none'?' ('+coupon+')':'')+'</div><div style="font-weight:700;color:var(--green)">−'+fmtRs(discount)+'</div></div>':'')+
+      '<div><div style="font-size:10px;text-transform:uppercase;color:var(--text2);font-weight:700">Shipping</div><div style="font-weight:700">'+(shipping>0?fmtRs(shipping):'Free')+'</div></div>'+
+      '<div><div style="font-size:10px;text-transform:uppercase;color:var(--text2);font-weight:700">Total Paid</div><div style="font-family:\'Syne\',sans-serif;font-size:20px;font-weight:800;color:var(--green)">'+fmtRs(total)+'</div></div>'+
     '</div>';
   openMod('orderDetailMod');
 }
 
 function deleteOrder(orderId){
-  if(!confirm('Delete this order? This cannot be undone.'))return;
-  var orders=loadOrders().filter(function(o){return o.id!==orderId;});
-  saveOrders(orders);
-  renderOrders();
-  toast('Order deleted','success');
+  if(!confirm('Delete this order? Cannot be undone.'))return;
+  fetch(ORDERS_API_BASE+'/order-update',{method:'DELETE',headers:{'Content-Type':'application/json','x-admin-key':ADMIN_API_KEY},body:JSON.stringify({id:orderId})})
+    .then(function(res){if(!res.ok)return res.json().then(function(d){throw new Error(d.error||('HTTP '+res.status));});return res.json();})
+    .then(function(){cachedOrders=cachedOrders.filter(function(x){return x.id!==orderId;});renderOrdersFromCache();toast('Order deleted','success');})
+    .catch(function(err){toast('Could not delete: '+err.message,'error');});
 }
 
 function clearOrders(){
-  if(!confirm('Delete ALL orders? This cannot be undone!'))return;
-  localStorage.removeItem('smw_orders');
-  localStorage.removeItem('smw_orders_unread');
-  renderOrders();
-  toast('All orders cleared');
+  toast('Bulk-delete is disabled. Delete orders individually.','error');
 }
 
-// ── NAV ──
+// NAV
 var PAGE_TITLES={orders:'Orders',products:'Products',add:'Add Product',view:'Product Details',deploy:'Publish to Website',offers:'Offers & Coupons',reviews:'Reviews',notifications:'Notifications',security:'Security'};
 function goto(pg){
   document.querySelectorAll('.page').forEach(function(e){e.classList.remove('active');});
@@ -836,8 +808,7 @@ function goto(pg){
   if(pg==='products'){renderProds();checkUnpublished();}
   if(pg==='deploy'){updateExpCount();}
   if(pg==='orders'){
-    // Clear unread badge when visiting orders
-    localStorage.setItem('smw_orders_unread','0');
+    localStorage.setItem('smw_orders_seen_count',String(cachedOrders.length));
     var nb=document.getElementById('nb-orders');if(nb){nb.style.display='none';}
     renderOrders();
   }
@@ -847,14 +818,14 @@ function openMod(id){document.getElementById(id).classList.add('open');}
 function closeMod(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.modal-overlay').forEach(function(m){m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('open');});});
 
-// ── TOAST ──
+// TOAST
 var toastTimer;
 function toast(msg,type){
   var t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(type?' '+type:'');t.classList.add('show');
   clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},3500);
 }
 
-// ── PRODUCT HELPERS ──
+// PRODUCT HELPERS
 function syncFromPublished(){
   var existing=loadProds();
   if(existing.length>0){existing.forEach(function(p){if(p.id>=nextId)nextId=p.id+1;});return;}
@@ -870,7 +841,7 @@ function checkUnpublished(){
 }
 function updateExpCount(){var el=document.getElementById('expCount');if(el)el.textContent=loadProds().length;}
 
-// ── CLOUDINARY ──
+// CLOUDINARY
 function loadCloudConfig(){
   CL_CLOUD=localStorage.getItem('smw_cl_cloud')||'';CL_PRESET=localStorage.getItem('smw_cl_preset')||'';
   var ci=document.getElementById('cl-cloud'),pi=document.getElementById('cl-preset');
@@ -885,10 +856,10 @@ function saveCloudConfig(){
 function updateCloudStatus(){
   var el=document.getElementById('cloudStatus');if(!el)return;
   if(CL_CLOUD&&CL_PRESET){el.className='cloud-status ok';el.textContent='✓ '+CL_CLOUD;}
-  else{el.className='cloud-status bad';el.textContent='⚠ Not configured';}
+  else{el.className='cloud-status bad';el.textContent='Not configured';}
 }
 
-// ── GITHUB ──
+// GITHUB
 function loadGHConfig(){
   GH_TOKEN=localStorage.getItem('smw_gh_token')||'';GH_USER_V=localStorage.getItem('smw_gh_user')||'';GH_REPO=localStorage.getItem('smw_gh_repo')||'';GH_BRANCH=localStorage.getItem('smw_gh_branch')||'main';
   var ti=document.getElementById('gh-token'),ui=document.getElementById('gh-user'),ri=document.getElementById('gh-repo'),bi=document.getElementById('gh-branch');
@@ -905,30 +876,30 @@ function saveGHConfig(){
 function updateGHStatus(){
   var el=document.getElementById('ghStatus');if(!el)return;
   if(GH_TOKEN&&GH_USER_V&&GH_REPO){el.className='cloud-status ok';el.textContent='✓ '+GH_USER_V+'/'+GH_REPO;}
-  else{el.className='cloud-status bad';el.textContent='⚠ Not connected';}
+  else{el.className='cloud-status bad';el.textContent='Not connected';}
 }
 function testGHConnection(){
-  var el=document.getElementById('ghStatus');if(el){el.className='cloud-status bad';el.textContent='⏳ Testing...';}
+  var el=document.getElementById('ghStatus');if(el){el.className='cloud-status bad';el.textContent='Testing...';}
   fetch('https://api.github.com/repos/'+GH_USER_V+'/'+GH_REPO,{headers:{'Authorization':'token '+GH_TOKEN,'Accept':'application/vnd.github.v3+json'}})
-  .then(function(r){if(r.ok){updateGHStatus();toast('✓ GitHub connected!','success');logAct('GitHub connected','var(--green)');}else if(r.status===401){toast('Token invalid','error');if(el){el.className='cloud-status bad';el.textContent='✗ Invalid token';}}else{toast('Repo not found','error');}})
+  .then(function(r){if(r.ok){updateGHStatus();toast('GitHub connected!','success');logAct('GitHub connected','var(--green)');}else if(r.status===401){toast('Token invalid','error');if(el){el.className='cloud-status bad';el.textContent='Invalid token';}}else{toast('Repo not found','error');}})
   .catch(function(){toast('Network error','error');});
 }
 function toggleGHSetup(){ghSetupOpen=!ghSetupOpen;var body=document.getElementById('ghSetupBody');if(body)body.style.display=ghSetupOpen?'block':'none';}
 function publishToGitHub(){
   if(!GH_TOKEN||!GH_USER_V||!GH_REPO){toast('Set up GitHub first','error');return;}
   var prods=loadProds();if(!prods.length){toast('No products to publish!','error');return;}
-  var btn=document.getElementById('publishBtn');setPS('info','📡 Connecting to GitHub...');if(btn){btn.disabled=true;btn.textContent='⏳ Publishing...';}
+  var btn=document.getElementById('publishBtn');setPS('info','Connecting to GitHub...');if(btn){btn.disabled=true;btn.textContent='Publishing...';}
   var clean=prods.map(function(p){var photos=(p.photos||[]).filter(function(u){return u&&u.indexOf('data:image')<0;});return Object.assign({},p,{photos:photos});});
-  var jsContent='/* Shanmuga Mens Wear Products — '+clean.length+' items — Updated '+new Date().toLocaleString('en-IN')+' */\n/* © 2026 Shanmuga Mens Wear. All rights reserved. */\n\nvar SMW_DEFAULT_PRODUCTS = '+JSON.stringify(clean,null,2)+';\n';
-  var encoded;try{encoded=btoa(unescape(encodeURIComponent(jsContent)));}catch(e){toast('Encoding error','error');if(btn){btn.disabled=false;btn.textContent='🚀 Publish to Website Now';}return;}
+  var jsContent='/* Shanmuga Mens Wear Products — '+clean.length+' items — Updated '+new Date().toLocaleString('en-IN')+' */\n/* 2026 Shanmuga Mens Wear. All rights reserved. */\n\nvar SMW_DEFAULT_PRODUCTS = '+JSON.stringify(clean,null,2)+';\n';
+  var encoded;try{encoded=btoa(unescape(encodeURIComponent(jsContent)));}catch(e){toast('Encoding error','error');if(btn){btn.disabled=false;btn.textContent='Publish to Website Now';}return;}
   var apiUrl='https://api.github.com/repos/'+GH_USER_V+'/'+GH_REPO+'/contents/smw-products.js';
   var headers={'Authorization':'token '+GH_TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'};
-  setPS('info','📡 Fetching current file...');
+  setPS('info','Fetching current file...');
   fetch(apiUrl+'?ref='+GH_BRANCH,{headers:headers})
   .then(function(r){if(r.status===404)return{sha:null};if(!r.ok)return r.json().then(function(d){throw new Error(d.message||('HTTP '+r.status));});return r.json();})
   .then(function(data){
-    setPS('info','📡 Uploading '+clean.length+' products...');
-    var body={message:'🛍️ Update products ('+clean.length+' items) — '+new Date().toLocaleDateString('en-IN'),content:encoded,branch:GH_BRANCH};
+    setPS('info','Uploading '+clean.length+' products...');
+    var body={message:'Update products ('+clean.length+' items) — '+new Date().toLocaleDateString('en-IN'),content:encoded,branch:GH_BRANCH};
     if(data.sha)body.sha=data.sha;
     return fetch(apiUrl,{method:'PUT',headers:headers,body:JSON.stringify(body)});
   })
@@ -936,20 +907,20 @@ function publishToGitHub(){
     if(r.ok||r.status===200||r.status===201){
       return r.json().then(function(){
         localStorage.setItem('smw_last_pub_count',clean.length);
-        if(btn){btn.disabled=false;btn.textContent='✅ Published!';}
-        setPS('ok','✅ '+clean.length+' products published!\n\n⏳ Vercel updates in ~30 seconds.\n👉 Visit: '+VERCEL_URL);
-        toast('🎉 '+clean.length+' products live!','success');
+        if(btn){btn.disabled=false;btn.textContent='Published!';}
+        setPS('ok',clean.length+' products published!\n\nVercel updates in ~30 seconds.\nVisit: '+VERCEL_URL);
+        toast(clean.length+' products live!','success');
         logAct('Published '+clean.length+' products','var(--green)');
         addPubLog(clean.length);checkUnpublished();
       });
     }else{return r.json().then(function(d){throw new Error(d.message||('HTTP '+r.status));});}
   })
   .catch(function(err){
-    if(btn){btn.disabled=false;btn.textContent='🚀 Publish to Website Now';}
+    if(btn){btn.disabled=false;btn.textContent='Publish to Website Now';}
     var msg=err.message||'Unknown error';
     if(msg.indexOf('Bad credentials')>=0)msg='Token invalid. Generate a new one.';
     else if(msg.indexOf('Not Found')>=0)msg='Repo not found. Check username and repo name.';
-    setPS('err','❌ Publish failed: '+msg);toast('Publish failed: '+msg,'error');
+    setPS('err','Publish failed: '+msg);toast('Publish failed: '+msg,'error');
   });
 }
 function setPS(type,msg){
@@ -963,13 +934,13 @@ function addPubLog(count){
   log.insertBefore(w,log.firstChild);
 }
 
-// ── LOGIN ──
+// LOGIN
 document.getElementById('lu').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 document.getElementById('lp').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 var loginAttempts=0,loginLockedUntil=parseInt(localStorage.getItem('smw_locked_until')||'0');
 function doLogin(){
   var now=Date.now();
-  if(loginLockedUntil>now){var mins=Math.ceil((loginLockedUntil-now)/60000);showErr('🔒 Locked. Try in '+mins+' min.');return;}
+  if(loginLockedUntil>now){var mins=Math.ceil((loginLockedUntil-now)/60000);showErr('Locked. Try in '+mins+' min.');return;}
   var u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value;
   if(u===ADMIN_USER&&p===ADMIN_PASS){
     loginAttempts=0;localStorage.removeItem('smw_locked_until');
@@ -979,33 +950,34 @@ function doLogin(){
     initApp();
   }else{
     loginAttempts++;
-    if(loginAttempts>=5){var lu2=Date.now()+10*60*1000;localStorage.setItem('smw_locked_until',lu2);loginLockedUntil=lu2;loginAttempts=0;showErr('🔒 Locked for 10 minutes.');}
-    else showErr('❌ Wrong credentials. '+(5-loginAttempts)+' left.');
+    if(loginAttempts>=5){var lu2=Date.now()+10*60*1000;localStorage.setItem('smw_locked_until',lu2);loginLockedUntil=lu2;loginAttempts=0;showErr('Locked for 10 minutes.');}
+    else showErr('Wrong credentials. '+(5-loginAttempts)+' left.');
     document.getElementById('lp').value='';document.getElementById('lp').focus();
   }
 }
 function showErr(msg){var el=document.getElementById('loginErr');el.textContent=msg;el.style.display='block';}
 function doLogout(){if(!confirm('Sign out?'))return;document.getElementById('app').style.display='none';document.getElementById('loginScreen').style.display='flex';document.getElementById('lu').value='';document.getElementById('lp').value='';}
 
-// ── INIT ──
+// INIT
 function initApp(){
   syncFromPublished();
   loadProds().forEach(function(p){if(p.id>=nextId)nextId=p.id+1;});
   loadCloudConfig();loadGHConfig();
   buildSizeChips();buildBadgeChips();
-  renderProds();renderCoupons();renderNotifs();renderRevs();updateExpCount();renderOrders();
+  renderProds();renderCoupons();renderNotifs();renderRevs();updateExpCount();
   checkUnpublished();startTimer();logAct('Admin logged in','var(--green)');
-  // Show orders badge if unread
-  var unread=parseInt(localStorage.getItem('smw_orders_unread')||'0');
-  var nb=document.getElementById('nb-orders');if(nb){nb.textContent=unread;nb.style.display=unread>0?'':'none';}
-  // Auto-open orders if there are new ones
-  if(unread>0){setTimeout(function(){toast('🛒 You have '+unread+' new order'+(unread>1?'s':'')+'! Click Orders to view.','success');},800);}
+  fetchOrdersFromServer().then(function(orders){
+    var seen=parseInt(localStorage.getItem('smw_orders_seen_count')||'0');
+    var unread=Math.max(0,orders.length-seen);
+    var nb=document.getElementById('nb-orders');if(nb){nb.textContent=unread;nb.style.display=unread>0?'':'none';}
+    if(unread>0){setTimeout(function(){toast('You have '+unread+' new order'+(unread>1?'s':'')+'! Click Orders to view.','success');},800);}
+  }).catch(function(){});
 }
 
-// ── IMAGE TABS ──
+// IMAGE TABS
 function switchTab(t,btn){document.querySelectorAll('.mtab').forEach(function(b){b.classList.remove('on');});document.querySelectorAll('.mpanel').forEach(function(p){p.classList.remove('on');});btn.classList.add('on');document.getElementById('tab-'+t).classList.add('on');}
 
-// ── IMAGE UPLOAD ──
+// IMAGE UPLOAD
 function onDrop(e){e.preventDefault();document.getElementById('uploadZone').classList.remove('dragover');if(e.dataTransfer.files&&e.dataTransfer.files.length)processFiles(e.dataTransfer.files);}
 function handleFiles(inp){if(inp.files&&inp.files.length)processFiles(inp.files);inp.value='';}
 function processFiles(files){if(uploading){toast('Please wait...');return;}if(CL_CLOUD&&CL_PRESET)uploadToCloud(Array.from(files));else uploadLocally(Array.from(files));}
@@ -1034,11 +1006,11 @@ function removeImg(i){currentImgs.splice(i,1);renderImgGrid();}
 function renderImgGrid(){
   var g=document.getElementById('imgGrid'),c=document.getElementById('imgCount');
   if(!currentImgs.length){g.innerHTML='';if(c)c.textContent='';return;}
-  g.innerHTML=currentImgs.map(function(u,i){return'<div class="img-thumb'+(i===0?' main-img':'')+'"><img src="'+escHTML(u)+'" onerror="this.style.opacity=\'0.3\'">'+(i===0?'<span class="main-lbl">MAIN</span>':'')+'<button class="del-btn" onclick="removeImg('+i+')">×</button></div>';}).join('');
+  g.innerHTML=currentImgs.map(function(u,i){return'<div class="img-thumb'+(i===0?' main-img':'')+'"><img src="'+escHTML(u)+'" onerror="this.style.opacity=\'0.3\'">'+(i===0?'<span class="main-lbl">MAIN</span>':'')+'<button class="del-btn" onclick="removeImg('+i+')">x</button></div>';}).join('');
   if(c)c.textContent=currentImgs.length+' image(s) — first is main';
 }
 
-// ── SIZE & BADGE CHIPS ──
+// SIZE & BADGE CHIPS
 function buildSizeChips(){var el=document.getElementById('sizeChips');if(!el)return;el.innerHTML=ALL_SIZES.map(function(sz){return'<button class="s-chip" onclick="toggleSz(this,\''+sz+'\')">'+sz+'</button>';}).join('');}
 function toggleSz(btn,size){var i=selSizes.indexOf(size);if(i>=0){selSizes.splice(i,1);btn.classList.remove('on');}else{selSizes.push(size);btn.classList.add('on');}}
 function resetSzChips(){selSizes=[];document.querySelectorAll('.s-chip').forEach(function(c){c.classList.remove('on');});}
@@ -1048,7 +1020,7 @@ function pickBadge(btn,val){selBadge=val;document.getElementById('f-badge').valu
 function resetBadgeChips(){selBadge='';document.getElementById('f-badge').value='';document.querySelectorAll('.b-chip').forEach(function(c){c.className='b-chip';});var first=document.querySelector('#badgeChips .b-chip');if(first)first.classList.add('sel-none');}
 function applyBadge(){document.querySelectorAll('.b-chip').forEach(function(c){c.className='b-chip';});var m={'':'sel-none','new':'sel-new','sale':'sel-sale','offer':'sel-offer'};ALL_BADGES.forEach(function(b){if(b.val===selBadge){document.querySelectorAll('#badgeChips .b-chip').forEach(function(c){if(c.textContent.trim()===b.label)c.classList.add(m[b.val]||'sel-none');});}});}
 
-// ── PRODUCTS RENDER ──
+// PRODUCTS RENDER
 function renderProds(){
   var prods=loadProds();
   var q=(document.getElementById('prodSearch')||{value:''}).value.toLowerCase();
@@ -1062,9 +1034,7 @@ function renderProds(){
   var sub=document.getElementById('prodSub');if(sub)sub.textContent=prods.length+' product'+(prods.length!==1?'s':'')+' in catalogue';
   var rows=prods.filter(function(p){if(q&&p.name.toLowerCase().indexOf(q)<0)return false;if(cf&&p.cat!==cf)return false;return true;});
   var tb=document.getElementById('prodTbody');
-  if(!rows.length){
-    tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text2)">'+(prods.length===0?'No products yet. <a href="#" onclick="gotoAdd()" style="color:var(--accent);font-weight:700;text-decoration:underline">Add your first product →</a>':'No products match your search.')+'</td></tr>';return;
-  }
+  if(!rows.length){tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text2)">'+(prods.length===0?'No products yet. <a href="#" onclick="gotoAdd()" style="color:var(--accent);font-weight:700;text-decoration:underline">Add your first product</a>':'No products match your search.')+'</td></tr>';return;}
   tb.innerHTML=rows.map(function(p,i){
     var img=(p.photos&&p.photos.length)?p.photos[0]:'';
     var hasSale=p.sale&&parseFloat(p.sale)<parseFloat(p.orig);
@@ -1091,7 +1061,7 @@ function switchPvImg(el,src){document.getElementById('pvMain').src=src;document.
 function editViewProd(){startEdit(viewingId);}
 function deleteViewProd(){var prods=loadProds(),p=prods.find(function(x){return x.id===viewingId;});if(!p||!confirm('Delete "'+p.name+'"?'))return;saveProds(prods.filter(function(x){return x.id!==viewingId;}));goto('products');checkUnpublished();toast('Deleted','success');logAct('Deleted: '+p.name,'var(--red)');}
 
-// ── FORM ──
+// FORM
 function resetForm(){
   ['f-editId','f-name','f-tagline','f-desc','f-fabric','f-fit','f-sale','f-orig','f-stock'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('f-threshold').value='5';document.getElementById('f-status').value='instock';
@@ -1118,7 +1088,7 @@ function saveProduct(){
   if(eid>0){var idx=prods.findIndex(function(x){return x.id===eid;});if(idx>=0)prods[idx]=obj;else prods.push(obj);toast('Updated: '+name,'success');logAct('Updated: '+name,'var(--blue)');}
   else{prods.push(obj);toast('Added: '+name,'success');logAct('Added: '+name,'var(--blue)');}
   saveProds(prods);updateExpCount();checkUnpublished();resetForm();goto('products');
-  setTimeout(function(){toast('✅ Saved! Go to Publish to make it live.','success');},1200);
+  setTimeout(function(){toast('Saved! Go to Publish to make it live.','success');},1200);
 }
 function delProd(id){
   var prods=loadProds(),p=prods.find(function(x){return x.id===id;});
@@ -1126,11 +1096,11 @@ function delProd(id){
   saveProds(prods.filter(function(x){return x.id!==id;}));renderProds();updateExpCount();checkUnpublished();toast('Deleted: '+p.name);logAct('Deleted: '+p.name,'var(--red)');
 }
 
-// ── EXPORT / IMPORT ──
+// EXPORT / IMPORT
 function doExport(){
   var prods=loadProds();if(!prods.length){toast('No products','error');return;}
   var clean=prods.map(function(p){var photos=(p.photos||[]).filter(function(u){return u&&u.indexOf('data:image')<0;});return Object.assign({},p,{photos:photos});});
-  var js='/* Shanmuga Mens Wear Products - '+new Date().toLocaleDateString('en-IN')+' */\n/* © 2026 Shanmuga Mens Wear. All rights reserved. */\n\nvar SMW_DEFAULT_PRODUCTS = '+JSON.stringify(clean,null,2)+';\n';
+  var js='/* Shanmuga Mens Wear Products - '+new Date().toLocaleDateString('en-IN')+' */\n\nvar SMW_DEFAULT_PRODUCTS = '+JSON.stringify(clean,null,2)+';\n';
   var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([js],{type:'application/javascript'}));a.download='smw-products.js';document.body.appendChild(a);a.click();document.body.removeChild(a);toast('Downloaded!','success');
 }
 function doCopyJSON(){
@@ -1148,7 +1118,7 @@ function doImport(input){
 }
 function clearProds(){if(!confirm('Delete ALL products? Cannot be undone!'))return;saveProds([]);renderProds();updateExpCount();checkUnpublished();toast('All cleared');logAct('All products cleared','var(--red)');}
 
-// ── COUPONS ──
+// COUPONS
 function renderCoupons(){
   var active=coupons.filter(function(c){return c.active;}).length;
   var cc=document.getElementById('couponCount');if(cc)cc.textContent=active+' active';
@@ -1171,10 +1141,10 @@ function createCouponMod(){
   renderCoupons();closeMod('couponMod');['mc-code','mc-val','mc-exp'].forEach(function(id){document.getElementById(id).value='';});toast('Coupon created!','success');
 }
 
-// ── REVIEWS ──
+// REVIEWS
 function renderRevs(){
   var pend=0,appr=0,html='';
-  reviews.forEach(function(r,i){if(r.status==='pending')pend++;else if(r.status==='approved')appr++;if(revFilter!=='all'&&r.status!==revFilter)return;html+='<div class="review-card"><div class="rev-head"><div class="rev-av">'+r.init+'</div><div style="flex:1"><div style="font-weight:700;font-size:13px">'+escHTML(r.name)+'</div><div style="font-size:11px;color:var(--text2)">'+escHTML(r.prod)+' • '+r.date+'</div></div><div class="stars">'+starsHTML(r.stars)+'</div>'+(r.status==='pending'?'<span class="tag to">Pending</span>':'<span class="tag tg">Approved</span>')+'</div><div class="rev-text">'+escHTML(r.text)+'</div><div style="display:flex;gap:7px;margin-top:10px">'+(r.status==='pending'?'<button class="btn btn-success btn-sm" onclick="appRev('+i+')">✓ Approve</button>':'')+'<button class="btn btn-danger btn-sm" onclick="delRev('+i+')">🗑 Delete</button></div></div>';});
+  reviews.forEach(function(r,i){if(r.status==='pending')pend++;else if(r.status==='approved')appr++;if(revFilter!=='all'&&r.status!==revFilter)return;html+='<div class="review-card"><div class="rev-head"><div class="rev-av">'+r.init+'</div><div style="flex:1"><div style="font-weight:700;font-size:13px">'+escHTML(r.name)+'</div><div style="font-size:11px;color:var(--text2)">'+escHTML(r.prod)+' • '+r.date+'</div></div><div class="stars">'+starsHTML(r.stars)+'</div>'+(r.status==='pending'?'<span class="tag to">Pending</span>':'<span class="tag tg">Approved</span>')+'</div><div class="rev-text">'+escHTML(r.text)+'</div><div style="display:flex;gap:7px;margin-top:10px">'+(r.status==='pending'?'<button class="btn btn-success btn-sm" onclick="appRev('+i+')">Approve</button>':'')+'<button class="btn btn-danger btn-sm" onclick="delRev('+i+')">Delete</button></div></div>';});
   if(!html)html='<p style="color:var(--text2)">No reviews.</p>';
   var el=document.getElementById('revList');if(el)el.innerHTML=html;
   document.getElementById('rv-total').textContent=reviews.length;document.getElementById('rv-pending').textContent=pend;document.getElementById('rv-approved').textContent=appr;
@@ -1183,7 +1153,7 @@ function appRev(i){reviews[i].status='approved';renderRevs();toast('Approved!','
 function delRev(i){if(!confirm('Delete?'))return;reviews.splice(i,1);renderRevs();toast('Deleted');}
 function setRevF(f,btn){revFilter=f;document.querySelectorAll('#revFilters .btn').forEach(function(b){b.className='btn btn-sm btn-outline';b.style.borderRadius='20px';});btn.className='btn btn-sm btn-primary';btn.style.borderRadius='20px';renderRevs();}
 
-// ── NOTIFICATIONS ──
+// NOTIFICATIONS
 function renderNotifs(){
   var html=notifs.map(function(n,i){return'<div class="notif-item'+(n.unread?' unread':'')+'" onclick="readNotif('+i+')"><div class="notif-icon" style="background:'+n.bg+'">'+n.icon+'</div><div style="flex:1"><div class="notif-title">'+n.title+'</div><div class="notif-desc">'+n.desc+'</div><div class="notif-time">'+n.time+'</div></div>'+(n.unread?'<div class="unread-dot"></div>':'')+'</div>';}).join('');
   var el=document.getElementById('notifList');if(el)el.innerHTML=html||'<p style="padding:14px;color:var(--text2)">No notifications.</p>';
@@ -1191,27 +1161,27 @@ function renderNotifs(){
 function readNotif(i){notifs[i].unread=false;renderNotifs();}
 function markAllRead(){notifs.forEach(function(n){n.unread=false;});renderNotifs();toast('All read');}
 
-// ── SECURITY ──
+// SECURITY
 function changePw(){
   var cur=document.getElementById('pw-cur').value,nw=document.getElementById('pw-new').value,cf=document.getElementById('pw-confirm').value;
   var msg=document.getElementById('pwMsg');
-  if(cur!==ADMIN_PASS){msg.className='pw-msg err';msg.style.display='block';msg.textContent='❌ Wrong current password';return;}
-  if(nw.length<8){msg.className='pw-msg err';msg.style.display='block';msg.textContent='❌ Min 8 characters';return;}
-  if(nw!==cf){msg.className='pw-msg err';msg.style.display='block';msg.textContent='❌ Passwords do not match';return;}
+  if(cur!==ADMIN_PASS){msg.className='pw-msg err';msg.style.display='block';msg.textContent='Wrong current password';return;}
+  if(nw.length<8){msg.className='pw-msg err';msg.style.display='block';msg.textContent='Min 8 characters';return;}
+  if(nw!==cf){msg.className='pw-msg err';msg.style.display='block';msg.textContent='Passwords do not match';return;}
   ADMIN_PASS=nw;localStorage.setItem('smw_admin_pass',nw);
-  msg.className='pw-msg ok';msg.style.display='block';msg.textContent='✅ Password updated!';
+  msg.className='pw-msg ok';msg.style.display='block';msg.textContent='Password updated!';
   ['pw-cur','pw-new','pw-confirm'].forEach(function(id){document.getElementById(id).value='';});
   setTimeout(function(){msg.style.display='none';},3000);
   toast('Password updated!','success');logAct('Password changed','var(--orange)');
 }
 
-// ── ACTIVITY LOG ──
+// ACTIVITY LOG
 function logAct(text,color){
   var log=document.getElementById('actLog');if(!log)return;var empty=log.querySelector('p');if(empty)empty.remove();
   var w=document.createElement('div');w.className='log-item';var d=document.createElement('div');d.className='log-dot';d.style.background=color;var info=document.createElement('div');info.innerHTML='<div class="log-text">'+escHTML(text)+'</div><div class="log-time">'+nowTime()+'</div>';w.appendChild(d);w.appendChild(info);log.insertBefore(w,log.firstChild);
 }
 
-// ── SESSION TIMER ──
+// SESSION TIMER
 function startTimer(){
   var secs=1800,el=document.getElementById('stimer');
   var iv=setInterval(function(){secs--;if(secs<=0){clearInterval(iv);doLogout();return;}var m=Math.floor(secs/60),s=secs%60;if(el)el.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;},1000);
