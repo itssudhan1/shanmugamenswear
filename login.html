@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -35,6 +34,10 @@ button{cursor:pointer;font-family:var(--sans);border:none}
 .login-card-head{background:var(--black);padding:2rem 1.5rem 1.75rem;text-align:center}
 .login-card-title{font-family:var(--serif);font-size:2rem;font-weight:500;letter-spacing:.12em;color:#fff;text-transform:uppercase;margin-bottom:.3rem}
 .login-card-sub{font-size:12px;color:var(--warm);letter-spacing:.06em}
+
+/* REDIRECT NOTICE */
+.redirect-notice{background:#eef4ff;border-bottom:1px solid #cfe0fb;padding:.75rem 1.5rem;font-size:12px;color:#1d4ed8;display:none;align-items:center;gap:.5rem;line-height:1.5}
+.redirect-notice.show{display:flex}
 
 /* TABS */
 .login-tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--stone)}
@@ -99,6 +102,8 @@ button{cursor:pointer;font-family:var(--sans);border:none}
 .btn-logout:hover{border-color:var(--red);color:var(--red)}
 .btn-goto{display:block;background:var(--black);color:#fff;padding:.75rem;font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;text-align:center;margin-bottom:.75rem;transition:background .2s}
 .btn-goto:hover{background:#2a2a28}
+.btn-goto.secondary{background:none;color:var(--black);border:1px solid var(--stone)}
+.btn-goto.secondary:hover{background:var(--off)}
 
 /* Firebase setup notice container */
 .setup-notice-wrap{max-width:440px;margin:1rem auto 0;padding:0 1rem 2rem}
@@ -130,6 +135,11 @@ button{cursor:pointer;font-family:var(--sans);border:none}
       <div class="login-card-sub" id="cardSub">Sign in to your account</div>
     </div>
 
+    <div class="redirect-notice" id="redirectNotice">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="redirectNoticeText">Please sign in to continue to checkout.</span>
+    </div>
+
     <div class="login-tabs">
       <button class="login-tab active" id="tab-login" onclick="showTab('login')">Login</button>
       <button class="login-tab" id="tab-signup" onclick="showTab('signup')">Sign Up</button>
@@ -142,6 +152,7 @@ button{cursor:pointer;font-family:var(--sans);border:none}
         <div class="user-name" id="userDisplayName"></div>
         <div class="user-email" id="userDisplayEmail"></div>
         <a href="index.html" class="btn-goto">Continue Shopping →</a>
+        <a href="account.html" class="btn-goto secondary" style="margin-bottom:1rem;display:block">View My Account</a>
         <button class="btn-logout" onclick="doLogout()">Sign Out</button>
       </div>
     </div>
@@ -242,6 +253,7 @@ button{cursor:pointer;font-family:var(--sans);border:none}
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<script src="smw-shared.js"></script>
 <script type="module">
   import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import{getAuth,signInWithPopup,GoogleAuthProvider,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile,sendPasswordResetEmail}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
@@ -258,12 +270,34 @@ const firebaseConfig = {
   const isConfigured = true;
   let auth,provider;
 
+  /* ── Where to send the user once they're signed in ── */
+  const params = new URLSearchParams(location.search);
+  const redirectTo = params.get('redirect') || 'index.html';
+  const cameFromRedirect = params.has('redirect');
+
+  if (cameFromRedirect) {
+    const notice = document.getElementById('redirectNotice');
+    const text = document.getElementById('redirectNoticeText');
+    const dest = redirectTo.replace('.html','').replace(/^\w/,c=>c.toUpperCase());
+    text.textContent = 'Please sign in to continue to ' + dest + '.';
+    notice.classList.add('show');
+  }
+
   if(isConfigured){
     const app=initializeApp(firebaseConfig);
     auth=getAuth(app);
     provider=new GoogleAuthProvider();
     provider.setCustomParameters({prompt:'select_account'});
-    onAuthStateChanged(auth,user=>{user?showUserLoggedIn(user):showLoginForms();});
+    onAuthStateChanged(auth,user=>{
+      if(user){
+        // Already signed in — if we were sent here to authenticate before
+        // continuing an action (checkout, account), bounce straight there.
+        if(cameFromRedirect){ location.replace(redirectTo); return; }
+        showUserLoggedIn(user);
+      } else {
+        showLoginForms();
+      }
+    });
   }
 
   function showUserLoggedIn(user){
@@ -294,7 +328,7 @@ const firebaseConfig = {
     try{
       const r=await signInWithPopup(auth,provider);
       showToast('✓ Signed in as '+r.user.displayName,'success');
-      setTimeout(()=>location.href='index.html',1200);
+      setTimeout(()=>location.href=redirectTo,1200);
     }catch(err){
       if(err.code==='auth/popup-closed-by-user'){showToast('Sign-in cancelled.');}
       else if(err.code==='auth/popup-blocked'){showToast('Popup blocked — allow popups for this site.','error-toast');}
@@ -312,13 +346,13 @@ const firebaseConfig = {
     const btn=document.getElementById('loginBtn');
     btn.textContent='Signing in…';btn.disabled=true;
     if(!isConfigured){
-      setTimeout(()=>{localStorage.setItem('smw_user',JSON.stringify({email,name:email.split('@')[0]}));showToast('Welcome back!','success');setTimeout(()=>location.href='index.html',1000);},900);
+      setTimeout(()=>{localStorage.setItem('smw_user',JSON.stringify({email,name:email.split('@')[0]}));showToast('Welcome back!','success');setTimeout(()=>location.href=redirectTo,1000);},900);
       return;
     }
     try{
       const r=await signInWithEmailAndPassword(auth,email,pass);
       showToast('Welcome back, '+(r.user.displayName||email.split('@')[0])+'!','success');
-      setTimeout(()=>location.href='index.html',1000);
+      setTimeout(()=>location.href=redirectTo,1000);
     }catch(err){
       btn.textContent='Sign In';btn.disabled=false;
       if(['auth/user-not-found','auth/wrong-password','auth/invalid-credential'].includes(err.code)){showToast('Invalid email or password.','error-toast');}
@@ -340,14 +374,14 @@ const firebaseConfig = {
     const btn=document.getElementById('signupBtn');
     btn.textContent='Creating account…';btn.disabled=true;
     if(!isConfigured){
-      setTimeout(()=>{localStorage.setItem('smw_user',JSON.stringify({email,name}));showToast('Account created! Welcome, '+name+'!','success');setTimeout(()=>location.href='index.html',1000);},1000);
+      setTimeout(()=>{localStorage.setItem('smw_user',JSON.stringify({email,name}));showToast('Account created! Welcome, '+name+'!','success');setTimeout(()=>location.href=redirectTo,1000);},1000);
       return;
     }
     try{
       const r=await createUserWithEmailAndPassword(auth,email,pass);
       await updateProfile(r.user,{displayName:name});
       showToast('Welcome, '+name+'!','success');
-      setTimeout(()=>location.href='index.html',1000);
+      setTimeout(()=>location.href=redirectTo,1000);
     }catch(err){
       btn.textContent='Create Account';btn.disabled=false;
       if(err.code==='auth/email-already-in-use'){showToast('Email already registered. Try logging in.','error-toast');}

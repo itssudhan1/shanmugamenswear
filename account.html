@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<title>My Account — Shanmuga Mens Wear</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#111110;--white:#ffffff;--off:#f5f4f1;--stone:#e8e6e1;
+  --warm:#c8c4bc;--mid:#8a8680;--red:#d93025;--green:#16a34a;
+  --serif:'Bebas Neue',sans-serif;--serif2:'Cormorant Garamond',serif;--sans:'Manrope',sans-serif;
+  --ease:cubic-bezier(.4,0,.2,1);--spring:cubic-bezier(.34,1.56,.64,1);
+  --nav-h:64px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--off);color:var(--black);overflow-x:hidden;}
+img{display:block;width:100%;object-fit:cover;}
+a{text-decoration:none;color:inherit}
+button{font-family:var(--sans);border:none;background:none;cursor:pointer}
+input,select,textarea{font-family:var(--sans);}
+
+/* NAV (shared with checkout.html) */
+nav{position:sticky;top:0;z-index:200;background:var(--black);display:flex;align-items:center;padding:0 2rem;height:var(--nav-h);border-bottom:1px solid #1e1e1c}
+.nav-left{display:flex;align-items:center;gap:1.5rem;flex:1}
+.hamburger{display:none;color:var(--white);padding:.25rem;flex-shrink:0;background:none;border:none;cursor:pointer}
+.nav-links{display:flex;list-style:none;align-items:center}
+.nav-links>li>a{display:block;padding:.5rem .9rem;font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);transition:color .2s;}
+.nav-links>li>a:hover{color:var(--white)}
+.nav-brand{position:absolute;left:50%;transform:translateX(-50%);text-align:center;line-height:1;text-decoration:none}
+.nav-brand-name{font-family:var(--serif);font-size:1.7rem;letter-spacing:.22em;color:var(--white);display:block;text-transform:uppercase;line-height:1}
+.nav-brand-sub{display:block;font-family:var(--sans);font-size:8px;letter-spacing:.38em;font-weight:400;color:var(--warm);margin-top:3px;text-transform:uppercase}
+.nav-right{display:flex;align-items:center;gap:.5rem;flex:1;justify-content:flex-end}
+.nav-icon-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--white);display:flex;align-items:center;justify-content:center;transition:background .2s;cursor:pointer}
+.nav-icon-btn:hover{background:rgba(255,255,255,.14);}
+.cart-wrap{position:relative}
+.cart-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:var(--white);font-size:8px;font-weight:700;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:none}
+
+/* MARQUEE */
+.marquee{background:var(--red);color:var(--white);padding:.65rem 0;overflow:hidden;white-space:nowrap}
+.marquee-track{display:inline-block;animation:scroll 22s linear infinite}
+.marquee-track span{font-size:11px;letter-spacing:.18em;text-transform:uppercase;margin:0 2.5rem}
+.marquee-track span::after{content:'★';margin-left:2.5rem;opacity:.6}
+@keyframes scroll{to{transform:translateX(-50%)}}
+
+/* BREADCRUMB */
+.breadcrumb{padding:12px 2rem;font-size:11px;letter-spacing:.07em;color:var(--mid);text-transform:uppercase;border-bottom:1px solid var(--stone);display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--white)}
+.breadcrumb a{color:var(--mid);transition:color .2s}.breadcrumb a:hover{color:var(--black)}
+.breadcrumb .sep{opacity:.4}.breadcrumb .current{color:var(--black);font-weight:600}
+
+/* CHECKING / GATE */
+.checking-auth{text-align:center;padding:4rem 1rem;color:var(--mid);font-size:13px}
+.login-gate{max-width:520px;margin:3rem auto;padding:0 1rem;display:none}
+.login-gate.show{display:block}
+.login-gate-card{background:var(--white);border:1px solid var(--stone);padding:2.5rem 2rem;text-align:center}
+.login-gate-icon{width:60px;height:60px;border-radius:50%;background:var(--off);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem}
+.login-gate-title{font-family:var(--serif);font-size:2rem;letter-spacing:.06em;margin-bottom:.5rem}
+.login-gate-sub{font-size:13px;color:var(--mid);line-height:1.7;margin-bottom:1.75rem}
+.login-gate-btns{display:flex;flex-direction:column;gap:.7rem}
+.btn-gate-primary{height:52px;background:var(--black);color:var(--white);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.btn-gate-primary:hover{background:#2a2a28}
+.btn-gate-secondary{height:52px;border:1px solid var(--stone);color:var(--black);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.btn-gate-secondary:hover{background:var(--off)}
+
+/* ACCOUNT LAYOUT */
+.account-wrap{max-width:1100px;margin:0 auto;padding:2.5rem 2rem 4rem;display:none;grid-template-columns:280px 1fr;gap:2rem;align-items:start}
+.account-wrap.show{display:grid}
+
+/* PROFILE CARD (sidebar) */
+.profile-card{background:var(--white);border:1px solid var(--stone);padding:2rem 1.5rem;text-align:center;position:sticky;top:calc(var(--nav-h) + 1.5rem)}
+.profile-avatar{width:76px;height:76px;border-radius:50%;margin:0 auto .9rem;object-fit:cover;border:2px solid var(--stone)}
+.profile-avatar-placeholder{width:76px;height:76px;border-radius:50%;margin:0 auto .9rem;background:var(--black);display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:600;font-family:var(--serif2)}
+.profile-name{font-size:17px;font-weight:700;margin-bottom:.2rem}
+.profile-email{font-size:12px;color:var(--mid);margin-bottom:1.25rem;word-break:break-all}
+.profile-stats{display:flex;justify-content:center;gap:1.5rem;padding:1rem 0;border-top:1px solid var(--stone);border-bottom:1px solid var(--stone);margin-bottom:1.25rem}
+.profile-stat{text-align:center}
+.profile-stat-num{font-family:var(--serif);font-size:1.6rem;letter-spacing:.02em}
+.profile-stat-label{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--mid)}
+.profile-field{display:flex;flex-direction:column;gap:.35rem;text-align:left;margin-bottom:.9rem}
+.profile-field label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);font-weight:700}
+.profile-field input{border:1.5px solid var(--stone);padding:.6rem .8rem;font-size:13px;outline:none;transition:border-color .2s;width:100%}
+.profile-field input:focus{border-color:var(--black)}
+.btn-save-profile{width:100%;height:42px;background:var(--black);color:#fff;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:.6rem;transition:background .2s}
+.btn-save-profile:hover{background:#2a2a28}
+.btn-logout-acc{width:100%;height:42px;border:1px solid var(--stone);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;transition:all .2s}
+.btn-logout-acc:hover{border-color:var(--red);color:var(--red)}
+
+/* MAIN PANEL */
+.account-main{display:flex;flex-direction:column;gap:1.5rem}
+.account-tabs{display:flex;gap:.5rem;border-bottom:1px solid var(--stone);overflow-x:auto}
+.acc-tab{padding:.85rem 1.1rem;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;white-space:nowrap}
+.acc-tab.active{color:var(--black);border-bottom-color:var(--black)}
+.acc-panel{display:none}
+.acc-panel.active{display:block}
+
+/* ORDERS */
+.empty-state{background:var(--white);border:1px solid var(--stone);padding:3rem 1.5rem;text-align:center}
+.empty-state-icon{width:56px;height:56px;border-radius:50%;background:var(--off);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.empty-state-title{font-family:var(--serif);font-size:1.7rem;letter-spacing:.06em;margin-bottom:.4rem}
+.empty-state-sub{font-size:13px;color:var(--mid);margin-bottom:1.5rem;line-height:1.6}
+.btn-shop-now{display:inline-block;background:var(--black);color:#fff;padding:.85rem 1.75rem;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;transition:background .2s}
+.btn-shop-now:hover{background:#2a2a28}
+
+.order-card{background:var(--white);border:1px solid var(--stone);margin-bottom:1rem}
+.order-card-head{padding:1rem 1.25rem;border-bottom:1px solid var(--stone);display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;justify-content:space-between;background:var(--off)}
+.order-id{font-size:12px;font-weight:700;letter-spacing:.04em}
+.order-date{font-size:11px;color:var(--mid)}
+.order-status{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green);background:#dcfce7;padding:.3rem .65rem;border-radius:20px}
+.order-card-body{padding:1.25rem}
+.order-item-row{display:flex;justify-content:space-between;gap:1rem;font-size:12.5px;padding:.4rem 0;border-bottom:1px dashed var(--stone)}
+.order-item-row:last-of-type{border-bottom:none}
+.order-item-name{color:var(--black);font-weight:500}
+.order-item-meta{color:var(--mid);font-size:11px}
+.order-card-foot{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-top:1px solid var(--stone)}
+.order-total-label{font-size:11px;color:var(--mid);text-transform:uppercase;letter-spacing:.06em}
+.order-total-val{font-family:var(--serif);font-size:1.5rem}
+.order-wa-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stone);padding:.5rem .9rem;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;transition:all .2s}
+.order-wa-btn:hover{border-color:#25d366;color:#1da855}
+
+/* ADDRESSES */
+.addr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:1.25rem}
+.addr-card{background:var(--white);border:1.5px solid var(--stone);padding:1.25rem;position:relative}
+.addr-card.is-default{border-color:var(--black)}
+.addr-default-tag{position:absolute;top:1rem;right:1rem;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green);background:#dcfce7;padding:.25rem .55rem;border-radius:20px}
+.addr-label{font-size:13px;font-weight:700;margin-bottom:.5rem}
+.addr-lines{font-size:12.5px;color:var(--mid);line-height:1.7;margin-bottom:1rem}
+.addr-lines strong{color:var(--black);display:block}
+.addr-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.addr-action-btn{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mid);border:1px solid var(--stone);padding:.4rem .7rem;transition:all .2s}
+.addr-action-btn:hover{border-color:var(--black);color:var(--black)}
+.addr-action-btn.danger:hover{border-color:var(--red);color:var(--red)}
+
+.addr-form-card{background:var(--white);border:1px solid var(--stone);padding:1.5rem;display:none}
+.addr-form-card.show{display:block}
+.addr-form-title{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1rem}
+.addr-field-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem}
+.addr-field{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.75rem}
+.addr-field label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);font-weight:700}
+.addr-field input,.addr-field select{border:1.5px solid var(--stone);padding:.7rem .9rem;font-size:13.5px;outline:none;transition:border-color .2s;width:100%}
+.addr-field input:focus,.addr-field select:focus{border-color:var(--black)}
+.addr-form-btns{display:flex;gap:.6rem;margin-top:.5rem;flex-wrap:wrap}
+.btn-addr-save{background:var(--black);color:#fff;padding:.8rem 1.5rem;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:background .2s}
+.btn-addr-save:hover{background:#2a2a28}
+.btn-addr-cancel{border:1px solid var(--stone);padding:.8rem 1.5rem;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:background .2s}
+.btn-addr-cancel:hover{background:var(--off)}
+.btn-add-address{display:inline-flex;align-items:center;gap:6px;border:1.5px dashed var(--stone);padding:.8rem 1.25rem;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);transition:all .2s;width:100%;justify-content:center}
+.btn-add-address:hover{border-color:var(--black);color:var(--black)}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--black);color:var(--white);padding:.75rem 1.75rem;font-size:13px;font-weight:500;opacity:0;transition:opacity .3s,transform .3s;z-index:900;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.3);max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err-toast{background:var(--red)}
+
+/* MOBILE DRAWER (shared) */
+.mob-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;opacity:0;pointer-events:none;transition:opacity .3s}
+.mob-overlay.open{opacity:1;pointer-events:all}
+.mob-drawer{position:fixed;left:0;top:0;bottom:0;width:min(320px,90vw);background:#fff;z-index:400;transform:translateX(-100%);transition:transform .4s var(--spring);display:flex;flex-direction:column;overflow:hidden}
+.mob-drawer.open{transform:none}
+.mob-drawer-top{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--stone);flex-shrink:0}
+.mob-close{width:36px;height:36px;display:flex;align-items:center;justify-content:center;color:#111;transition:transform .2s;background:transparent;border:none;cursor:pointer}
+.mob-close:hover{transform:rotate(90deg)}
+.mob-drawer-logo{font-family:var(--serif);font-size:1.2rem;letter-spacing:.2em;color:#111;text-transform:uppercase;text-align:center}
+.mob-drawer-logo span{display:block;font-family:var(--sans);font-size:7px;letter-spacing:.35em;color:var(--mid);margin-top:2px;font-weight:400;text-transform:uppercase}
+.mob-nav{flex:1;overflow-y:auto;padding:1rem 1.25rem;display:flex;flex-direction:column;background:#fff}
+.mob-nav-item{display:flex;align-items:center;justify-content:space-between;padding:.95rem 0;border-bottom:1px solid var(--stone);font-size:1rem;font-weight:500;color:#111;background:#fff;width:100%;text-align:left;font-family:var(--sans);border-top:none;border-left:none;border-right:none;outline:none;cursor:pointer;transition:opacity .2s}
+.mob-nav-item:first-child{border-top:1px solid var(--stone)}.mob-nav-item:hover{opacity:.55}
+
+/* FOOTER */
+footer{background:var(--black);color:var(--white);padding:2rem;text-align:center;border-top:1px solid #222}
+.footer-bottom-simple{font-size:11px;color:var(--mid);letter-spacing:.06em}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  nav{padding:0 1rem;height:56px}.nav-links{display:none}
+  .hamburger{display:flex!important;align-items:center;justify-content:center}
+  .nav-brand-name{font-size:1.35rem}.nav-right{gap:.3rem}.nav-icon-btn{width:32px;height:32px}
+  .account-wrap{grid-template-columns:1fr;gap:1.25rem;padding:1.25rem 1rem 3rem}
+  .profile-card{position:static}
+  .breadcrumb{padding:10px 1rem}
+}
+@media(max-width:480px){
+  .addr-field-row{grid-template-columns:1fr}
+  .order-card-head{padding:.85rem 1rem}
+  .order-card-body{padding:1rem}
+  .login-gate-card{padding:2rem 1.25rem}
+  .account-wrap{padding:1rem .75rem 3rem}
+}
+</style>
+</head>
+<body>
+
+<!-- MARQUEE -->
+<div class="marquee">
+  <div class="marquee-track">
+    <span>New Arrivals</span><span>Free Shipping Above Rs.1999</span><span>Easy 3-Day Returns</span><span>100% Quality products</span>
+    <span>New Arrivals</span><span>Free Shipping Above Rs.1999</span><span>Easy 3-Day Returns</span><span>100% Quality products</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <button class="hamburger" onclick="openDrawer()">
+      <svg width="22" height="16" viewBox="0 0 22 16" fill="none"><rect width="22" height="2" rx="1" fill="white"/><rect y="7" width="16" height="2" rx="1" fill="white"/><rect y="14" width="22" height="2" rx="1" fill="white"/></svg>
+    </button>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="index.html#shop">Shop</a></li>
+      <li><a href="support.html">Support</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+  </div>
+  <a href="index.html" class="nav-brand">
+    <span class="nav-brand-name">Shanmuga</span>
+    <span class="nav-brand-sub">Mens Wear</span>
+  </a>
+  <div class="nav-right">
+    <div class="cart-wrap">
+      <a class="nav-icon-btn" href="index.html#shop" aria-label="Cart">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      </a>
+      <span class="cart-badge" id="cartCount">0</span>
+    </div>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="index.html">Home</a><span class="sep">/</span>
+  <span class="current">My Account</span>
+</div>
+
+<!-- MOBILE DRAWER -->
+<div class="mob-overlay" id="mobOverlay" onclick="closeDrawer()"></div>
+<div class="mob-drawer" id="mobDrawer">
+  <div class="mob-drawer-top">
+    <button class="mob-close" onclick="closeDrawer()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="mob-drawer-logo">Shanmuga<span>Mens Wear</span></div>
+    <div style="width:36px"></div>
+  </div>
+  <nav class="mob-nav">
+    <button class="mob-nav-item" onclick="location.href='index.html'">Home <span>→</span></button>
+    <button class="mob-nav-item" onclick="location.href='index.html#shop'">Shop <span>→</span></button>
+    <button class="mob-nav-item" onclick="location.href='support.html'">Support <span>→</span></button>
+    <button class="mob-nav-item" onclick="location.href='index.html#contact'">Contact <span>→</span></button>
+  </nav>
+</div>
+
+<!-- AUTH CHECKING -->
+<div class="checking-auth" id="checkingAuth">Checking your account…</div>
+
+<!-- LOGIN GATE -->
+<div class="login-gate" id="loginGate">
+  <div class="login-gate-card">
+    <div class="login-gate-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#111110" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <div class="login-gate-title">Sign In to View Your Account</div>
+    <p class="login-gate-sub">Log in to see your past orders, saved delivery addresses and profile details. Not shopped with us yet? No problem — you can browse and check out anytime.</p>
+    <div class="login-gate-btns">
+      <a class="btn-gate-primary" href="login.html?redirect=account.html">Log In / Sign Up</a>
+      <a class="btn-gate-secondary" href="index.html#shop">Continue Shopping</a>
+    </div>
+  </div>
+</div>
+
+<!-- ACCOUNT WRAP -->
+<div class="account-wrap" id="accountWrap">
+
+  <!-- SIDEBAR: PROFILE -->
+  <div class="profile-card">
+    <div id="profileAvatarWrap"></div>
+    <div class="profile-name" id="profileName">—</div>
+    <div class="profile-email" id="profileEmail">—</div>
+
+    <div class="profile-stats">
+      <div class="profile-stat">
+        <div class="profile-stat-num" id="statOrders">0</div>
+        <div class="profile-stat-label">Orders</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-num" id="statAddresses">0</div>
+        <div class="profile-stat-label">Addresses</div>
+      </div>
+    </div>
+
+    <div class="profile-field">
+      <label>Phone Number</label>
+      <input type="tel" id="profilePhone" placeholder="9876543210" maxlength="10">
+    </div>
+    <button class="btn-save-profile" onclick="saveProfileInfo()">Save Details</button>
+    <button class="btn-logout-acc" onclick="doAccountLogout()">Sign Out</button>
+  </div>
+
+  <!-- MAIN: TABS -->
+  <div class="account-main">
+    <div class="account-tabs">
+      <button class="acc-tab active" id="tab-orders" onclick="showAccTab('orders')">My Orders</button>
+      <button class="acc-tab" id="tab-addresses" onclick="showAccTab('addresses')">My Addresses</button>
+    </div>
+
+    <!-- ORDERS PANEL -->
+    <div class="acc-panel active" id="panel-orders">
+      <div id="ordersEmpty" class="empty-state" style="display:none">
+        <div class="empty-state-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8a8680" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        </div>
+        <div class="empty-state-title">No Orders Yet</div>
+        <p class="empty-state-sub">You haven't placed any orders with us yet.<br>Explore our latest collection and find something you'll love.</p>
+        <a class="btn-shop-now" href="index.html#shop">Continue Shopping →</a>
+      </div>
+      <div id="ordersList"></div>
+    </div>
+
+    <!-- ADDRESSES PANEL -->
+    <div class="acc-panel" id="panel-addresses">
+      <div id="addrGrid" class="addr-grid"></div>
+      <button class="btn-add-address" id="addAddrBtn" onclick="openAddressForm()">+ Add New Address</button>
+
+      <div class="addr-form-card" id="addrFormCard" style="margin-top:1rem">
+        <div class="addr-form-title" id="addrFormTitle">Add New Address</div>
+        <input type="hidden" id="addrId">
+        <div class="addr-field-row">
+          <div class="addr-field">
+            <label>Label</label>
+            <input type="text" id="addrLabel" placeholder="Home, Work, etc.">
+          </div>
+          <div class="addr-field">
+            <label>Full Name</label>
+            <input type="text" id="addrName" placeholder="Sudhan Kumar">
+          </div>
+        </div>
+        <div class="addr-field-row">
+          <div class="addr-field">
+            <label>Phone</label>
+            <input type="tel" id="addrPhone" placeholder="9876543210" maxlength="10">
+          </div>
+          <div class="addr-field">
+            <label>PIN Code</label>
+            <input type="text" id="addrPincode" placeholder="630001" maxlength="6">
+          </div>
+        </div>
+        <div class="addr-field">
+          <label>Street Address</label>
+          <input type="text" id="addrAddress" placeholder="Main Road, Near Bus Stand">
+        </div>
+        <div class="addr-field-row">
+          <div class="addr-field">
+            <label>City</label>
+            <input type="text" id="addrCity" placeholder="Karaikudi">
+          </div>
+          <div class="addr-field">
+            <label>State</label>
+            <select id="addrState">
+              <option value="">Select state</option>
+              <option value="Tamil Nadu">Tamil Nadu</option>
+              <option value="Karnataka">Karnataka</option>
+              <option value="Kerala">Kerala</option>
+              <option value="Andhra Pradesh">Andhra Pradesh</option>
+              <option value="Telangana">Telangana</option>
+              <option value="Maharashtra">Maharashtra</option>
+              <option value="Delhi">Delhi</option>
+              <option value="Gujarat">Gujarat</option>
+              <option value="Rajasthan">Rajasthan</option>
+              <option value="West Bengal">West Bengal</option>
+              <option value="Uttar Pradesh">Uttar Pradesh</option>
+              <option value="Madhya Pradesh">Madhya Pradesh</option>
+              <option value="Punjab">Punjab</option>
+              <option value="Haryana">Haryana</option>
+              <option value="Bihar">Bihar</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:12px;color:var(--mid);margin-bottom:.5rem">
+          <input type="checkbox" id="addrIsDefault" style="width:15px;height:15px;accent-color:var(--black)"> Set as default delivery address
+        </label>
+        <div class="addr-form-btns">
+          <button class="btn-addr-save" onclick="saveAddressForm()">Save Address</button>
+          <button class="btn-addr-cancel" onclick="closeAddressForm()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-bottom-simple">© 2026 Shanmuga Mens Wear. All rights reserved.</div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="smw-shared.js"></script>
+
+<script type="module">
+  import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import{getAuth,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB0onzty6LC3kGpQmKq4f6CR7J7Bn0Ov_g",
+    authDomain: "shanmuga-mens-wear.firebaseapp.com",
+    projectId: "shanmuga-mens-wear",
+    storageBucket: "shanmuga-mens-wear.firebasestorage.app",
+    messagingSenderId: "525819935373",
+    appId: "1:525819935373:web:b65ca8df1f026b7ea340c4"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  window.SMW_CURRENT_USER = null;
+
+  onAuthStateChanged(auth, user => {
+    document.getElementById('checkingAuth').style.display = 'none';
+    if (!user) {
+      window.SMW_CURRENT_USER = null;
+      document.getElementById('loginGate').classList.add('show');
+      document.getElementById('accountWrap').classList.remove('show');
+      return;
+    }
+    window.SMW_CURRENT_USER = user;
+    document.getElementById('loginGate').classList.remove('show');
+    document.getElementById('accountWrap').classList.add('show');
+    window.renderAccountPage(user);
+  });
+
+  window.doAccountLogout = async function () {
+    try { await signOut(auth); window.showAccToast('Signed out.'); setTimeout(() => location.href = 'index.html', 700); }
+    catch (e) { window.showAccToast('Sign out failed.', true); }
+  };
+</script>
+
+<script>
+'use strict';
+
+/* Cart badge (account page still shows nav cart count) */
+(function () {
+  try {
+    var raw = localStorage.getItem('smw_cart');
+    var cart = raw ? JSON.parse(raw) : [];
+    if (Array.isArray(cart)) {
+      document.getElementById('cartCount').textContent = cart.reduce(function (s, x) { return s + x.qty; }, 0);
+    }
+  } catch (e) {}
+})();
+
+var toastTimer;
+window.showAccToast = function (msg, isErr) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isErr ? ' err-toast' : '') + ' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { t.classList.remove('show'); }, 3200);
+};
+
+function openDrawer(){ document.getElementById('mobDrawer').classList.add('open'); document.getElementById('mobOverlay').classList.add('open'); }
+function closeDrawer(){ document.getElementById('mobDrawer').classList.remove('open'); document.getElementById('mobOverlay').classList.remove('open'); }
+
+function showAccTab(tab){
+  document.querySelectorAll('.acc-tab').forEach(function(el){ el.classList.remove('active'); });
+  document.querySelectorAll('.acc-panel').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+var CURRENT_ADDR_LIST = [];
+
+window.renderAccountPage = function (user) {
+  // Profile card
+  var wrap = document.getElementById('profileAvatarWrap');
+  if (user.photoURL) {
+    wrap.innerHTML = '<img class="profile-avatar" src="' + user.photoURL + '" alt="' + SMW.esc(user.displayName || 'User') + '">';
+  } else {
+    wrap.innerHTML = '<div class="profile-avatar-placeholder">' + SMW.esc((user.displayName || user.email || 'U')[0].toUpperCase()) + '</div>';
+  }
+  document.getElementById('profileName').textContent = user.displayName || 'Welcome!';
+  document.getElementById('profileEmail').textContent = user.email || '';
+
+  var profile = SMW.getProfile(user);
+  document.getElementById('profilePhone').value = profile.phone || '';
+
+  renderOrders(user);
+  renderAddresses(user);
+};
+
+/* ── PROFILE SAVE ── */
+window.saveProfileInfo = function () {
+  var user = window.SMW_CURRENT_USER;
+  if (!user) return;
+  var phone = document.getElementById('profilePhone').value.trim().replace(/\D/g, '').slice(0, 10);
+  document.getElementById('profilePhone').value = phone;
+  SMW.saveProfile(user, { phone: phone });
+  showAccToast('Profile details saved.');
+};
+
+/* ── ORDERS ── */
+function renderOrders(user) {
+  var orders = SMW.getOrders(user);
+  document.getElementById('statOrders').textContent = orders.length;
+  var listEl = document.getElementById('ordersList');
+  var emptyEl = document.getElementById('ordersEmpty');
+
+  if (!orders.length) {
+    emptyEl.style.display = 'block';
+    listEl.innerHTML = '';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  listEl.innerHTML = orders.map(function (o) {
+    var itemsHtml = (o.items || []).map(function (it) {
+      return '<div class="order-item-row">' +
+        '<span class="order-item-name">' + SMW.esc(it.name) + (it.size ? ' <span class="order-item-meta">(Size: ' + SMW.esc(it.size) + ')</span>' : '') + ' × ' + it.qty + '</span>' +
+        '<span>' + SMW.fmt(it.total) + '</span>' +
+      '</div>';
+    }).join('');
+
+    return '<div class="order-card">' +
+      '<div class="order-card-head">' +
+        '<div>' +
+          '<div class="order-id">' + SMW.esc(o.id) + '</div>' +
+          '<div class="order-date">' + SMW.esc(o.dateStr || '') + '</div>' +
+        '</div>' +
+        '<span class="order-status">' + SMW.esc(o.status || 'Confirmed') + '</span>' +
+      '</div>' +
+      '<div class="order-card-body">' + itemsHtml + '</div>' +
+      '<div class="order-card-foot">' +
+        '<div><div class="order-total-label">Total Paid</div><div class="order-total-val">' + SMW.fmt(o.total) + '</div></div>' +
+        '<a class="order-wa-btn" href="https://wa.me/919442689858?text=' + encodeURIComponent('Hi, I have a question about my order ' + o.id) + '" target="_blank" rel="noopener">Ask About Order</a>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+/* ── ADDRESSES ── */
+function renderAddresses(user) {
+  CURRENT_ADDR_LIST = SMW.getAddresses(user);
+  document.getElementById('statAddresses').textContent = CURRENT_ADDR_LIST.length;
+  var grid = document.getElementById('addrGrid');
+
+  if (!CURRENT_ADDR_LIST.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8a8680" stroke-width="1.8"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="empty-state-title" style="font-size:1.3rem">No Saved Addresses</div><p class="empty-state-sub">Add a delivery address to make checkout faster next time.</p></div>';
+    return;
+  }
+
+  grid.innerHTML = CURRENT_ADDR_LIST.map(function (a) {
+    return '<div class="addr-card' + (a.isDefault ? ' is-default' : '') + '">' +
+      (a.isDefault ? '<span class="addr-default-tag">Default</span>' : '') +
+      '<div class="addr-label">' + SMW.esc(a.label || 'Address') + '</div>' +
+      '<div class="addr-lines"><strong>' + SMW.esc(a.name || '') + '</strong>' +
+        SMW.esc([a.address, a.apt, a.city, a.state, a.pincode].filter(Boolean).join(', ')) +
+        (a.phone ? '<br>+91 ' + SMW.esc(a.phone) : '') +
+      '</div>' +
+      '<div class="addr-actions">' +
+        '<button class="addr-action-btn" onclick="editAddress(\'' + a.id + '\')">Edit</button>' +
+        (a.isDefault ? '' : '<button class="addr-action-btn" onclick="makeDefaultAddress(\'' + a.id + '\')">Set Default</button>') +
+        '<button class="addr-action-btn danger" onclick="removeAddress(\'' + a.id + '\')">Delete</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+window.openAddressForm = function () {
+  document.getElementById('addrFormTitle').textContent = 'Add New Address';
+  document.getElementById('addrId').value = '';
+  ['addrLabel','addrName','addrPhone','addrPincode','addrAddress','addrCity'].forEach(function(id){ document.getElementById(id).value = ''; });
+  document.getElementById('addrState').value = '';
+  document.getElementById('addrIsDefault').checked = CURRENT_ADDR_LIST.length === 0;
+  document.getElementById('addrFormCard').classList.add('show');
+  document.getElementById('addAddrBtn').style.display = 'none';
+  document.getElementById('addrFormCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
+
+window.closeAddressForm = function () {
+  document.getElementById('addrFormCard').classList.remove('show');
+  document.getElementById('addAddrBtn').style.display = '';
+};
+
+window.editAddress = function (id) {
+  var a = CURRENT_ADDR_LIST.find(function (x) { return x.id === id; });
+  if (!a) return;
+  document.getElementById('addrFormTitle').textContent = 'Edit Address';
+  document.getElementById('addrId').value = a.id;
+  document.getElementById('addrLabel').value = a.label || '';
+  document.getElementById('addrName').value = a.name || '';
+  document.getElementById('addrPhone').value = a.phone || '';
+  document.getElementById('addrPincode').value = a.pincode || '';
+  document.getElementById('addrAddress').value = a.address || '';
+  document.getElementById('addrCity').value = a.city || '';
+  document.getElementById('addrState').value = a.state || '';
+  document.getElementById('addrIsDefault').checked = !!a.isDefault;
+  document.getElementById('addrFormCard').classList.add('show');
+  document.getElementById('addAddrBtn').style.display = 'none';
+  document.getElementById('addrFormCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
+
+window.saveAddressForm = function () {
+  var user = window.SMW_CURRENT_USER;
+  if (!user) return;
+
+  var pincode = document.getElementById('addrPincode').value.trim();
+  var address = document.getElementById('addrAddress').value.trim();
+  var city = document.getElementById('addrCity').value.trim();
+  var state = document.getElementById('addrState').value;
+
+  if (!address || !city || !state || !/^\d{6}$/.test(pincode)) {
+    showAccToast('Please fill in address, city, state and a valid 6-digit PIN.', true);
+    return;
+  }
+
+  var addr = {
+    id: document.getElementById('addrId').value || undefined,
+    label: document.getElementById('addrLabel').value.trim() || 'Address',
+    name: document.getElementById('addrName').value.trim(),
+    phone: document.getElementById('addrPhone').value.trim().replace(/\D/g, '').slice(0, 10),
+    address: address,
+    city: city,
+    state: state,
+    pincode: pincode,
+    isDefault: document.getElementById('addrIsDefault').checked
+  };
+
+  SMW.saveAddress(user, addr);
+  renderAddresses(user);
+  closeAddressForm();
+  showAccToast('Address saved.');
+};
+
+window.makeDefaultAddress = function (id) {
+  var user = window.SMW_CURRENT_USER;
+  if (!user) return;
+  var a = CURRENT_ADDR_LIST.find(function (x) { return x.id === id; });
+  if (!a) return;
+  a.isDefault = true;
+  SMW.saveAddress(user, a);
+  renderAddresses(user);
+  showAccToast('Default address updated.');
+};
+
+window.removeAddress = function (id) {
+  var user = window.SMW_CURRENT_USER;
+  if (!user) return;
+  if (!confirm('Delete this saved address?')) return;
+  SMW.deleteAddress(user, id);
+  renderAddresses(user);
+  showAccToast('Address removed.');
+};
+
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDrawer(); });
+</script>
+</body>
+</html>
