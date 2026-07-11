@@ -214,7 +214,7 @@ input:checked+.slider::before{transform:translateX(18px)}
     <div id="loginErr">Incorrect credentials.</div>
     <div class="lf-group"><label>Username</label><input type="text" id="lu" placeholder="admin" autocomplete="off"></div>
     <div class="lf-group"><label>Password</label><input type="password" id="lp" placeholder=""></div>
-    <button class="btn-login" onclick="doLogin()">Sign In</button>
+    <button class="btn-login" id="loginBtn" onclick="doLogin()">Sign In</button>
   </div>
 </div>
 <div id="app">
@@ -585,15 +585,9 @@ input:checked+.slider::before{transform:translateX(18px)}
 <div class="toast" id="toast"></div>
 <script>
 'use strict';
-// CREDENTIALS
-var DEFAULT_USER='admin',DEFAULT_PASS='shanmuga2026';
-var ADMIN_USER=localStorage.getItem('smw_admin_user')||DEFAULT_USER;
-var ADMIN_PASS=localStorage.getItem('smw_admin_pass')||DEFAULT_PASS;
-if(!localStorage.getItem('smw_admin_user'))localStorage.setItem('smw_admin_user',DEFAULT_USER);
-if(!localStorage.getItem('smw_admin_pass'))localStorage.setItem('smw_admin_pass',DEFAULT_PASS);
-
-// ORDERS API CONFIG
-var ADMIN_API_KEY='admin_5fT8qWzN2pXc';
+// AUTH is now handled entirely server-side. No password or API key lives
+// in this file anymore — see /api/admin-login.js, /api/admin-session.js,
+// /api/admin-logout.js, /api/admin-change-password.js.
 var ORDERS_API_BASE='https://shanmugamenswear.vercel.app/api';
 var cachedOrders=[];
 var ordersLoading=false;
@@ -630,8 +624,9 @@ function shipTagLabel(s){return{pending:'Pending',dispatched:'Dispatched',delive
 
 // ORDERS - reads from real backend API
 function fetchOrdersFromServer(){
-  return fetch(ORDERS_API_BASE+'/orders',{headers:{'x-admin-key':ADMIN_API_KEY}})
+  return fetch(ORDERS_API_BASE+'/orders',{credentials:'include'})
     .then(function(res){
+      if(res.status===401){forceLogout();throw new Error('Session expired. Please log in again.');}
       if(!res.ok)return res.json().then(function(d){throw new Error(d.error||('HTTP '+res.status));});
       return res.json();
     })
@@ -737,7 +732,7 @@ function renderOrdersFromCache(orders){
 }
 
 function updateShipStatus(orderId,status){
-  fetch(ORDERS_API_BASE+'/order-update',{method:'PATCH',headers:{'Content-Type':'application/json','x-admin-key':ADMIN_API_KEY},body:JSON.stringify({id:orderId,shippingStatus:status})})
+  fetch(ORDERS_API_BASE+'/order-update',{method:'PATCH',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:orderId,shippingStatus:status})})
     .then(function(res){if(!res.ok)return res.json().then(function(d){throw new Error(d.error||('HTTP '+res.status));});return res.json();})
     .then(function(){
       var o=cachedOrders.find(function(x){return x.id===orderId;});
@@ -787,7 +782,7 @@ function showOrderDetail(orderId){
 
 function deleteOrder(orderId){
   if(!confirm('Delete this order? Cannot be undone.'))return;
-  fetch(ORDERS_API_BASE+'/order-update',{method:'DELETE',headers:{'Content-Type':'application/json','x-admin-key':ADMIN_API_KEY},body:JSON.stringify({id:orderId})})
+  fetch(ORDERS_API_BASE+'/order-update',{method:'DELETE',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:orderId})})
     .then(function(res){if(!res.ok)return res.json().then(function(d){throw new Error(d.error||('HTTP '+res.status));});return res.json();})
     .then(function(){cachedOrders=cachedOrders.filter(function(x){return x.id!==orderId;});renderOrdersFromCache();toast('Order deleted','success');})
     .catch(function(err){toast('Could not delete: '+err.message,'error');});
@@ -934,29 +929,67 @@ function addPubLog(count){
   log.insertBefore(w,log.firstChild);
 }
 
-// LOGIN
+// LOGIN — credentials are checked server-side (/api/admin-login.js) and
+// never stored or compared in this file. The session lives in an httpOnly
+// cookie the browser sends automatically; JS on this page can't read it,
+// so it can't be exfiltrated by an XSS bug either.
 document.getElementById('lu').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 document.getElementById('lp').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
-var loginAttempts=0,loginLockedUntil=parseInt(localStorage.getItem('smw_locked_until')||'0');
+
 function doLogin(){
-  var now=Date.now();
-  if(loginLockedUntil>now){var mins=Math.ceil((loginLockedUntil-now)/60000);showErr('Locked. Try in '+mins+' min.');return;}
   var u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value;
-  if(u===ADMIN_USER&&p===ADMIN_PASS){
-    loginAttempts=0;localStorage.removeItem('smw_locked_until');
+  if(!u||!p){showErr('Enter username and password.');return;}
+  var btn=document.getElementById('loginBtn');
+  if(btn){btn.disabled=true;btn.textContent='Signing in…';}
+  fetch(ORDERS_API_BASE+'/admin-login',{
+    method:'POST',credentials:'include',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({username:u,password:p})
+  }).then(function(res){
+    return res.json().then(function(d){return{ok:res.ok,data:d};});
+  }).then(function(r){
+    if(btn){btn.disabled=false;btn.textContent='Sign In';}
+    if(!r.ok){
+      showErr((r.data&&r.data.error)||'Invalid credentials.');
+      document.getElementById('lp').value='';document.getElementById('lp').focus();
+      return;
+    }
     document.getElementById('loginErr').style.display='none';
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('app').style.display='block';
     initApp();
-  }else{
-    loginAttempts++;
-    if(loginAttempts>=5){var lu2=Date.now()+10*60*1000;localStorage.setItem('smw_locked_until',lu2);loginLockedUntil=lu2;loginAttempts=0;showErr('Locked for 10 minutes.');}
-    else showErr('Wrong credentials. '+(5-loginAttempts)+' left.');
-    document.getElementById('lp').value='';document.getElementById('lp').focus();
-  }
+  }).catch(function(){
+    if(btn){btn.disabled=false;btn.textContent='Sign In';}
+    showErr('Could not reach server. Try again.');
+  });
 }
+
 function showErr(msg){var el=document.getElementById('loginErr');el.textContent=msg;el.style.display='block';}
-function doLogout(){if(!confirm('Sign out?'))return;document.getElementById('app').style.display='none';document.getElementById('loginScreen').style.display='flex';document.getElementById('lu').value='';document.getElementById('lp').value='';}
+
+function doLogout(){
+  if(!confirm('Sign out?'))return;
+  fetch(ORDERS_API_BASE+'/admin-logout',{method:'POST',credentials:'include'}).finally(forceLogout);
+}
+
+function forceLogout(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('lu').value='';document.getElementById('lp').value='';
+}
+
+// On page load, check whether a valid session already exists (e.g. the
+// admin refreshed the page) so they aren't forced to log in again every time.
+(function checkExistingSession(){
+  fetch(ORDERS_API_BASE+'/admin-session',{credentials:'include'})
+    .then(function(res){return res.json();})
+    .then(function(d){
+      if(d&&d.authenticated){
+        document.getElementById('loginScreen').style.display='none';
+        document.getElementById('app').style.display='block';
+        initApp();
+      }
+    }).catch(function(){});
+})();
 
 // INIT
 function initApp(){
@@ -1165,14 +1198,21 @@ function markAllRead(){notifs.forEach(function(n){n.unread=false;});renderNotifs
 function changePw(){
   var cur=document.getElementById('pw-cur').value,nw=document.getElementById('pw-new').value,cf=document.getElementById('pw-confirm').value;
   var msg=document.getElementById('pwMsg');
-  if(cur!==ADMIN_PASS){msg.className='pw-msg err';msg.style.display='block';msg.textContent='Wrong current password';return;}
-  if(nw.length<8){msg.className='pw-msg err';msg.style.display='block';msg.textContent='Min 8 characters';return;}
-  if(nw!==cf){msg.className='pw-msg err';msg.style.display='block';msg.textContent='Passwords do not match';return;}
-  ADMIN_PASS=nw;localStorage.setItem('smw_admin_pass',nw);
-  msg.className='pw-msg ok';msg.style.display='block';msg.textContent='Password updated!';
-  ['pw-cur','pw-new','pw-confirm'].forEach(function(id){document.getElementById(id).value='';});
-  setTimeout(function(){msg.style.display='none';},3000);
-  toast('Password updated!','success');logAct('Password changed','var(--orange)');
+  function fail(t){msg.className='pw-msg err';msg.style.display='block';msg.textContent=t;}
+  if(nw.length<8){fail('Min 8 characters');return;}
+  if(nw!==cf){fail('Passwords do not match');return;}
+  fetch(ORDERS_API_BASE+'/admin-change-password',{
+    method:'POST',credentials:'include',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({currentPassword:cur,newPassword:nw})
+  }).then(function(res){return res.json().then(function(d){return{ok:res.ok,data:d};});})
+  .then(function(r){
+    if(!r.ok){fail((r.data&&r.data.error)||'Could not update password');return;}
+    msg.className='pw-msg ok';msg.style.display='block';msg.textContent='Password updated!';
+    ['pw-cur','pw-new','pw-confirm'].forEach(function(id){document.getElementById(id).value='';});
+    setTimeout(function(){msg.style.display='none';},3000);
+    toast('Password updated!','success');logAct('Password changed','var(--orange)');
+  }).catch(function(){fail('Network error. Try again.');});
 }
 
 // ACTIVITY LOG
