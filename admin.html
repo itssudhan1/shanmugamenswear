@@ -979,17 +979,26 @@ function forceLogout(){
 
 // On page load, check whether a valid session already exists (e.g. the
 // admin refreshed the page) so they aren't forced to log in again every time.
-(function checkExistingSession(){
-  fetch(ORDERS_API_BASE+'/admin-session',{credentials:'include'})
+function checkExistingSession(){
+  fetch(ORDERS_API_BASE+'/admin-session',{credentials:'include',cache:'no-store'})
     .then(function(res){return res.json();})
     .then(function(d){
       if(d&&d.authenticated){
         document.getElementById('loginScreen').style.display='none';
         document.getElementById('app').style.display='block';
         initApp();
+      }else{
+        forceLogout();
       }
-    }).catch(function(){});
-})();
+    }).catch(function(){forceLogout();});
+}
+checkExistingSession();
+// If the browser restores this page from back/forward cache (bfcache) —
+// e.g. hitting Back after logging out, or a suspended tab being resumed —
+// re-verify the session instead of trusting whatever was frozen in the DOM.
+window.addEventListener('pageshow',function(e){
+  if(e.persisted){forceLogout();checkExistingSession();}
+});
 
 // INIT
 function initApp(){
