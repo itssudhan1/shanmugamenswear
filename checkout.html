@@ -1072,16 +1072,23 @@ async function onPaymentSuccess(response, customerInfo){
 
   var verifyResp;
   try {
+    // Send the signed-in customer's Firebase ID token so the backend can
+    // associate this order with their account (needed for "My Orders").
+    var idToken = currentUser ? await currentUser.getIdToken() : null;
     var res = await fetch('/api/verify-payment', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: Object.assign(
+        { 'Content-Type': 'application/json' },
+        idToken ? { 'Authorization': 'Bearer ' + idToken } : {}
+      ),
       body: JSON.stringify({
         razorpay_order_id: response.razorpay_order_id,
         razorpay_payment_id: response.razorpay_payment_id,
         razorpay_signature: response.razorpay_signature,
         cart: cartBackup,
         customer: customerInfo,
-        totals: totals
+        totals: totals,
+        uid: currentUser ? currentUser.uid : null
       })
     });
     verifyResp = await res.json();
@@ -1122,13 +1129,15 @@ async function onPaymentSuccess(response, customerInfo){
     shipping: totals.shipping, total: totals.total
   };
 
-  // Save the order to this signed-in user's account (shows up in account.html)
-  if (currentUser && window.SMW) {
-    window.SMW.addOrder(currentUser, lastOrderData);
+  // Note: the order itself is already persisted server-side by
+  // /api/verify-payment (that's what powers admin.html's Orders tab).
+  // We don't write it again from the browser.
 
-    // Save/update the delivery address + phone on the account if requested.
-    // Reuse the existing default address record (if any) so repeat orders
-    // update the same saved address instead of creating a new one each time.
+  // Save/update the delivery address + phone on the account if requested
+  // (this part stays local to the device — reuse the existing default
+  // address record, if any, so repeat orders update the same saved
+  // address instead of creating a new one each time)
+  if (currentUser && window.SMW) {
     var saveAddrChecked = document.getElementById('saveAddrCheck').checked;
     if (saveAddrChecked) {
       var existingDefault = window.SMW.getDefaultAddress(currentUser);
