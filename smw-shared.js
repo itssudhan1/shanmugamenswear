@@ -51,22 +51,59 @@
   }
 
   // ── ADDRESSES ──
+
+  // Same street+city+state+pincode counts as "the same address" for dedupe
+  function addrKey(a) {
+    return [a.address, a.city, a.state, a.pincode]
+      .map(function (x) { return String(x || '').trim().toLowerCase(); })
+      .join('|');
+  }
+
+  // Collapses accidental duplicate addresses (e.g. checkout used to create a
+  // brand-new saved address on every single order). Keeps default entries
+  // first so the default survives, then writes the cleaned list back.
+  function dedupeAddresses(list) {
+    var seen = {};
+    var result = [];
+    var changed = false;
+    var ordered = list.slice().sort(function (a, b) { return (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0); });
+    ordered.forEach(function (a) {
+      var key = addrKey(a);
+      if (key && seen[key]) { changed = true; return; }
+      if (key) seen[key] = true;
+      result.push(a);
+    });
+    if (changed && result.length && !result.some(function (a) { return a.isDefault; })) {
+      result[0].isDefault = true;
+    }
+    return { list: result, changed: changed };
+  }
+
   function getAddresses(user) {
     var k = userKey(user);
     if (!k) return [];
-    return readJSON('smw_addresses_' + k, []);
+    var list = readJSON('smw_addresses_' + k, []);
+    var deduped = dedupeAddresses(list);
+    if (deduped.changed) writeJSON('smw_addresses_' + k, deduped.list);
+    return deduped.list;
   }
   function saveAddress(user, addr) {
     var k = userKey(user);
     if (!k) return [];
     var list = getAddresses(user);
-    if (!addr.id) addr.id = 'addr_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+    if (!addr.id) {
+      // No id given — if an address with the exact same street/city/state/pincode
+      // already exists, update that one instead of creating a duplicate.
+      var match = list.find(function (a) { return addrKey(a) === addrKey(addr); });
+      addr.id = match ? match.id : 'addr_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+    }
     var idx = list.findIndex(function (a) { return a.id === addr.id; });
     if (addr.isDefault) list.forEach(function (a) { a.isDefault = false; });
     if (idx > -1) list[idx] = addr; else list.push(addr);
     if (!list.some(function (a) { return a.isDefault; }) && list.length) list[0].isDefault = true;
-    writeJSON('smw_addresses_' + k, list);
-    return list;
+    var deduped = dedupeAddresses(list);
+    writeJSON('smw_addresses_' + k, deduped.list);
+    return deduped.list;
   }
   function deleteAddress(user, id) {
     var k = userKey(user);
