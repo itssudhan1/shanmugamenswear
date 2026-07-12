@@ -107,7 +107,12 @@ nav{position:sticky;top:0;z-index:200;background:var(--black);display:flex;align
 .order-card-head{padding:1rem 1.25rem;border-bottom:1px solid var(--stone);display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;justify-content:space-between;background:var(--off)}
 .order-id{font-size:12px;font-weight:700;letter-spacing:.04em}
 .order-date{font-size:11px;color:var(--mid)}
-.order-status{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green);background:#dcfce7;padding:.3rem .65rem;border-radius:20px}
+.order-status{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .65rem;border-radius:20px}
+.order-status.status-confirmed{color:#8a8680;background:#ece9e3}
+.order-status.status-processing{color:#b45309;background:#fef3c7}
+.order-status.status-shipped{color:#1d4ed8;background:#dbeafe}
+.order-status.status-delivered{color:var(--green);background:#dcfce7}
+.order-status.status-cancelled{color:var(--red);background:#fde2e1}
 .order-card-body{padding:1.25rem}
 .order-item-row{display:flex;justify-content:space-between;gap:1rem;font-size:12.5px;padding:.4rem 0;border-bottom:1px dashed var(--stone)}
 .order-item-row:last-of-type{border-bottom:none}
@@ -415,6 +420,7 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
 
   onAuthStateChanged(auth, user => {
     document.getElementById('checkingAuth').style.display = 'none';
+
     if (!user) {
       window.SMW_CURRENT_USER = null;
       document.getElementById('loginGate').classList.add('show');
@@ -425,7 +431,35 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
     document.getElementById('loginGate').classList.remove('show');
     document.getElementById('accountWrap').classList.add('show');
     window.renderAccountPage(user);
+    window.loadMyOrders(user);
   });
+
+  // Fetches this customer's own orders from the real backend (the same one
+  // admin.html manages). Sends the Firebase ID token so the server can
+  // verify who's asking and return only their orders.
+  window.loadMyOrders = async function (user) {
+    var listEl = document.getElementById('ordersList');
+    var emptyEl = document.getElementById('ordersEmpty');
+    try {
+      var idToken = await user.getIdToken();
+      var res = await fetch('/api/my-orders', {
+        headers: { 'Authorization': 'Bearer ' + idToken }
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      var data = await res.json();
+      window.renderOrdersFromServer(data.orders || []);
+    } catch (e) {
+      console.error('Could not load orders:', e);
+      // Backend endpoint isn't set up yet — show a friendly explanation
+      // instead of silently pretending there are no orders.
+      emptyEl.style.display = 'none';
+      listEl.innerHTML = '<div class="empty-state">' +
+        '<div class="empty-state-title" style="font-size:1.3rem">Couldn\'t load your orders</div>' +
+        '<p class="empty-state-sub">We had trouble reaching the order system. If you just placed an order, WhatsApp us your payment ID and we\'ll confirm it right away.</p>' +
+        '<a class="btn-shop-now" href="https://wa.me/919442689858" target="_blank" rel="noopener">Message on WhatsApp →</a>' +
+      '</div>';
+    }
+  };
 
   window.doAccountLogout = async function () {
     try { await signOut(auth); window.showAccToast('Signed out.'); setTimeout(() => location.href = 'index.html', 700); }
@@ -482,8 +516,8 @@ window.renderAccountPage = function (user) {
   var profile = SMW.getProfile(user);
   document.getElementById('profilePhone').value = profile.phone || '';
 
-  renderOrders(user);
   renderAddresses(user);
+  // Orders are rendered by the Firestore onSnapshot listener (live updates)
 };
 
 /* ── PROFILE SAVE ── */
@@ -496,9 +530,11 @@ window.saveProfileInfo = function () {
   showAccToast('Profile details saved.');
 };
 
-/* ── ORDERS ── */
-function renderOrders(user) {
-  var orders = SMW.getOrders(user);
+/* ── ORDERS (from the real backend — same data source admin.html manages) ── */
+var ORDER_STATUS_LABEL = { pending: 'Confirmed', dispatched: 'Dispatched', delivered: 'Delivered', cancelled: 'Cancelled' };
+var ORDER_STATUS_CLASS = { pending: 'status-confirmed', dispatched: 'status-shipped', delivered: 'status-delivered', cancelled: 'status-cancelled' };
+
+window.renderOrdersFromServer = function (orders) {
   document.getElementById('statOrders').textContent = orders.length;
   var listEl = document.getElementById('ordersList');
   var emptyEl = document.getElementById('ordersEmpty');
@@ -514,26 +550,32 @@ function renderOrders(user) {
     var itemsHtml = (o.items || []).map(function (it) {
       return '<div class="order-item-row">' +
         '<span class="order-item-name">' + SMW.esc(it.name) + (it.size ? ' <span class="order-item-meta">(Size: ' + SMW.esc(it.size) + ')</span>' : '') + ' × ' + it.qty + '</span>' +
-        '<span>' + SMW.fmt(it.total) + '</span>' +
+        '<span>' + SMW.fmt(it.total || (it.price * it.qty)) + '</span>' +
       '</div>';
     }).join('');
+
+    var rawStatus = o.shippingStatus || 'pending';
+    var status = ORDER_STATUS_LABEL[rawStatus] || 'Confirmed';
+    var statusClass = ORDER_STATUS_CLASS[rawStatus] || 'status-confirmed';
+    var t = o.totals || o;
+    var total = t.total != null ? t.total : (o.total || 0);
 
     return '<div class="order-card">' +
       '<div class="order-card-head">' +
         '<div>' +
           '<div class="order-id">' + SMW.esc(o.id) + '</div>' +
-          '<div class="order-date">' + SMW.esc(o.dateStr || '') + '</div>' +
+          '<div class="order-date">' + SMW.esc(o.dateStr || o.date || '') + '</div>' +
         '</div>' +
-        '<span class="order-status">' + SMW.esc(o.status || 'Confirmed') + '</span>' +
+        '<span class="order-status ' + statusClass + '">' + SMW.esc(status) + '</span>' +
       '</div>' +
       '<div class="order-card-body">' + itemsHtml + '</div>' +
       '<div class="order-card-foot">' +
-        '<div><div class="order-total-label">Total Paid</div><div class="order-total-val">' + SMW.fmt(o.total) + '</div></div>' +
+        '<div><div class="order-total-label">Total Paid</div><div class="order-total-val">' + SMW.fmt(total) + '</div></div>' +
         '<a class="order-wa-btn" href="https://wa.me/919442689858?text=' + encodeURIComponent('Hi, I have a question about my order ' + o.id) + '" target="_blank" rel="noopener">Ask About Order</a>' +
       '</div>' +
     '</div>';
   }).join('');
-}
+};
 
 /* ── ADDRESSES ── */
 function renderAddresses(user) {
