@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
 <title>Checkout — Shanmuga Mens Wear</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&display=swap"></noscript>
 <style>
 :root{
   --black:#111110;--white:#ffffff;--off:#f5f4f1;--stone:#e8e6e1;
@@ -254,7 +258,7 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
 <!-- NAV -->
 <nav>
   <div class="nav-left">
-    <button class="hamburger" onclick="openDrawer()">
+    <button class="hamburger" onclick="openDrawer()" aria-label="Open menu">
       <svg width="22" height="16" viewBox="0 0 22 16" fill="none"><rect width="22" height="2" rx="1" fill="white"/><rect y="7" width="16" height="2" rx="1" fill="white"/><rect y="14" width="22" height="2" rx="1" fill="white"/></svg>
     </button>
     <ul class="nav-links">
@@ -293,7 +297,7 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
 <div class="mob-overlay" id="mobOverlay" onclick="closeDrawer()"></div>
 <div class="mob-drawer" id="mobDrawer">
   <div class="mob-drawer-top">
-    <button class="mob-close" onclick="closeDrawer()">
+    <button class="mob-close" onclick="closeDrawer()" aria-label="Close menu">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
     <div class="mob-drawer-logo">Shanmuga<span>Mens Wear</span></div>
@@ -341,23 +345,23 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
       <div class="form-block-body">
         <div class="field-row">
           <div class="field" id="f-fname">
-            <label>First Name *</label>
+            <label for="fname">First Name *</label>
             <input type="text" id="fname" placeholder="Sudhan" autocomplete="given-name">
             <span class="err-msg">Please enter your first name</span>
           </div>
           <div class="field" id="f-lname">
-            <label>Last Name *</label>
+            <label for="lname">Last Name *</label>
             <input type="text" id="lname" placeholder="Kumar" autocomplete="family-name">
             <span class="err-msg">Please enter your last name</span>
           </div>
         </div>
         <div class="field" id="f-email">
-          <label>Email Address *</label>
+          <label for="email">Email Address *</label>
           <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
           <span class="err-msg">Please enter a valid email</span>
         </div>
         <div class="field" id="f-phone">
-          <label>Phone Number * (10 digits)</label>
+          <label for="phone">Phone Number * (10 digits)</label>
           <input type="tel" id="phone" placeholder="9876543210" autocomplete="tel" maxlength="10">
           <span class="err-msg">Please enter a valid 10-digit phone number</span>
         </div>
@@ -374,22 +378,22 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
       <div class="form-block-body">
         <div class="saved-addr-list" id="savedAddrList" style="display:none"></div>
         <div class="field" id="f-address">
-          <label>Street Address *</label>
+          <label for="address">Street Address *</label>
           <input type="text" id="address" placeholder="Main Road, Near Bus Stand" autocomplete="street-address">
           <span class="err-msg">Please enter your address</span>
         </div>
         <div class="field">
-          <label>Apartment / Suite (Optional)</label>
+          <label for="apt">Apartment / Suite (Optional)</label>
           <input type="text" id="apt" placeholder="Flat 2B, Second Floor">
         </div>
         <div class="field-row">
           <div class="field" id="f-city">
-            <label>City *</label>
+            <label for="city">City *</label>
             <input type="text" id="city" placeholder="Karaikudi" autocomplete="address-level2">
             <span class="err-msg">Please enter your city</span>
           </div>
           <div class="field" id="f-state">
-            <label>State *</label>
+            <label for="state">State *</label>
             <select id="state" autocomplete="address-level1">
               <option value="">Select state</option>
               <option value="Tamil Nadu" selected>Tamil Nadu</option>
@@ -414,13 +418,13 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
         </div>
         <div class="field-row">
           <div class="field" id="f-pincode">
-            <label>PIN Code *</label>
+            <label for="pincode">PIN Code *</label>
             <input type="text" id="pincode" placeholder="630001" maxlength="6" autocomplete="postal-code">
             <span class="err-msg">Please enter a valid 6-digit PIN</span>
           </div>
           <div class="field">
-            <label>Country</label>
-            <select disabled><option>India</option></select>
+            <label for="country-select">Country</label>
+            <select id="country-select" disabled><option>India</option></select>
           </div>
         </div>
         <div class="checkbox-row">
