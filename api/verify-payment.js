@@ -64,37 +64,57 @@ module.exports = async function handler(req, res) {
 
   // --- Signature is valid: this payment is real. Save the order. ---
   try {
-    // Idempotency: if this payment_id was already verified (e.g. the
-    // browser retried after a network blip), don't create a duplicate.
     const existing = await kv.get('payment:' + razorpay_payment_id);
-    if (existing) {
+
+    // Real duplicate: verify-payment already fully processed this
+    // payment before (e.g. the browser retried after a network blip).
+    // A webhook-created stub is NOT a real duplicate — it's an empty
+    // placeholder (empty items, no customer info) that the race
+    // between Razorpay's webhook and this call can create. We only
+    // treat it as "already done" if it was written by this same
+    // handler previously.
+    if (existing && existing.source !== 'webhook-recovery') {
       return res.status(200).json({ verified: true, order: existing, duplicate: true });
     }
-    const orderId = 'ORD-' + Date.now();
+
+    // If a webhook stub already exists for this payment, reuse its
+    // order ID and metadata so we enrich the SAME record instead of
+    // creating a second one (the admin panel's orders:list already
+    // has this ID from the webhook).
+    const orderId = existing ? existing.id : ('ORD-' + Date.now());
     const order = {
       id: orderId,
       razorpayOrderId: razorpay_order_id,
       paymentId: razorpay_payment_id,
-      date: new Date().toISOString(),
-      dateStr: new Date().toLocaleString('en-IN', {
+      date: existing ? existing.date : new Date().toISOString(),
+      dateStr: existing ? existing.dateStr : new Date().toLocaleString('en-IN', {
         day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
       }),
       customer: customer || {},
       items: cart || [],
       totals: totals || {},
       status: 'paid',
-      shippingStatus: 'pending',
+      shippingStatus: existing ? existing.shippingStatus : 'pending',
       source: 'verify-payment',
       uid: decoded ? decoded.uid : null,
       customerEmail: (decoded && decoded.email) || (customer && customer.email) || null
     };
+
     await kv.set('order:' + orderId, order);
     await kv.set('payment:' + razorpay_payment_id, order);
-    await kv.lpush('orders:list', orderId);
-    await kv.incr('orders:unread');
+
+    // Only push into the orders list / bump the unread counter for a
+    // genuinely new order. If we're enriching a webhook stub, it was
+    // already pushed and counted when the webhook created it.
+    if (!existing) {
+      await kv.lpush('orders:list', orderId);
+      await kv.incr('orders:unread');
+    }
+
     if (decoded && decoded.uid) {
       await kv.lpush('orders:by-uid:' + decoded.uid, orderId);
     }
+
     return res.status(200).json({ verified: true, order });
   } catch (err) {
     console.error('verify-payment storage error:', err);
