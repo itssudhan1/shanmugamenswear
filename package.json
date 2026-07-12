@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "razorpay": "^2.9.4",
-    "@vercel/kv": "^2.0.0"
+    "@vercel/kv": "^2.0.0",
+    "firebase-admin": "^12.7.0"
   }
 }
