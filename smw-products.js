@@ -1,4 +1,4 @@
-/* Shanmuga Mens Wear Products — 2 items — Updated 11/7/2026, 12:38:04 pm */
+/* Shanmuga Mens Wear Products — 3 items — Updated 12/7/2026, 9:42:51 pm */
 /* 2026 Shanmuga Mens Wear. All rights reserved. */
 
 var SMW_DEFAULT_PRODUCTS = [
@@ -59,6 +59,35 @@ var SMW_DEFAULT_PRODUCTS = [
       "https://res.cloudinary.com/do2topls5/image/upload/v1777637816/v0x46fm2lk56klrq8gq6.jpg",
       "https://res.cloudinary.com/do2topls5/image/upload/v1777637827/hquiozogvibaoh2z98yz.jpg",
       "https://res.cloudinary.com/do2topls5/image/upload/v1777637861/hsfsbwbemzfaa76o0l98.webp"
+    ]
+  },
+  {
+    "id": 200,
+    "name": "CLASSIC OVERSIZED TSHIRT",
+    "cat": "tshirts",
+    "tagline": "premium tshirt",
+    "description": "",
+    "fabric": "100% cotton",
+    "fit": "OVERSIED",
+    "orig": 699,
+    "sale": 397,
+    "stock": 0,
+    "threshold": 5,
+    "status": "instock",
+    "visible": true,
+    "lowStock": false,
+    "badge": "",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "photos": [
+      "https://res.cloudinary.com/do2topls5/image/upload/v1783872499/sl6w4q6aoxpl3pgwcknu.jpg",
+      "https://res.cloudinary.com/do2topls5/image/upload/v1783872513/itwuevpnlin0crudpk9m.jpg",
+      "https://res.cloudinary.com/do2topls5/image/upload/v1783872514/wbj2tacw9boh0sp9lgcd.jpg"
     ]
   }
 ];
