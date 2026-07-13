@@ -256,7 +256,7 @@ button{cursor:pointer;font-family:var(--sans);border:none}
 <script src="smw-shared.js"></script>
 <script type="module">
   import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import{getAuth,signInWithPopup,GoogleAuthProvider,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile,sendPasswordResetEmail}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import{getAuth,signInWithPopup,GoogleAuthProvider,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile,sendPasswordResetEmail,fetchSignInMethodsForEmail}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyB0onzty6LC3kGpQmKq4f6CR7J7Bn0Ov_g",
@@ -393,8 +393,19 @@ const firebaseConfig = {
     const email=document.getElementById('loginEmail').value.trim();
     if(!validateEmail(email)){showToast('Enter your email address first.','error-toast');return;}
     if(!isConfigured){showToast('Password reset sent! (demo mode)','success');return;}
-    try{await sendPasswordResetEmail(auth,email);showToast('Password reset email sent to '+email,'success');}
-    catch(err){showToast('Failed to send reset email.','error-toast');}
+    try{
+      const methods=await fetchSignInMethodsForEmail(auth,email);
+      if(methods.length && !methods.includes('password')){
+        showToast('This email uses Google Sign-In — use "Continue with Google" instead.','error-toast');
+        return;
+      }
+      await sendPasswordResetEmail(auth,email);
+      showToast('Password reset email sent to '+email,'success');
+    }
+    catch(err){
+      if(err.code==='auth/user-not-found'){showToast('No account found with that email.','error-toast');}
+      else{showToast('Failed to send reset email.','error-toast');}
+    }
   };
 
   window.doLogout=async function(){
