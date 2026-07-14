@@ -566,7 +566,10 @@ input:checked+.slider::before{transform:translateX(18px)}
   <div class="modal-box">
     <h3>Order Details</h3>
     <div id="orderDetailContent"></div>
-    <div class="modal-foot"><button class="btn btn-outline" onclick="closeMod('orderDetailMod')">Close</button></div>
+    <div class="modal-foot">
+      <button class="btn btn-gold" onclick="printShippingLabel(viewingOrderId)">🖨 Print Label</button>
+      <button class="btn btn-outline" onclick="closeMod('orderDetailMod')">Close</button>
+    </div>
   </div>
 </div>
 <div class="modal-overlay" id="couponMod">
@@ -593,12 +596,21 @@ var ORDERS_API_BASE='https://shanmugamenswear.vercel.app/api';
 var cachedOrders=[];
 var ordersLoading=false;
 
+// STORE ADDRESS — used as the "From" address on printed shipping labels.
+var STORE_ADDRESS = {
+  name: 'Shanmuga City Centre',
+  line1: '10-1-32, Vaniyan Kovil Street',
+  line2: 'Thirupathur',
+  city: 'Sivaganga Dt, Tamil Nadu - 630211',
+  phone: 'Ph: +91 9772689858'
+};
+
 // STATE
 var CL_CLOUD='',CL_PRESET='';
 var GH_TOKEN='',GH_USER_V='',GH_REPO='',GH_BRANCH='main';
 var ghSetupOpen=true;
 var nextId=200;
-var currentImgs=[],selSizes=[],selBadge='',viewingId=-1,revFilter='all',uploading=false;
+var currentImgs=[],selSizes=[],selBadge='',viewingId=-1,viewingOrderId=null,revFilter='all',uploading=false;
 var ALL_SIZES=['XS','S','M','L','XL','XXL','28','30','32','34','36','38'];
 var ALL_BADGES=[{val:'',label:'None',cls:'sel-none'},{val:'new',label:'New',cls:'sel-new'},{val:'sale',label:'Sale',cls:'sel-sale'},{val:'offer',label:'Offer',cls:'sel-offer'}];
 var coupons=[{code:'SAVE10',type:'percent',val:10,min:0,expiry:'31 Dec 2026',uses:0,active:true},{code:'WELCOME',type:'percent',val:5,min:0,expiry:'31 Dec 2026',uses:0,active:true},{code:'SMW20',type:'percent',val:20,min:999,expiry:'31 Dec 2026',uses:0,active:true}];
@@ -622,6 +634,42 @@ function nowTime(){var d=new Date(),h=d.getHours(),m=d.getMinutes(),ap=h>=12?'PM
 function escHTML(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function shipTagClass(s){return{pending:'to',dispatched:'tb',delivered:'tg',cancelled:'tr'}[s]||'ty';}
 function shipTagLabel(s){return{pending:'Pending',dispatched:'Dispatched',delivered:'Delivered',cancelled:'Cancelled'}[s]||s;}
+
+// SHIPPING LABEL PRINT — From (store) / To (customer)
+function printShippingLabel(orderId){
+  var o=cachedOrders.find(function(x){return x.id===orderId;});
+  if(!o){toast('Order not found','error');return;}
+  var c=o.customer||{};
+  var custName=c.name||(c.fname?(c.fname+' '+(c.lname||'')):'—');
+  var w=window.open('','_blank','width=700,height=850');
+  if(!w){toast('Popup blocked — allow popups to print','error');return;}
+  var html='<!DOCTYPE html><html><head><title>Label - '+escHTML(o.id)+'</title><style>'+
+    'body{font-family:Arial,sans-serif;padding:26px;color:#000}'+
+    '.label-box{border:2px solid #000;border-radius:8px;padding:22px;max-width:600px;margin:0 auto}'+
+    '.row{display:flex;gap:18px;margin-bottom:22px}'+
+    '.box{flex:1;border:1.5px dashed #999;border-radius:8px;padding:15px}'+
+    '.box h4{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#666;margin:0 0 8px}'+
+    '.box .nm{font-weight:800;font-size:16px;margin-bottom:4px}'+
+    '.box .ad{font-size:13px;line-height:1.6}'+
+    '.meta{border-top:1px solid #ccc;padding-top:10px;margin-top:6px;font-size:12px;color:#333}'+
+    '.items{margin-top:14px;font-size:12px}.items div{padding:3px 0;border-bottom:1px dotted #ccc}'+
+    '@media print{.no-print{display:none}}'+
+    '</style></head><body>'+
+    '<div class="label-box">'+
+      '<div class="row">'+
+        '<div class="box"><h4>From</h4><div class="nm">'+escHTML(STORE_ADDRESS.name)+'</div>'+
+          '<div class="ad">'+escHTML(STORE_ADDRESS.line1)+'<br>'+escHTML(STORE_ADDRESS.line2)+'<br>'+escHTML(STORE_ADDRESS.city)+'<br>'+escHTML(STORE_ADDRESS.phone)+'</div></div>'+
+        '<div class="box"><h4>To</h4><div class="nm">'+escHTML(custName)+'</div>'+
+          '<div class="ad">'+escHTML(c.address||'—')+'<br>Phone: '+escHTML(c.phone||'—')+'</div></div>'+
+      '</div>'+
+      '<div class="meta">Order ID: <strong>'+escHTML(o.id)+'</strong> &nbsp;|&nbsp; Date: '+escHTML(o.dateStr||o.date||'')+'</div>'+
+      '<div class="items">'+(o.items||[]).map(function(it){return'<div>'+escHTML(it.name)+' — Size: '+escHTML(it.size||'—')+' — Qty: '+it.qty+'</div>';}).join('')+'</div>'+
+    '</div>'+
+    '<div class="no-print" style="text-align:center;margin-top:18px"><button onclick="window.print()" style="padding:10px 24px;font-size:14px;cursor:pointer">Print</button></div>'+
+    '</body></html>';
+  w.document.write(html);w.document.close();
+  w.onload=function(){w.print();};
+}
 
 // ORDERS - reads from real backend API
 function fetchOrdersFromServer(){
@@ -698,6 +746,7 @@ function renderOrdersFromCache(orders){
         '<span class="tag '+shipTagClass(curStatus)+'">'+shipTagLabel(curStatus)+'</span>'+srcTag+
         '<div style="margin-left:auto;display:flex;gap:8px">'+
           '<button class="btn btn-outline btn-xs" onclick="showOrderDetail(\''+escHTML(o.id)+'\')">View Details</button>'+
+          '<button class="btn btn-gold btn-xs" onclick="printShippingLabel(\''+escHTML(o.id)+'\')">🖨 Print Label</button>'+
           '<button class="btn btn-danger btn-xs" onclick="deleteOrder(\''+escHTML(o.id)+'\')">Delete</button>'+
         '</div>'+
       '</div>'+
@@ -748,6 +797,7 @@ function updateShipStatus(orderId,status){
 function showOrderDetail(orderId){
   var o=cachedOrders.find(function(x){return x.id===orderId;});
   if(!o){toast('Order not found','error');return;}
+  viewingOrderId=orderId;
   var c=o.customer||{};
   var custName=c.name||(c.fname?(c.fname+' '+(c.lname||'')):'—');
   var t=o.totals||o;
