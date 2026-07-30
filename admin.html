@@ -435,6 +435,23 @@ input:checked+.slider::before{transform:translateX(18px)}
     <a href="https://shanmugamenswear.vercel.app" target="_blank">https://shanmugamenswear.vercel.app</a>
     <button class="btn btn-sm" style="background:var(--green);color:#fff" onclick="window.open('https://shanmugamenswear.vercel.app','_blank')">Open</button>
   </div>
+
+  <!-- CHECKOUT MODE TOGGLE — controls whether checkout.html collects
+       Razorpay payments live, or hands orders off to WhatsApp. Reads/writes
+       via /api/checkout-mode (stored in Vercel KV), so it takes effect for
+       every customer immediately — no redeploy or code edit needed. -->
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-title">Checkout Mode</div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label" id="checkoutModeLabel">WhatsApp Orders</div>
+        <div class="toggle-desc" id="checkoutModeDesc">Customers place orders via WhatsApp — no online payment collected yet.</div>
+      </div>
+      <label class="toggle"><input type="checkbox" id="checkoutModeToggle" onchange="toggleCheckoutMode(this)"><span class="slider"></span></label>
+    </div>
+    <div id="checkoutModeStatus" style="font-size:11px;color:var(--text2);margin-top:8px"></div>
+  </div>
+
   <div class="gh-dark" id="ghSetupCard">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
       <div>
@@ -566,22 +583,7 @@ input:checked+.slider::before{transform:translateX(18px)}
   <div class="modal-box">
     <h3>Order Details</h3>
     <div id="orderDetailContent"></div>
-    <div class="modal-foot">
-      <button class="btn btn-gold" onclick="openPrintLabel(viewingOrderId)">🖨 Print Label</button>
-      <button class="btn btn-outline" onclick="closeMod('orderDetailMod')">Close</button>
-    </div>
-  </div>
-</div>
-<div class="modal-overlay" id="printLabelMod">
-  <div class="modal-box">
-    <h3>Print Shipping Label</h3>
-    <div class="fg"><label>From (Your Store)</label><textarea id="pl-from" rows="4" style="min-height:90px"></textarea></div>
-    <div class="fg"><label>To (Customer)</label><textarea id="pl-to" rows="4" style="min-height:90px"></textarea></div>
-    <div class="fg" style="margin-bottom:0"><label>Order Ref (shown on label)</label><input type="text" id="pl-ref"></div>
-    <div class="modal-foot">
-      <button class="btn btn-outline" onclick="closeMod('printLabelMod')">Cancel</button>
-      <button class="btn btn-gold" onclick="confirmPrintLabel()">🖨 Print</button>
-    </div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeMod('orderDetailMod')">Close</button></div>
   </div>
 </div>
 <div class="modal-overlay" id="couponMod">
@@ -598,7 +600,6 @@ input:checked+.slider::before{transform:translateX(18px)}
   </div>
 </div>
 <div class="toast" id="toast"></div>
-  <script src="smw-products.js"></script>
 <script>
 'use strict';
 // AUTH is now handled entirely server-side. No password or API key lives
@@ -608,21 +609,12 @@ var ORDERS_API_BASE='https://shanmugamenswear.vercel.app/api';
 var cachedOrders=[];
 var ordersLoading=false;
 
-// STORE ADDRESS — used as the "From" address on printed shipping labels.
-var STORE_ADDRESS = {
-  name: 'Shanmuga City Centre',
-  line1: '10-1-32, Vaniyan Kovil Street',
-  line2: 'Thirupathur',
-  city: 'Sivaganga Dt, Tamil Nadu - 630211',
-  phone: 'Ph: +91 9772689858'
-};
-
 // STATE
 var CL_CLOUD='',CL_PRESET='';
 var GH_TOKEN='',GH_USER_V='',GH_REPO='',GH_BRANCH='main';
 var ghSetupOpen=true;
 var nextId=200;
-var currentImgs=[],selSizes=[],selBadge='',viewingId=-1,viewingOrderId=null,revFilter='all',uploading=false;
+var currentImgs=[],selSizes=[],selBadge='',viewingId=-1,revFilter='all',uploading=false;
 var ALL_SIZES=['XS','S','M','L','XL','XXL','28','30','32','34','36','38'];
 var ALL_BADGES=[{val:'',label:'None',cls:'sel-none'},{val:'new',label:'New',cls:'sel-new'},{val:'sale',label:'Sale',cls:'sel-sale'},{val:'offer',label:'Offer',cls:'sel-offer'}];
 var coupons=[{code:'SAVE10',type:'percent',val:10,min:0,expiry:'31 Dec 2026',uses:0,active:true},{code:'WELCOME',type:'percent',val:5,min:0,expiry:'31 Dec 2026',uses:0,active:true},{code:'SMW20',type:'percent',val:20,min:999,expiry:'31 Dec 2026',uses:0,active:true}];
@@ -646,54 +638,6 @@ function nowTime(){var d=new Date(),h=d.getHours(),m=d.getMinutes(),ap=h>=12?'PM
 function escHTML(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function shipTagClass(s){return{pending:'to',dispatched:'tb',delivered:'tg',cancelled:'tr'}[s]||'ty';}
 function shipTagLabel(s){return{pending:'Pending',dispatched:'Dispatched',delivered:'Delivered',cancelled:'Cancelled'}[s]||s;}
-
-// SHIPPING LABEL PRINT — From (store) / To (customer), editable before printing
-var printLabelOrderId=null;
-function openPrintLabel(orderId){
-  var o=cachedOrders.find(function(x){return x.id===orderId;});
-  if(!o){toast('Order not found','error');return;}
-  var c=o.customer||{};
-  var custName=c.name||(c.fname?(c.fname+' '+(c.lname||'')):'—');
-  printLabelOrderId=orderId;
-  document.getElementById('pl-from').value=
-    STORE_ADDRESS.name+'\n'+STORE_ADDRESS.line1+'\n'+STORE_ADDRESS.line2+'\n'+STORE_ADDRESS.city+'\n'+STORE_ADDRESS.phone;
-  document.getElementById('pl-to').value=
-    custName+'\n'+(c.address||'')+'\nPhone: '+(c.phone||'—');
-  document.getElementById('pl-ref').value='Order: '+o.id+'   Date: '+(o.dateStr||o.date||'');
-  openMod('printLabelMod');
-}
-function confirmPrintLabel(){
-  var fromTxt=document.getElementById('pl-from').value.trim();
-  var toTxt=document.getElementById('pl-to').value.trim();
-  var refTxt=document.getElementById('pl-ref').value.trim();
-  if(!toTxt){toast('Enter the customer address','error');return;}
-  var w=window.open('','_blank','width=700,height=650');
-  if(!w){toast('Popup blocked — allow popups to print','error');return;}
-  var fromHTML=escHTML(fromTxt).replace(/\n/g,'<br>');
-  var toHTML=escHTML(toTxt).replace(/\n/g,'<br>');
-  var html='<!DOCTYPE html><html><head><title>Shipping Label</title><style>'+
-    'body{font-family:Arial,sans-serif;padding:26px;color:#000}'+
-    '.label-box{border:2px solid #000;border-radius:8px;padding:22px;max-width:600px;margin:0 auto}'+
-    '.row{display:flex;gap:18px;margin-bottom:16px}'+
-    '.box{flex:1;border:1.5px dashed #999;border-radius:8px;padding:15px}'+
-    '.box h4{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#666;margin:0 0 8px}'+
-    '.box .ad{font-size:14px;line-height:1.7;font-weight:600}'+
-    '.meta{border-top:1px solid #ccc;padding-top:10px;margin-top:6px;font-size:12px;color:#333}'+
-    '@media print{.no-print{display:none}}'+
-    '</style></head><body>'+
-    '<div class="label-box">'+
-      '<div class="row">'+
-        '<div class="box"><h4>From</h4><div class="ad">'+fromHTML+'</div></div>'+
-        '<div class="box"><h4>To</h4><div class="ad">'+toHTML+'</div></div>'+
-      '</div>'+
-      '<div class="meta">'+escHTML(refTxt)+'</div>'+
-    '</div>'+
-    '<div class="no-print" style="text-align:center;margin-top:18px"><button onclick="window.print()" style="padding:10px 24px;font-size:14px;cursor:pointer">Print</button></div>'+
-    '</body></html>';
-  w.document.write(html);w.document.close();
-  closeMod('printLabelMod');
-  w.onload=function(){w.print();};
-}
 
 // ORDERS - reads from real backend API
 function fetchOrdersFromServer(){
@@ -770,7 +714,6 @@ function renderOrdersFromCache(orders){
         '<span class="tag '+shipTagClass(curStatus)+'">'+shipTagLabel(curStatus)+'</span>'+srcTag+
         '<div style="margin-left:auto;display:flex;gap:8px">'+
           '<button class="btn btn-outline btn-xs" onclick="showOrderDetail(\''+escHTML(o.id)+'\')">View Details</button>'+
-          '<button class="btn btn-gold btn-xs" onclick="openPrintLabel(\''+escHTML(o.id)+'\')">🖨 Print Label</button>'+
           '<button class="btn btn-danger btn-xs" onclick="deleteOrder(\''+escHTML(o.id)+'\')">Delete</button>'+
         '</div>'+
       '</div>'+
@@ -821,7 +764,6 @@ function updateShipStatus(orderId,status){
 function showOrderDetail(orderId){
   var o=cachedOrders.find(function(x){return x.id===orderId;});
   if(!o){toast('Order not found','error');return;}
-  viewingOrderId=orderId;
   var c=o.customer||{};
   var custName=c.name||(c.fname?(c.fname+' '+(c.lname||'')):'—');
   var t=o.totals||o;
@@ -876,7 +818,7 @@ function goto(pg){
   var ne=document.getElementById('nav-'+pg);if(ne)ne.classList.add('active');
   document.getElementById('topTitle').textContent=PAGE_TITLES[pg]||pg;
   if(pg==='products'){renderProds();checkUnpublished();}
-  if(pg==='deploy'){updateExpCount();}
+  if(pg==='deploy'){updateExpCount();loadCheckoutMode();}
   if(pg==='orders'){
     localStorage.setItem('smw_orders_seen_count',String(cachedOrders.length));
     var nb=document.getElementById('nb-orders');if(nb){nb.style.display='none';}
@@ -910,6 +852,54 @@ function checkUnpublished(){
   bar.style.display=(lastPub===-1||prods.length!==lastPub)?'flex':'none';
 }
 function updateExpCount(){var el=document.getElementById('expCount');if(el)el.textContent=loadProds().length;}
+
+// CHECKOUT MODE — reads/writes /api/checkout-mode, which persists to
+// Vercel KV. This is what checkout.html checks on every page load to
+// decide whether to show Razorpay or the WhatsApp-only flow.
+function loadCheckoutMode(){
+  fetch(ORDERS_API_BASE+'/checkout-mode',{credentials:'include'})
+    .then(function(res){return res.json();})
+    .then(function(d){applyCheckoutModeUI(d.mode||'whatsapp');})
+    .catch(function(){applyCheckoutModeUI('whatsapp');});
+}
+function applyCheckoutModeUI(mode){
+  var t=document.getElementById('checkoutModeToggle');
+  var lbl=document.getElementById('checkoutModeLabel');
+  var desc=document.getElementById('checkoutModeDesc');
+  if(!t)return;
+  t.checked=(mode==='razorpay');
+  if(mode==='razorpay'){
+    lbl.textContent='Razorpay Payments';
+    desc.textContent='Customers pay online via Razorpay (UPI/Cards/Wallets) at checkout.';
+  }else{
+    lbl.textContent='WhatsApp Orders';
+    desc.textContent='Customers place orders via WhatsApp — no online payment collected yet.';
+  }
+}
+function toggleCheckoutMode(chk){
+  var mode=chk.checked?'razorpay':'whatsapp';
+  chk.disabled=true;
+  fetch(ORDERS_API_BASE+'/checkout-mode',{
+    method:'POST',credentials:'include',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({mode:mode})
+  }).then(function(res){return res.json().then(function(d){return{ok:res.ok,data:d};});})
+  .then(function(r){
+    chk.disabled=false;
+    if(!r.ok){
+      toast((r.data&&r.data.error)||'Could not update checkout mode','error');
+      chk.checked=!chk.checked; // revert the toggle since the save failed
+      return;
+    }
+    applyCheckoutModeUI(mode);
+    toast('Checkout mode set to '+(mode==='razorpay'?'Razorpay':'WhatsApp'),'success');
+    logAct('Checkout mode → '+mode,'var(--blue)');
+  }).catch(function(){
+    chk.disabled=false;
+    chk.checked=!chk.checked;
+    toast('Network error — could not update checkout mode','error');
+  });
+}
 
 // CLOUDINARY
 function loadCloudConfig(){
@@ -1079,7 +1069,7 @@ window.addEventListener('pageshow',function(e){
 function initApp(){
   syncFromPublished();
   loadProds().forEach(function(p){if(p.id>=nextId)nextId=p.id+1;});
-  loadCloudConfig();loadGHConfig();
+  loadCloudConfig();loadGHConfig();loadCheckoutMode();
   buildSizeChips();buildBadgeChips();
   renderProds();renderCoupons();renderNotifs();renderRevs();updateExpCount();
   checkUnpublished();startTimer();logAct('Admin logged in','var(--green)');
