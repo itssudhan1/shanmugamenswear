@@ -5,11 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
 <title>Checkout — Shanmuga Mens Wear</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&display=swap"></noscript>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --black:#111110;--white:#ffffff;--off:#f5f4f1;--stone:#e8e6e1;
@@ -122,6 +118,8 @@ nav{position:sticky;top:0;z-index:200;background:var(--black);display:flex;align
 .pay-icon-pill{border:1px solid var(--stone);padding:3px 8px;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mid);background:var(--white)}
 .razorpay-badge{display:flex;align-items:center;gap:6px;margin-top:10px;padding:10px 12px;background:rgba(0,116,212,.06);border:1px solid rgba(0,116,212,.15)}
 .razorpay-badge span{font-size:11px;color:#0074d4;font-weight:500}
+.whatsapp-badge{display:flex;align-items:center;gap:6px;margin-top:10px;padding:10px 12px;background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25)}
+.whatsapp-badge span{font-size:11px;color:#128c4a;font-weight:500}
 .checkbox-row{display:flex;align-items:flex-start;gap:.75rem}
 .checkbox-row input[type=checkbox]{width:16px;height:16px;flex-shrink:0;margin-top:2px;accent-color:var(--black);}
 .checkbox-row label{font-size:12px;color:var(--mid);line-height:1.6;}
@@ -258,7 +256,7 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
 <!-- NAV -->
 <nav>
   <div class="nav-left">
-    <button class="hamburger" onclick="openDrawer()" aria-label="Open menu">
+    <button class="hamburger" onclick="openDrawer()">
       <svg width="22" height="16" viewBox="0 0 22 16" fill="none"><rect width="22" height="2" rx="1" fill="white"/><rect y="7" width="16" height="2" rx="1" fill="white"/><rect y="14" width="22" height="2" rx="1" fill="white"/></svg>
     </button>
     <ul class="nav-links">
@@ -297,7 +295,7 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
 <div class="mob-overlay" id="mobOverlay" onclick="closeDrawer()"></div>
 <div class="mob-drawer" id="mobDrawer">
   <div class="mob-drawer-top">
-    <button class="mob-close" onclick="closeDrawer()" aria-label="Close menu">
+    <button class="mob-close" onclick="closeDrawer()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.8"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
     <div class="mob-drawer-logo">Shanmuga<span>Mens Wear</span></div>
@@ -345,23 +343,23 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
       <div class="form-block-body">
         <div class="field-row">
           <div class="field" id="f-fname">
-            <label for="fname">First Name *</label>
+            <label>First Name *</label>
             <input type="text" id="fname" placeholder="Sudhan" autocomplete="given-name">
             <span class="err-msg">Please enter your first name</span>
           </div>
           <div class="field" id="f-lname">
-            <label for="lname">Last Name *</label>
+            <label>Last Name *</label>
             <input type="text" id="lname" placeholder="Kumar" autocomplete="family-name">
             <span class="err-msg">Please enter your last name</span>
           </div>
         </div>
         <div class="field" id="f-email">
-          <label for="email">Email Address *</label>
+          <label>Email Address *</label>
           <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
           <span class="err-msg">Please enter a valid email</span>
         </div>
         <div class="field" id="f-phone">
-          <label for="phone">Phone Number * (10 digits)</label>
+          <label>Phone Number * (10 digits)</label>
           <input type="tel" id="phone" placeholder="9876543210" autocomplete="tel" maxlength="10">
           <span class="err-msg">Please enter a valid 10-digit phone number</span>
         </div>
@@ -378,22 +376,22 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
       <div class="form-block-body">
         <div class="saved-addr-list" id="savedAddrList" style="display:none"></div>
         <div class="field" id="f-address">
-          <label for="address">Street Address *</label>
+          <label>Street Address *</label>
           <input type="text" id="address" placeholder="Main Road, Near Bus Stand" autocomplete="street-address">
           <span class="err-msg">Please enter your address</span>
         </div>
         <div class="field">
-          <label for="apt">Apartment / Suite (Optional)</label>
+          <label>Apartment / Suite (Optional)</label>
           <input type="text" id="apt" placeholder="Flat 2B, Second Floor">
         </div>
         <div class="field-row">
           <div class="field" id="f-city">
-            <label for="city">City *</label>
+            <label>City *</label>
             <input type="text" id="city" placeholder="Karaikudi" autocomplete="address-level2">
             <span class="err-msg">Please enter your city</span>
           </div>
           <div class="field" id="f-state">
-            <label for="state">State *</label>
+            <label>State *</label>
             <select id="state" autocomplete="address-level1">
               <option value="">Select state</option>
               <option value="Tamil Nadu" selected>Tamil Nadu</option>
@@ -418,13 +416,13 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
         </div>
         <div class="field-row">
           <div class="field" id="f-pincode">
-            <label for="pincode">PIN Code *</label>
+            <label>PIN Code *</label>
             <input type="text" id="pincode" placeholder="630001" maxlength="6" autocomplete="postal-code">
             <span class="err-msg">Please enter a valid 6-digit PIN</span>
           </div>
           <div class="field">
-            <label for="country-select">Country</label>
-            <select id="country-select" disabled><option>India</option></select>
+            <label>Country</label>
+            <select disabled><option>India</option></select>
           </div>
         </div>
         <div class="checkbox-row">
@@ -469,7 +467,8 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
         <h3>Payment</h3>
       </div>
       <div class="form-block-body">
-        <div class="pay-opt selected">
+        <!-- Razorpay option: hidden while CHECKOUT_MODE = 'whatsapp' -->
+        <div class="pay-opt selected" id="payOptRazorpay">
           <input type="radio" name="payment" value="razorpay" checked>
           <div class="pay-opt-info">
             <div class="pay-opt-name">Razorpay Secure Payment</div>
@@ -481,10 +480,28 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
             <span class="pay-icon-pill">MC</span>
           </div>
         </div>
-        <div class="razorpay-badge">
+        <div class="razorpay-badge" id="razorpayBadge">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0074d4" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           <span>All payments are 256-bit SSL encrypted and processed securely by Razorpay</span>
         </div>
+
+        <!-- WhatsApp order option: shown while CHECKOUT_MODE = 'whatsapp' -->
+        <div class="pay-opt selected" id="payOptWhatsapp" style="display:none">
+          <input type="radio" name="payment" value="whatsapp" checked disabled>
+          <div class="pay-opt-info">
+            <div class="pay-opt-name">Order via WhatsApp</div>
+            <div class="pay-opt-desc">We'll confirm your order and collect payment on WhatsApp</div>
+          </div>
+          <div class="pay-icons">
+            <span class="pay-icon-pill">UPI</span>
+            <span class="pay-icon-pill">COD</span>
+          </div>
+        </div>
+        <div class="whatsapp-badge" id="whatsappBadge" style="display:none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#128c4a" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Your order details will be sent to us on WhatsApp to confirm and arrange payment</span>
+        </div>
+
         <div class="checkbox-row" style="margin-top:.5rem">
           <input type="checkbox" id="terms" checked>
           <label for="terms">I agree to the <a href="support.html">Terms of Service</a> and <a href="support.html">Privacy Policy</a></label>
@@ -498,7 +515,7 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
       <svg class="lock-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
       <span id="payBtnText">Pay Securely</span>
     </button>
-    <div class="btn-pay-sub">
+    <div class="btn-pay-sub" id="payBtnSub">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
       Secure &amp; encrypted checkout powered by Razorpay
     </div>
@@ -672,6 +689,15 @@ var WA_NUMBER = '919442689858';
 /* ── Razorpay public key (safe to expose client-side) ── */
 var RZP_KEY_ID = 'rzp_test_TAGc9RidKy77kO'; // swap to rzp_live_... when going live
 
+/* ── CHECKOUT MODE ──
+   'whatsapp' = skip Razorpay entirely, order goes straight to WhatsApp
+   'razorpay' = normal online payment flow
+   This is now controlled from the admin dashboard (Publish to Website →
+   Checkout Mode toggle) — NOT hardcoded here. We default to 'whatsapp'
+   until the real value comes back from /api/checkout-mode, so the page
+   never looks broken while that request is in flight. */
+var CHECKOUT_MODE = 'whatsapp';
+
 /* ── STATE ── */
 var cart = [];
 var shippingCost = 0;
@@ -797,7 +823,11 @@ function updateTotals(){
   }
 
   document.getElementById('grandVal').textContent = fmt(getTotal());
-  document.getElementById('payBtnText').textContent = getTotal() > 0 ? 'Pay ' + fmt(getTotal()) + ' Securely' : 'Pay Securely';
+  if (CHECKOUT_MODE === 'whatsapp') {
+    document.getElementById('payBtnText').textContent = 'Place Order via WhatsApp';
+  } else {
+    document.getElementById('payBtnText').textContent = getTotal() > 0 ? 'Pay ' + fmt(getTotal()) + ' Securely' : 'Pay Securely';
+  }
   document.getElementById('cartCount').textContent = cart.reduce(function(s,x){ return s+x.qty; }, 0);
 }
 
@@ -907,9 +937,11 @@ function buildWhatsAppMsg(order){
     'Subtotal: ' + fmt(order.subtotal),
     order.discount > 0 ? 'Discount (' + (order.coupon || 'coupon') + '): −' + fmt(order.discount) : null,
     'Shipping: ' + (order.shipping > 0 ? fmt(order.shipping) : 'FREE'),
-    '*Total Paid: ' + fmt(order.total) + '*',
+    '*Total: ' + fmt(order.total) + '*',
     '',
-    '✅ Payment confirmed via Razorpay. Please dispatch soon!'
+    order.paymentId === 'Pending (WhatsApp)'
+      ? '💬 Payment to be collected — please confirm with customer.'
+      : '✅ Payment confirmed via Razorpay. Please dispatch soon!'
   ]).filter(function(l){ return l !== null; }).join('\n');
 }
 
@@ -919,7 +951,7 @@ function sendWhatsApp(){
   window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
-/* ── MAIN PAYMENT FUNCTION ── */
+/* ── MAIN PAYMENT / ORDER ENTRY POINT ── */
 async function initiatePayment(){
   if (paymentInProgress) return;
 
@@ -942,6 +974,12 @@ async function initiatePayment(){
 
   var total = getTotal();
   if (total < 1) { showToast('Order total must be at least Rs.1', true); return; }
+
+  // ── WhatsApp-only mode: skip Razorpay entirely ──
+  if (CHECKOUT_MODE === 'whatsapp') {
+    placeWhatsAppOrder(currentUser);
+    return;
+  }
 
   if (typeof Razorpay === 'undefined') {
     showToast('Payment gateway not loaded. Check your internet and reload.', true); return;
@@ -1057,7 +1095,81 @@ async function initiatePayment(){
   }
 }
 
-/* ── PAYMENT SUCCESS HANDLER ──
+/* ── WHATSAPP-ONLY ORDER FLOW (no Razorpay, no backend order created) ──
+   Saves the order locally (so it shows in "My Orders" as pending),
+   shows the success modal, and opens WhatsApp with the order details
+   so the customer can confirm + arrange payment with you directly. */
+function placeWhatsAppOrder(currentUser){
+  var btn = document.getElementById('payBtn');
+  btn.disabled = true; btn.classList.add('loading');
+  document.getElementById('payBtnText').textContent = 'Placing order…';
+
+  var fname   = document.getElementById('fname').value.trim();
+  var lname   = document.getElementById('lname').value.trim();
+  var email   = document.getElementById('email').value.trim();
+  var phone   = document.getElementById('phone').value.trim().replace(/\D/g,'');
+  var address = document.getElementById('address').value.trim();
+  var apt     = document.getElementById('apt').value.trim();
+  var city    = document.getElementById('city').value.trim();
+  var state   = document.getElementById('state').value;
+  var pincode = document.getElementById('pincode').value.trim();
+
+  var cartBackup = JSON.parse(JSON.stringify(cart));
+  var total = getTotal();
+  var orderId = 'SMW' + Date.now();
+
+  lastOrderData = {
+    id: orderId,
+    paymentId: 'Pending (WhatsApp)',
+    dateStr: new Date().toLocaleString('en-IN'),
+    status: 'Pending Confirmation',
+    customer: {
+      name: fname + ' ' + lname,
+      email: email, phone: phone,
+      address: [address, apt, city, state, pincode].filter(Boolean).join(', ')
+    },
+    items: cartBackup.map(function(x){ return {name:x.name,size:x.size||'',qty:x.qty,price:x.price,total:x.price*x.qty}; }),
+    subtotal: getSubtotal(), discount: discountAmount, coupon: appliedCoupon,
+    shipping: shippingCost, total: total
+  };
+
+  // Save order locally so it shows in "My Orders" (status: pending confirmation)
+  if (currentUser && window.SMW) {
+    window.SMW.addOrder(currentUser, lastOrderData);
+
+    if (document.getElementById('saveAddrCheck').checked) {
+      var existingDefault = window.SMW.getDefaultAddress(currentUser);
+      window.SMW.saveAddress(currentUser, {
+        id: existingDefault ? existingDefault.id : undefined,
+        label: existingDefault ? (existingDefault.label || 'Home') : 'Home',
+        name: fname + ' ' + lname, phone: phone,
+        address: address, apt: apt, city: city, state: state, pincode: pincode,
+        isDefault: true
+      });
+    }
+    window.SMW.saveProfile(currentUser, { phone: phone });
+  }
+
+  try { localStorage.removeItem('smw_cart'); } catch(e){}
+  cart = [];
+
+  document.getElementById('successOrderId').textContent = 'Order ID: ' + orderId;
+  document.getElementById('successDetail').innerHTML =
+    '<strong>Customer:</strong> <span>' + esc(fname + ' ' + lname) + '</span><br>' +
+    '<strong>Phone:</strong> <span>+91' + esc(phone) + '</span><br>' +
+    '<strong>Address:</strong> <span>' + esc([address, city, state, pincode].filter(Boolean).join(', ')) + '</span><br>' +
+    '<strong>Items:</strong> <span>' + cartBackup.length + ' item(s)</span><br>' +
+    '<strong>Total:</strong> <span style="color:var(--green);font-weight:700">' + fmt(total) + '</span>';
+
+  document.getElementById('successOverlay').classList.add('open');
+  btn.disabled = false; btn.classList.remove('loading');
+  paymentInProgress = false;
+
+  // Auto-open WhatsApp with the order details prefilled
+  setTimeout(function(){ sendWhatsApp(); }, 800);
+}
+
+/* ── PAYMENT SUCCESS HANDLER (Razorpay mode only) ──
    Sends the response to our backend for signature verification FIRST.
    Only shows "Order Placed" once the backend confirms it's real. */
 async function onPaymentSuccess(response, customerInfo){
@@ -1204,8 +1316,47 @@ document.addEventListener('keydown', function(e){
   if (e.key === 'Escape') closeDrawer();
 });
 
+/* ── Applies whatever CHECKOUT_MODE currently is to the Payment section,
+   the pay button sub-text, and re-runs updateTotals() (which sets the
+   pay button's main label based on CHECKOUT_MODE too). Called once with
+   the default, then again if the server returns a different value. ── */
+function applyCheckoutModeUI(){
+  if (CHECKOUT_MODE === 'whatsapp') {
+    document.getElementById('payOptRazorpay').style.display = 'none';
+    document.getElementById('razorpayBadge').style.display = 'none';
+    document.getElementById('payOptWhatsapp').style.display = '';
+    document.getElementById('whatsappBadge').style.display = '';
+    document.getElementById('payBtnSub').innerHTML =
+      '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> ' +
+      'We\'ll confirm your order and payment on WhatsApp';
+  } else {
+    document.getElementById('payOptRazorpay').style.display = '';
+    document.getElementById('razorpayBadge').style.display = '';
+    document.getElementById('payOptWhatsapp').style.display = 'none';
+    document.getElementById('whatsappBadge').style.display = 'none';
+    document.getElementById('payBtnSub').innerHTML =
+      '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> ' +
+      'Secure &amp; encrypted checkout powered by Razorpay';
+  }
+  updateTotals(); // pay button's main label also depends on CHECKOUT_MODE
+}
+
 /* ── INIT ── */
+applyCheckoutModeUI(); // apply the default immediately, don't wait on network
 renderSummary();
+
+// Now fetch the REAL mode the admin has set. If this fails for any reason
+// (network issue, etc.) we just stay on the 'whatsapp' default above —
+// never silently fall back to accepting live payments unintentionally.
+fetch('/api/checkout-mode')
+  .then(function(res){ return res.json(); })
+  .then(function(data){
+    if (data && (data.mode === 'whatsapp' || data.mode === 'razorpay')) {
+      CHECKOUT_MODE = data.mode;
+      applyCheckoutModeUI();
+    }
+  })
+  .catch(function(err){ console.error('checkout-mode fetch failed, staying on whatsapp:', err); });
 </script>
 </body>
 </html>
