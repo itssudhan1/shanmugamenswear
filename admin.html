@@ -204,6 +204,34 @@ input:checked+.slider::before{transform:translateX(18px)}
 .no-orders h3{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:8px;color:var(--text)}
 .no-orders p{font-size:13px;line-height:1.8}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* ANALYTICS / INSIGHTS MODULE */
+.insight-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px}
+@media(max-width:1100px){.insight-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:20px;box-shadow:var(--shadow)}
+.chart-card .card-title{display:flex;align-items:center;justify-content:space-between}
+.chart-card .card-title .ct-sub{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:var(--text2);text-transform:none;letter-spacing:0}
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:170px;padding-top:10px}
+.bar-chart .bc-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;min-width:0}
+.bar-chart .bc-bar{width:100%;max-width:26px;border-radius:5px 5px 2px 2px;background:var(--accent);transition:height .3s;position:relative;cursor:default}
+.bar-chart .bc-bar:hover{background:var(--gold)}
+.bar-chart .bc-lbl{font-size:9px;color:var(--text2);font-weight:600;white-space:nowrap}
+.donut-row{display:flex;align-items:center;gap:20px}
+.donut-legend{display:flex;flex-direction:column;gap:10px;flex:1}
+.dl-item{display:flex;align-items:center;gap:8px;font-size:12px}
+.dl-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.dl-lbl{flex:1;color:var(--text2);font-weight:600}
+.dl-val{font-weight:800}
+.insight-list{display:flex;flex-direction:column;gap:10px}
+.insight-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:9px;border:1px solid var(--border);background:var(--surface2)}
+.insight-row .ir-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.insight-row .ir-body{flex:1;min-width:0}
+.insight-row .ir-title{font-size:13px;font-weight:700}
+.insight-row .ir-desc{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.5}
+.seg-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:16px;text-align:center}
+.seg-card .seg-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800}
+.seg-card .seg-lbl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-top:4px}
+.mini-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -222,6 +250,8 @@ input:checked+.slider::before{transform:translateX(18px)}
   <div class="s-brand"><span class="name">SHANMUGA</span><span class="badge">ADMIN</span></div>
   <div class="s-section">Orders</div>
   <button class="nav-btn" id="nav-orders" onclick="goto('orders')">Orders <span class="nbadge" id="nb-orders" style="display:none">0</span></button>
+  <div class="s-section">Insights</div>
+  <button class="nav-btn" id="nav-analytics" onclick="goto('analytics')">Analytics &amp; AI Insights</button>
   <div class="s-section">Catalogue</div>
   <button class="nav-btn active" id="nav-products" onclick="goto('products')">Products</button>
   <button class="nav-btn" id="nav-add" onclick="gotoAdd()">Add Product</button>
@@ -422,6 +452,67 @@ input:checked+.slider::before{transform:translateX(18px)}
     </div>
   </div>
   <div id="viewContent"></div>
+</div>
+<div class="page" id="page-analytics">
+  <div class="ph">
+    <div class="ph-left"><h1>Analytics &amp; AI Insights</h1><div class="sub" id="anSub">Built from your real orders, stock and reviews — no external AI, just your own numbers, crunched.</div></div>
+    <div class="ph-right"><button class="btn btn-outline btn-sm" onclick="renderAnalytics()">Refresh</button></div>
+  </div>
+
+  <div class="stat-grid" style="grid-template-columns:repeat(5,1fr)">
+    <div class="stat-card dark"><div class="s-lbl">Total Revenue</div><div class="s-val" id="an-revenue" style="font-size:20px">Rs.0</div></div>
+    <div class="stat-card"><div class="s-lbl">Orders</div><div class="s-val" id="an-orders">0</div></div>
+    <div class="stat-card"><div class="s-lbl">Avg Order Value</div><div class="s-val" id="an-aov" style="font-size:20px;color:var(--blue)">Rs.0</div></div>
+    <div class="stat-card"><div class="s-lbl">Customers</div><div class="s-val" id="an-customers" style="color:var(--green)">0</div></div>
+    <div class="stat-card"><div class="s-lbl">Repeat Rate</div><div class="s-val" id="an-repeat" style="color:var(--gold);font-size:22px">0%</div></div>
+  </div>
+
+  <div class="insight-grid">
+    <div class="chart-card">
+      <div class="card-title">Revenue — Last 14 Days <span class="ct-sub" id="an-revtotal"></span></div>
+      <div class="bar-chart" id="an-revChart"></div>
+    </div>
+    <div class="chart-card">
+      <div class="card-title">Revenue by Category</div>
+      <div class="donut-row">
+        <svg id="an-donut" width="120" height="120" viewBox="0 0 120 120"></svg>
+        <div class="donut-legend" id="an-donutLegend"></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:15px;margin:24px 0 12px">📦 Inventory Agent — Reorder Predictions</div>
+  <div class="alert alert-info" style="margin-bottom:14px">Based on units sold in the last 30 days vs. current stock, here's how long each product will last and what to reorder first.</div>
+  <div class="table-wrap" style="margin-bottom:22px">
+    <table>
+      <thead><tr><th>Product</th><th>Stock</th><th>Sold (30d)</th><th>Daily Rate</th><th>Days Left</th><th>Recommendation</th></tr></thead>
+      <tbody id="an-inventoryTbody"></tbody>
+    </table>
+  </div>
+
+  <div class="insight-grid">
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:15px;margin-bottom:12px">💰 Pricing Agent — Suggestions</div>
+      <div class="insight-list" id="an-pricingList"></div>
+    </div>
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:15px;margin-bottom:12px">🏆 Top Products by Revenue</div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>Product</th><th>Revenue</th></tr></thead><tbody id="an-topProdsTbody"></tbody></table></div>
+    </div>
+  </div>
+
+  <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:15px;margin:24px 0 12px">👤 Customer Agent — Segmentation</div>
+  <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px">
+    <div class="seg-card"><div class="seg-val" id="an-seg-new" style="color:var(--blue)">0</div><div class="seg-lbl">New (1 order)</div></div>
+    <div class="seg-card"><div class="seg-val" id="an-seg-repeat" style="color:var(--orange)">0</div><div class="seg-lbl">Repeat (2-3 orders)</div></div>
+    <div class="seg-card"><div class="seg-val" id="an-seg-loyal" style="color:var(--green)">0</div><div class="seg-lbl">Loyal (4+ orders)</div></div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Customer</th><th>Phone</th><th>Orders</th><th>Total Spend</th><th>Segment</th></tr></thead>
+      <tbody id="an-customerTbody"></tbody>
+    </table>
+  </div>
 </div>
 <div class="page" id="page-deploy">
   <div class="ph">
@@ -810,7 +901,7 @@ function clearOrders(){
 }
 
 // NAV
-var PAGE_TITLES={orders:'Orders',products:'Products',add:'Add Product',view:'Product Details',deploy:'Publish to Website',offers:'Offers & Coupons',reviews:'Reviews',notifications:'Notifications',security:'Security'};
+var PAGE_TITLES={orders:'Orders',products:'Products',add:'Add Product',view:'Product Details',deploy:'Publish to Website',offers:'Offers & Coupons',reviews:'Reviews',notifications:'Notifications',security:'Security',analytics:'Analytics & AI Insights'};
 function goto(pg){
   document.querySelectorAll('.page').forEach(function(e){e.classList.remove('active');});
   document.querySelectorAll('.nav-btn').forEach(function(e){e.classList.remove('active');});
@@ -819,6 +910,7 @@ function goto(pg){
   document.getElementById('topTitle').textContent=PAGE_TITLES[pg]||pg;
   if(pg==='products'){renderProds();checkUnpublished();}
   if(pg==='deploy'){updateExpCount();loadCheckoutMode();}
+  if(pg==='analytics'){renderAnalytics();}
   if(pg==='orders'){
     localStorage.setItem('smw_orders_seen_count',String(cachedOrders.length));
     var nb=document.getElementById('nb-orders');if(nb){nb.style.display='none';}
@@ -1293,6 +1385,170 @@ function changePw(){
 function logAct(text,color){
   var log=document.getElementById('actLog');if(!log)return;var empty=log.querySelector('p');if(empty)empty.remove();
   var w=document.createElement('div');w.className='log-item';var d=document.createElement('div');d.className='log-dot';d.style.background=color;var info=document.createElement('div');info.innerHTML='<div class="log-text">'+escHTML(text)+'</div><div class="log-time">'+nowTime()+'</div>';w.appendChild(d);w.appendChild(info);log.insertBefore(w,log.firstChild);
+}
+
+// ============================================================
+// ANALYTICS & AI INSIGHTS — all computed client-side from the
+// real orders (cachedOrders, via fetchOrdersFromServer) and the
+// real product catalogue (loadProds()). Nothing here is fetched
+// from an external AI — it's rule-based math over your own data.
+// ============================================================
+function anOrderDate(o){
+  var d=null;
+  if(o.date)d=new Date(o.date);
+  if((!d||isNaN(d))&&o.dateStr)d=new Date(o.dateStr);
+  return(d&&!isNaN(d))?d:null;
+}
+function anOrderTotal(o){var t=o.totals||o;return t.total!=null?t.total:(o.total||0);}
+function anCustKey(o){var c=o.customer||{};return(c.phone||c.email||c.name||'unknown').toLowerCase().trim();}
+function anCustName(o){var c=o.customer||{};return c.name||(c.fname?(c.fname+' '+(c.lname||'')):'Unknown');}
+
+function renderAnalytics(){
+  var sub=document.getElementById('anSub');
+  if(sub)sub.textContent='Loading your numbers...';
+  fetchOrdersFromServer().then(function(orders){
+    if(sub)sub.textContent='Built from your real orders, stock and reviews — no external AI, just your own numbers, crunched.';
+    computeAndRenderAnalytics(orders);
+  }).catch(function(){
+    if(sub)sub.textContent='Could not load orders — showing catalogue-only insights.';
+    computeAndRenderAnalytics(cachedOrders);
+  });
+}
+
+function computeAndRenderAnalytics(orders){
+  orders=orders||[];
+  var prods=loadProds();
+  var prodByName={};prods.forEach(function(p){prodByName[p.name]=p;});
+
+  // ---- top-line KPIs ----
+  var totalRev=0;var custMap={};
+  orders.forEach(function(o){
+    totalRev+=anOrderTotal(o);
+    var k=anCustKey(o);
+    if(!custMap[k])custMap[k]={name:anCustName(o),phone:(o.customer||{}).phone||'—',orders:0,spend:0};
+    custMap[k].orders++;custMap[k].spend+=anOrderTotal(o);
+  });
+  var custKeys=Object.keys(custMap);
+  var repeatCount=custKeys.filter(function(k){return custMap[k].orders>1;}).length;
+  document.getElementById('an-revenue').textContent=fmtRs(totalRev);
+  document.getElementById('an-orders').textContent=orders.length;
+  document.getElementById('an-aov').textContent=fmtRs(orders.length?Math.round(totalRev/orders.length):0);
+  document.getElementById('an-customers').textContent=custKeys.length;
+  document.getElementById('an-repeat').textContent=(custKeys.length?Math.round(repeatCount/custKeys.length*100):0)+'%';
+
+  // ---- 14-day revenue bar chart ----
+  var days=[],dayMap={};
+  for(var i=13;i>=0;i--){
+    var d=new Date();d.setDate(d.getDate()-i);
+    var key=d.toISOString().slice(0,10);
+    days.push(key);dayMap[key]=0;
+  }
+  orders.forEach(function(o){
+    var d=anOrderDate(o);if(!d)return;
+    var key=d.toISOString().slice(0,10);
+    if(dayMap[key]!=null)dayMap[key]+=anOrderTotal(o);
+  });
+  var maxDay=Math.max.apply(null,days.map(function(k){return dayMap[k];}).concat([1]));
+  var chartEl=document.getElementById('an-revChart');
+  chartEl.innerHTML=days.map(function(key){
+    var v=dayMap[key];var h=Math.max(3,Math.round(v/maxDay*140));
+    var d=new Date(key+'T00:00:00');var lbl=d.getDate()+'/'+(d.getMonth()+1);
+    return'<div class="bc-col" title="'+lbl+': '+fmtRs(v)+'"><div class="bc-bar" style="height:'+h+'px"></div><div class="bc-lbl">'+lbl+'</div></div>';
+  }).join('');
+  document.getElementById('an-revtotal').textContent='Total: '+fmtRs(days.reduce(function(s,k){return s+dayMap[k];},0));
+
+  // ---- revenue by category donut ----
+  var catRev={shirts:0,tshirts:0,pants:0,other:0};
+  orders.forEach(function(o){
+    (o.items||[]).forEach(function(it){
+      var p=prodByName[it.name];var cat=p?p.cat:'other';
+      if(catRev[cat]==null)cat='other';
+      catRev[cat]+=(it.total||(it.price*it.qty)||0);
+    });
+  });
+  var catColors={shirts:'#c26b1a',tshirts:'#1d52a8',pants:'#1e6b44',other:'#7a746e'};
+  var catLabels={shirts:'Shirts',tshirts:'T-Shirts',pants:'Pants',other:'Other'};
+  var catTotal=Object.keys(catRev).reduce(function(s,k){return s+catRev[k];},0)||1;
+  var svg=document.getElementById('an-donut');var r=50,cx=60,cy=60,circ=2*Math.PI*r,offset=0;
+  var segs='';
+  Object.keys(catRev).forEach(function(k){
+    var frac=catRev[k]/catTotal;if(frac<=0)return;
+    var len=frac*circ;
+    segs+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+catColors[k]+'" stroke-width="18" stroke-dasharray="'+len+' '+(circ-len)+'" stroke-dashoffset="'+(-offset)+'" transform="rotate(-90 '+cx+' '+cy+')"/>';
+    offset+=len;
+  });
+  svg.innerHTML=segs||'<circle cx="60" cy="60" r="50" fill="none" stroke="#e4dfd8" stroke-width="18"/>';
+  document.getElementById('an-donutLegend').innerHTML=Object.keys(catRev).map(function(k){
+    return'<div class="dl-item"><div class="dl-dot" style="background:'+catColors[k]+'"></div><div class="dl-lbl">'+catLabels[k]+'</div><div class="dl-val">'+fmtRs(catRev[k])+'</div></div>';
+  }).join('');
+
+  // ---- inventory agent: reorder prediction (last 30 days velocity) ----
+  var cutoff=new Date();cutoff.setDate(cutoff.getDate()-30);
+  var soldQty={};
+  orders.forEach(function(o){
+    var d=anOrderDate(o);if(d&&d<cutoff)return;
+    (o.items||[]).forEach(function(it){soldQty[it.name]=(soldQty[it.name]||0)+(it.qty||0);});
+  });
+  var invRows=prods.map(function(p){
+    var sold=soldQty[p.name]||0;
+    var rate=sold/30;
+    var stock=parseInt(p.stock)||0;
+    var daysLeft=rate>0?Math.round(stock/rate):(stock>0?Infinity:0);
+    var rec,recCls;
+    if(stock===0){rec='Out of stock — reorder now';recCls='tr';}
+    else if(rate>0&&daysLeft<=7){rec='Reorder urgently';recCls='tr';}
+    else if(rate>0&&daysLeft<=14){rec='Reorder soon';recCls='to';}
+    else if(rate===0&&stock>0){rec='No recent sales — no reorder needed';recCls='ty';}
+    else{rec='Stock healthy';recCls='tg';}
+    return{p:p,sold:sold,rate:rate,daysLeft:daysLeft,rec:rec,recCls:recCls};
+  }).sort(function(a,b){return(a.daysLeft===Infinity?9999:a.daysLeft)-(b.daysLeft===Infinity?9999:b.daysLeft);});
+  var invTb=document.getElementById('an-inventoryTbody');
+  if(!invRows.length){invTb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text2)">No products yet.</td></tr>';}
+  else invTb.innerHTML=invRows.map(function(r){
+    return'<tr><td><strong>'+escHTML(r.p.name)+'</strong></td><td>'+(parseInt(r.p.stock)||0)+'</td><td>'+r.sold+'</td><td>'+r.rate.toFixed(2)+'/day</td><td>'+(r.daysLeft===Infinity?'—':r.daysLeft+' days')+'</td><td><span class="tag '+r.recCls+'">'+r.rec+'</span></td></tr>';
+  }).join('');
+
+  // ---- pricing agent: rule-based suggestions ----
+  var avgStock=prods.length?prods.reduce(function(s,p){return s+(parseInt(p.stock)||0);},0)/prods.length:0;
+  var pricingCards=[];
+  invRows.forEach(function(r){
+    var p=r.p;var hasSale=p.sale&&parseFloat(p.sale)<parseFloat(p.orig);
+    if(r.rate===0&&(parseInt(p.stock)||0)>avgStock&&!hasSale&&(parseInt(p.stock)||0)>0){
+      pricingCards.push({icon:'🐢',bg:'var(--red-bg)',title:p.name,desc:'Slow-moving with above-average stock and no discount. Consider a limited-time offer to move inventory.'});
+    }else if(r.daysLeft!==Infinity&&r.daysLeft<=10&&!hasSale&&r.rate>0){
+      pricingCards.push({icon:'🔥',bg:'var(--green-bg)',title:p.name,desc:'Selling fast at full price — a strong seller. No discount needed right now.'});
+    }else if(hasSale&&r.rate>0&&r.daysLeft!==Infinity&&r.daysLeft<=10){
+      pricingCards.push({icon:'💡',bg:'var(--blue-bg)',title:p.name,desc:'On sale and still selling briskly — you could end the discount early without hurting sales.'});
+    }
+  });
+  var plEl=document.getElementById('an-pricingList');
+  if(!pricingCards.length)plEl.innerHTML='<div class="insight-row"><div class="ir-icon" style="background:var(--surface2)">✓</div><div class="ir-body"><div class="ir-title">No pricing flags right now</div><div class="ir-desc">Pricing looks reasonable across the catalogue based on current sales velocity.</div></div></div>';
+  else plEl.innerHTML=pricingCards.slice(0,6).map(function(c){
+    return'<div class="insight-row"><div class="ir-icon" style="background:'+c.bg+'">'+c.icon+'</div><div class="ir-body"><div class="ir-title">'+escHTML(c.title)+'</div><div class="ir-desc">'+c.desc+'</div></div></div>';
+  }).join('');
+
+  // ---- top products by revenue ----
+  var prodRev={};
+  orders.forEach(function(o){(o.items||[]).forEach(function(it){prodRev[it.name]=(prodRev[it.name]||0)+(it.total||(it.price*it.qty)||0);});});
+  var topProds=Object.keys(prodRev).map(function(n){return{name:n,rev:prodRev[n]};}).sort(function(a,b){return b.rev-a.rev;}).slice(0,8);
+  var tpEl=document.getElementById('an-topProdsTbody');
+  if(!topProds.length)tpEl.innerHTML='<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text2)">No sales data yet.</td></tr>';
+  else tpEl.innerHTML=topProds.map(function(t,i){return'<tr><td style="font-weight:800;color:var(--text2)">'+(i+1)+'</td><td>'+escHTML(t.name)+'</td><td><strong style="color:var(--green)">'+fmtRs(t.rev)+'</strong></td></tr>';}).join('');
+
+  // ---- customer agent: segmentation ----
+  var segNew=0,segRepeat=0,segLoyal=0;
+  var custRows=custKeys.map(function(k){return custMap[k];});
+  custRows.forEach(function(c){if(c.orders>=4)segLoyal++;else if(c.orders>=2)segRepeat++;else segNew++;});
+  document.getElementById('an-seg-new').textContent=segNew;
+  document.getElementById('an-seg-repeat').textContent=segRepeat;
+  document.getElementById('an-seg-loyal').textContent=segLoyal;
+  custRows.sort(function(a,b){return b.spend-a.spend;});
+  var custTb=document.getElementById('an-customerTbody');
+  if(!custRows.length)custTb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text2)">No customers yet.</td></tr>';
+  else custTb.innerHTML=custRows.slice(0,15).map(function(c){
+    var seg=c.orders>=4?{l:'Loyal',cl:'tg'}:(c.orders>=2?{l:'Repeat',cl:'to'}:{l:'New',cl:'tb'});
+    return'<tr><td><strong>'+escHTML(c.name)+'</strong></td><td>'+escHTML(c.phone)+'</td><td>'+c.orders+'</td><td>'+fmtRs(c.spend)+'</td><td><span class="tag '+seg.cl+'">'+seg.l+'</span></td></tr>';
+  }).join('');
 }
 
 // SESSION TIMER
