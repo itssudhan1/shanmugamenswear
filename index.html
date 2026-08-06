@@ -11,6 +11,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet"/>
 <!-- PRODUCT DATA — edit smw-products.js to update your catalogue -->
 <script src="smw-products.js"></script>
+<!-- BANNER DATA — edit smw-banners.js to update homepage offer banners -->
+<script src="smw-banners.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -467,14 +469,7 @@ footer{background:var(--black);color:var(--white);padding:4rem 2rem 2rem}
   </div>
 </section>
 
-<div class="promo reveal">
-  <div class="promo-inner">
-    <p class="promo-eyebrow">Limited Time Offer</p>
-    <h2 class="promo-h">UP TO 40% OFF ON SHIRTS</h2>
-    <p class="promo-sub">Shop our sale collection before stock runs out.</p>
-    <a class="btn-red" href="#shop" onclick="switchTab('shirts')">Shop Sale</a>
-  </div>
-</div>
+<div id="promoBanners"></div>
 
 <div class="features">
   <div class="features-grid reveal">
@@ -517,6 +512,15 @@ function getProductsAll() {
   stored.forEach(function(p){ if(p.id) adminIds[p.id] = true; });
   var merged = defaults.filter(function(p){ return !adminIds[p.id]; }).concat(stored);
   return merged.filter(function(p){ return p.visible !== false; });
+}
+
+function getBannersAll(){
+  var stored=[];
+  try{var raw=localStorage.getItem('smw_banners');if(raw)stored=JSON.parse(raw);if(!Array.isArray(stored))stored=[];}catch(e){stored=[];}
+  var defaults=(typeof SMW_DEFAULT_BANNERS!=='undefined'&&Array.isArray(SMW_DEFAULT_BANNERS))?SMW_DEFAULT_BANNERS:[];
+  var adminIds={};stored.forEach(function(b){if(b.id)adminIds[b.id]=true;});
+  var merged=defaults.filter(function(b){return !adminIds[b.id];}).concat(stored);
+  return merged.filter(function(b){return b.active!==false;}).sort(function(a,b){return(a.order||0)-(b.order||0);});
 }
 
 (function(){
@@ -629,6 +633,23 @@ function addToCart(id,btnEl){
   showToast('✓ '+p.name+' added!');
 }
 
+function renderPromoBanners(){
+  var banners=getBannersAll();
+  var wrap=document.getElementById('promoBanners');if(!wrap)return;
+  if(!banners.length){wrap.innerHTML='';return;}
+  wrap.innerHTML=banners.map(function(b){
+    var bgStyle=b.bg?' style="background-image:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),url(\''+esc(b.bg)+'\');background-size:cover;background-position:center"':'';
+    var isShop=b.btnLink&&b.btnLink.indexOf('#shop=')===0;
+    var cat=isShop?b.btnLink.split('=')[1]:'';
+    return '<div class="promo reveal in"'+bgStyle+'><div class="promo-inner">'+
+      (b.eyebrow?'<p class="promo-eyebrow">'+esc(b.eyebrow)+'</p>':'')+
+      '<h2 class="promo-h">'+esc(b.heading)+'</h2>'+
+      (b.subtext?'<p class="promo-sub">'+esc(b.subtext)+'</p>':'')+
+      '<a class="btn-red" href="'+(isShop?'#shop':esc(b.btnLink||'#'))+'"'+(isShop?' onclick="switchTab(\''+esc(cat)+'\')"':'')+'>'+esc(b.btnText||'Shop Now')+'</a>'+
+    '</div></div>';
+  }).join('');
+}
+
 function openSearch(){document.getElementById('searchOverlay').classList.add('open');setTimeout(function(){document.getElementById('searchInput').focus();},100);resetSearch();}
 function closeSearch(){document.getElementById('searchOverlay').classList.remove('open');document.getElementById('searchInput').value='';}
 function resetSearch(){document.getElementById('searchSugg').classList.remove('show');document.getElementById('searchNoResults').classList.remove('show');document.getElementById('searchTags').style.display='flex';}
@@ -669,8 +690,12 @@ updateCartUI();
 var searchParam=new URLSearchParams(location.search).get('search');
 if(searchParam){var ql=searchParam.toLowerCase();var matched=getProductsAll().filter(function(p){return(p.name||'').toLowerCase().indexOf(ql)>=0||(CAT_MAP[p.cat]||'').toLowerCase().indexOf(ql)>=0;});renderProducts(matched);document.getElementById('prodCount').textContent=matched.length+' results for "'+searchParam+'"';setTimeout(function(){document.getElementById('shop').scrollIntoView({behavior:'smooth'});},300);}
 else{renderProducts(getProductsAll());}
+renderPromoBanners();
 
-window.addEventListener('storage',function(e){if(e.key==='smw_products'){var prods=getProductsAll();renderProducts(currentTab==='all'?prods:prods.filter(function(p){return p.cat===currentTab;}));}});
+window.addEventListener('storage',function(e){
+  if(e.key==='smw_products'){var prods=getProductsAll();renderProducts(currentTab==='all'?prods:prods.filter(function(p){return p.cat===currentTab;}));}
+  if(e.key==='smw_banners'){renderPromoBanners();}
+});
 
 /* ── COPYRIGHT PROTECTION ── */
 document.addEventListener('contextmenu',function(e){e.preventDefault();return false;});
