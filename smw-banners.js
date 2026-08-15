@@ -1,4 +1,4 @@
-/* Shanmuga Mens Wear Banners — 1 items — Updated 7/8/2026, 6:44:17 pm */
+/* Shanmuga Mens Wear Banners — 2 items — Updated 15/8/2026, 6:55:58 pm */
 
 var SMW_DEFAULT_BANNERS = [
   {
@@ -11,5 +11,16 @@ var SMW_DEFAULT_BANNERS = [
     "bg": "",
     "active": true,
     "order": 0
+  },
+  {
+    "id": 2,
+    "eyebrow": "AADI  OFFER",
+    "heading": "UP TO 50% OFFER ON SHIRT",
+    "subtext": "shop our sale collection before stock run out",
+    "btnText": "Shop Sale",
+    "btnLink": "#shop=shirt",
+    "bg": "",
+    "active": true,
+    "order": 1
   }
 ];
