@@ -1,4 +1,4 @@
-/* Shanmuga Mens Wear Banners — 1 items — Updated 17/8/2026, 7:26:09 pm */
+/* Shanmuga Mens Wear Banners — 1 items — Updated 17/8/2026, 7:27:12 pm */
 
 var SMW_DEFAULT_BANNERS = [
   {
