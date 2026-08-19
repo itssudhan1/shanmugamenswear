@@ -74,10 +74,14 @@ tr:hover td{background:#fafaf7}
 .fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--gold);background:var(--surface)}
 .fg textarea{min-height:80px;resize:vertical}
 .fg .hint{font-size:11px;color:var(--text2);margin-top:3px}
+.hint{font-size:11px;color:var(--text2)}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:900px){.g2{grid-template-columns:1fr}}
 .size-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
 .s-chip{padding:6px 13px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);transition:all .16s;font-family:'DM Sans',sans-serif}
+.sz-row{display:inline-flex;align-items:center;gap:6px;margin:0 6px 6px 0}
+.sz-stock-input{width:64px;padding:6px 8px;border:1.5px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;background:var(--surface2);color:var(--text)}
+.sz-stock-input.zero{border-color:var(--red);color:var(--red);font-weight:700}
 .s-chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 .b-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:5px}
 .b-chip{padding:6px 14px;border:1.5px solid var(--border);border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .16s;font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text2)}
@@ -257,7 +261,6 @@ input:checked+.slider::before{transform:translateX(18px)}
   <button class="nav-btn" id="nav-add" onclick="gotoAdd()">Add Product</button>
   <div class="s-section">Marketing</div>
   <button class="nav-btn" id="nav-offers" onclick="goto('offers')">Offers &amp; Coupons</button>
-  <button class="nav-btn" id="nav-banners" onclick="goto('banners')">Homepage Banners</button>
   <button class="nav-btn" id="nav-reviews" onclick="goto('reviews')">Reviews</button>
   <div class="s-section">System</div>
   <button class="nav-btn" id="nav-deploy" onclick="goto('deploy')">Publish to Website</button>
@@ -303,6 +306,7 @@ input:checked+.slider::before{transform:translateX(18px)}
   <div class="ph">
     <div class="ph-left"><h1>Products</h1><div class="sub" id="prodSub">Loading...</div></div>
     <div class="ph-right">
+      <button class="btn btn-outline btn-sm" onclick="openWaSale()">Log WhatsApp Sale</button>
       <button class="btn btn-success btn-sm" onclick="goto('deploy')">Publish to Site</button>
       <button class="btn btn-primary btn-sm" onclick="gotoAdd()">+ Add Product</button>
     </div>
@@ -331,6 +335,20 @@ input:checked+.slider::before{transform:translateX(18px)}
       <thead><tr><th>#</th><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Badge</th><th>Sizes</th><th>Actions</th></tr></thead>
       <tbody id="prodTbody"></tbody>
     </table>
+  </div>
+</div>
+<div id="waSaleOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border-radius:12px;padding:24px;width:360px;max-width:92vw">
+    <h3 style="margin:0 0 4px">Log a WhatsApp Sale</h3>
+    <div class="hint" style="margin-bottom:14px">Reduces live stock for this size right away. Doesn't touch smw-products.js — your Publish numbers are unaffected until you next edit and republish.</div>
+    <div class="fg"><label>Product</label><select id="wa-product" onchange="waProductChanged()"></select></div>
+    <div class="fg"><label>Size</label><select id="wa-size"></select></div>
+    <div class="fg"><label>Quantity sold</label><input type="number" id="wa-qty" value="1" min="1"></div>
+    <div id="waSaleMsg" style="font-size:12px;margin-bottom:10px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-outline btn-sm" onclick="closeWaSale()">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="waSaleBtn" onclick="submitWaSale()">Reduce Stock</button>
+    </div>
   </div>
 </div>
 <div class="page" id="page-add">
@@ -408,7 +426,7 @@ input:checked+.slider::before{transform:translateX(18px)}
       <div class="card" style="margin-bottom:16px">
         <div class="card-title">Stock</div>
         <div class="g2">
-          <div class="fg"><label>Quantity *</label><input type="number" id="f-stock" placeholder="20" min="0"></div>
+          <div class="fg"><label>Quantity *</label><input type="number" id="f-stock" placeholder="20" min="0"><div class="hint" id="f-stock-hint" style="display:none">Auto-calculated as the sum of stock across the sizes below</div></div>
           <div class="fg"><label>Low Stock Alert At</label><input type="number" id="f-threshold" placeholder="5" min="0"></div>
         </div>
         <div class="fg" style="margin-bottom:0"><label>Status</label>
@@ -416,8 +434,9 @@ input:checked+.slider::before{transform:translateX(18px)}
         </div>
       </div>
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title">Available Sizes</div>
-        <div class="size-chips" id="sizeChips"></div>
+        <div class="card-title">Sizes &amp; Stock</div>
+        <div class="hint" style="margin-bottom:8px">Select a size, then set how many units you have in that size (e.g. 38 = 0 for no stock).</div>
+        <div class="size-chips" id="sizeStockList"></div>
       </div>
       <div class="card" style="margin-bottom:16px">
         <div class="card-title">Product Badge</div>
@@ -626,17 +645,6 @@ input:checked+.slider::before{transform:translateX(18px)}
     </div>
   </div>
 </div>
-<div class="page" id="page-banners">
-  <div class="ph">
-    <div class="ph-left"><h1>Homepage Banners</h1><div class="sub" id="bannerSub">Manage the offer banners shown on your homepage</div></div>
-    <div class="ph-right"><button class="btn btn-primary btn-sm" onclick="openBannerForm()">+ Add Banner</button></div>
-  </div>
-  <div id="unpubBannerBar" class="unpub-bar" style="display:none">
-    You have unpublished banner changes.
-    <button class="btn btn-sm" style="background:#78350f;color:#fff;white-space:nowrap" onclick="goto('deploy')">Publish Now</button>
-  </div>
-  <div id="bannerList"></div>
-</div>
 <div class="page" id="page-reviews">
   <div class="ph"><div class="ph-left"><h1>Reviews &amp; Ratings</h1></div></div>
   <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">
@@ -702,29 +710,6 @@ input:checked+.slider::before{transform:translateX(18px)}
     </div>
   </div>
 </div>
-<div class="modal-overlay" id="bannerMod">
-  <div class="modal-box">
-    <h3 id="bannerModTitle">Add Banner</h3>
-    <div class="fg"><label>Eyebrow Text</label><input type="text" id="bn-eyebrow" placeholder="Limited Time Offer"></div>
-    <div class="fg"><label>Heading *</label><input type="text" id="bn-heading" placeholder="UP TO 40% OFF ON SHIRTS"></div>
-    <div class="fg"><label>Subtext</label><input type="text" id="bn-subtext" placeholder="Shop our sale collection before stock runs out."></div>
-    <div class="g2">
-      <div class="fg"><label>Button Text</label><input type="text" id="bn-btntext" placeholder="Shop Sale"></div>
-      <div class="fg"><label>Button Link</label><input type="text" id="bn-btnlink" placeholder="#shop=shirts or https://...">
-        <div class="hint">Use #shop=shirts / #shop=tshirts / #shop=pants to jump to a category, or paste any URL.</div>
-      </div>
-    </div>
-    <div class="fg"><label>Background Image URL (optional)</label><input type="text" id="bn-bg" placeholder="https://...">
-      <div class="hint">Leave blank to use the default dark background.</div>
-    </div>
-    <div class="toggle-row"><div class="toggle-label">Active</div><label class="toggle"><input type="checkbox" id="bn-active" checked><span class="slider"></span></label></div>
-    <input type="hidden" id="bn-editId" value="">
-    <div class="modal-foot">
-      <button class="btn btn-outline" onclick="closeMod('bannerMod')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveBannerMod()">Save Banner</button>
-    </div>
-  </div>
-</div>
 <div class="toast" id="toast"></div>
 <script>
 'use strict';
@@ -740,7 +725,7 @@ var CL_CLOUD='',CL_PRESET='';
 var GH_TOKEN='',GH_USER_V='',GH_REPO='',GH_BRANCH='main';
 var ghSetupOpen=true;
 var nextId=200;
-var currentImgs=[],selSizes=[],selBadge='',viewingId=-1,revFilter='all',uploading=false;
+var currentImgs=[],selSizes=[],sizeStockMap={},selBadge='',viewingId=-1,revFilter='all',uploading=false;
 var ALL_SIZES=['XS','S','M','L','XL','XXL','28','30','32','34','36','38'];
 var ALL_BADGES=[{val:'',label:'None',cls:'sel-none'},{val:'new',label:'New',cls:'sel-new'},{val:'sale',label:'Sale',cls:'sel-sale'},{val:'offer',label:'Offer',cls:'sel-offer'}];
 var coupons=[{code:'SAVE10',type:'percent',val:10,min:0,expiry:'31 Dec 2026',uses:0,active:true},{code:'WELCOME',type:'percent',val:5,min:0,expiry:'31 Dec 2026',uses:0,active:true},{code:'SMW20',type:'percent',val:20,min:999,expiry:'31 Dec 2026',uses:0,active:true}];
@@ -757,7 +742,7 @@ function saveProds(arr){try{localStorage.setItem('smw_products',JSON.stringify(a
 function catLabel(c){return{shirts:'Shirts',tshirts:'T-Shirts',pants:'Pants'}[c]||c;}
 function catTagClass(c){return{shirts:'to',tshirts:'tb',pants:'tg'}[c]||'ty';}
 function badgeHTML(b){if(!b)return'';return{new:'<span class="tag tb">New</span>',sale:'<span class="tag tr">Sale</span>',offer:'<span class="tag to">Offer</span>'}[b]||'';}
-function stockHTML(p){var s=parseInt(p.stock)||0,t=parseInt(p.threshold)||5;if(s===0)return'<span class="tag tr">Out of Stock</span>';if(s<=t)return'<span class="tag to">Low Stock</span>';return'<span class="tag tg">In Stock</span>';}
+function stockHTML(p,liveTotal){var s=liveTotal!=null?liveTotal:(parseInt(p.stock)||0),t=parseInt(p.threshold)||5;if(s===0)return'<span class="tag tr">Out of Stock</span>';if(s<=t)return'<span class="tag to">Low Stock</span>';return'<span class="tag tg">In Stock</span>';}
 function fmtRs(n){return'Rs.'+Number(n).toLocaleString('en-IN');}
 function starsHTML(n){var s='';for(var i=0;i<5;i++)s+=i<n?'★':'☆';return s;}
 function nowTime(){var d=new Date(),h=d.getHours(),m=d.getMinutes(),ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+(m<10?'0'+m:m)+' '+ap;}
@@ -936,17 +921,16 @@ function clearOrders(){
 }
 
 // NAV
-var PAGE_TITLES={orders:'Orders',products:'Products',add:'Add Product',view:'Product Details',deploy:'Publish to Website',offers:'Offers & Coupons',reviews:'Reviews',notifications:'Notifications',security:'Security',analytics:'Analytics & AI Insights',banners:'Homepage Banners'};
+var PAGE_TITLES={orders:'Orders',products:'Products',add:'Add Product',view:'Product Details',deploy:'Publish to Website',offers:'Offers & Coupons',reviews:'Reviews',notifications:'Notifications',security:'Security',analytics:'Analytics & AI Insights'};
 function goto(pg){
   document.querySelectorAll('.page').forEach(function(e){e.classList.remove('active');});
   document.querySelectorAll('.nav-btn').forEach(function(e){e.classList.remove('active');});
   var pe=document.getElementById('page-'+pg);if(pe)pe.classList.add('active');
   var ne=document.getElementById('nav-'+pg);if(ne)ne.classList.add('active');
   document.getElementById('topTitle').textContent=PAGE_TITLES[pg]||pg;
-  if(pg==='products'){renderProds();checkUnpublished();}
+  if(pg==='products'){renderProds();checkUnpublished();refreshLiveStock(renderProds);}
   if(pg==='deploy'){updateExpCount();loadCheckoutMode();}
   if(pg==='analytics'){renderAnalytics();}
-  if(pg==='banners'){renderBanners();checkUnpublishedBanners();}
   if(pg==='orders'){
     localStorage.setItem('smw_orders_seen_count',String(cachedOrders.length));
     var nb=document.getElementById('nb-orders');if(nb){nb.style.display='none';}
@@ -980,79 +964,6 @@ function checkUnpublished(){
   bar.style.display=(lastPub===-1||prods.length!==lastPub)?'flex':'none';
 }
 function updateExpCount(){var el=document.getElementById('expCount');if(el)el.textContent=loadProds().length;}
-
-// BANNERS
-var nextBannerId=1;
-function loadBanners(){try{var r=localStorage.getItem('smw_banners');if(!r||r==='null'||r==='[]')return[];var a=JSON.parse(r);return Array.isArray(a)?a:[];}catch(e){return[];}}
-function saveBanners(arr){try{localStorage.setItem('smw_banners',JSON.stringify(arr));}catch(e){toast('Storage error: '+e.message,'error');}}
-function syncBannersFromPublished(){
-  var existing=loadBanners();
-  if(existing.length>0){existing.forEach(function(b){if(b.id>=nextBannerId)nextBannerId=b.id+1;});return;}
-  if(typeof SMW_DEFAULT_BANNERS!=='undefined'&&Array.isArray(SMW_DEFAULT_BANNERS)&&SMW_DEFAULT_BANNERS.length>0){
-    saveBanners(SMW_DEFAULT_BANNERS);SMW_DEFAULT_BANNERS.forEach(function(b){if(b.id>=nextBannerId)nextBannerId=b.id+1;});
-  }
-}
-function checkUnpublishedBanners(){
-  var bar=document.getElementById('unpubBannerBar');if(!bar)return;
-  var b=loadBanners();var lastPub=parseInt(localStorage.getItem('smw_last_pub_banner_count')||'-1');
-  bar.style.display=(lastPub===-1||b.length!==lastPub)?'flex':'none';
-}
-function renderBanners(){
-  var banners=loadBanners().sort(function(a,b){return(a.order||0)-(b.order||0);});
-  var el=document.getElementById('bannerList');if(!el)return;
-  if(!banners.length){el.innerHTML='<div class="no-orders"><h3>No banners yet</h3><p>Add a banner to show an offer strip on your homepage.</p></div>';var s=document.getElementById('bannerSub');if(s)s.textContent='No banners yet';return;}
-  el.innerHTML=banners.map(function(b){
-    return '<div class="card" style="margin-bottom:14px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">'+
-      '<div style="flex:1;min-width:200px">'+
-        '<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text2);letter-spacing:.08em">'+escHTML(b.eyebrow||'')+'</div>'+
-        '<div style="font-family:\'Syne\',sans-serif;font-weight:800;font-size:16px">'+escHTML(b.heading)+'</div>'+
-        '<div style="font-size:12px;color:var(--text2)">'+escHTML(b.subtext||'')+'</div>'+
-        '<div style="font-size:11px;color:var(--text2);margin-top:4px">Button: "'+escHTML(b.btnText||'')+'" → '+escHTML(b.btnLink||'')+'</div>'+
-      '</div>'+
-      '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">'+
-        (b.active?'<span class="tag tg">Active</span>':'<span class="tag ty">Hidden</span>')+
-        '<button class="btn btn-outline btn-xs" onclick="moveBanner('+b.id+',-1)">↑</button>'+
-        '<button class="btn btn-outline btn-xs" onclick="moveBanner('+b.id+',1)">↓</button>'+
-        '<button class="btn btn-warning btn-xs" onclick="openBannerForm('+b.id+')">Edit</button>'+
-        '<button class="btn '+(b.active?'btn-outline':'btn-success')+' btn-xs" onclick="toggleBannerActive('+b.id+')">'+(b.active?'Hide':'Show')+'</button>'+
-        '<button class="btn btn-danger btn-xs" onclick="deleteBanner('+b.id+')">Delete</button>'+
-      '</div>'+
-    '</div>';
-  }).join('');
-  var sub=document.getElementById('bannerSub');if(sub)sub.textContent=banners.length+' banner'+(banners.length!==1?'s':'')+' — '+banners.filter(function(b){return b.active;}).length+' active on site';
-}
-function openBannerForm(id){
-  ['bn-eyebrow','bn-heading','bn-subtext','bn-btntext','bn-btnlink','bn-bg'].forEach(function(f){document.getElementById(f).value='';});
-  document.getElementById('bn-editId').value='';document.getElementById('bn-active').checked=true;
-  document.getElementById('bannerModTitle').textContent='Add Banner';
-  if(id){
-    var b=loadBanners().find(function(x){return x.id===id;});
-    if(b){
-      document.getElementById('bn-editId').value=b.id;document.getElementById('bn-eyebrow').value=b.eyebrow||'';document.getElementById('bn-heading').value=b.heading||'';document.getElementById('bn-subtext').value=b.subtext||'';document.getElementById('bn-btntext').value=b.btnText||'';document.getElementById('bn-btnlink').value=b.btnLink||'';document.getElementById('bn-bg').value=b.bg||'';document.getElementById('bn-active').checked=b.active!==false;
-      document.getElementById('bannerModTitle').textContent='Edit Banner';
-    }
-  }
-  openMod('bannerMod');
-}
-function saveBannerMod(){
-  var heading=document.getElementById('bn-heading').value.trim();
-  if(!heading){toast('Enter a heading','error');return;}
-  var banners=loadBanners();var eid=parseInt(document.getElementById('bn-editId').value)||0;
-  var existingOrder=eid>0?((banners.find(function(x){return x.id===eid;})||{}).order||0):banners.length;
-  var obj={id:eid>0?eid:nextBannerId++,eyebrow:document.getElementById('bn-eyebrow').value.trim(),heading:heading,subtext:document.getElementById('bn-subtext').value.trim(),btnText:document.getElementById('bn-btntext').value.trim()||'Shop Now',btnLink:document.getElementById('bn-btnlink').value.trim()||'#shop',bg:document.getElementById('bn-bg').value.trim(),active:document.getElementById('bn-active').checked,order:existingOrder};
-  if(eid>0){var idx=banners.findIndex(function(x){return x.id===eid;});if(idx>=0)banners[idx]=obj;else banners.push(obj);toast('Banner updated','success');}
-  else{banners.push(obj);toast('Banner added','success');}
-  saveBanners(banners);closeMod('bannerMod');renderBanners();checkUnpublishedBanners();
-}
-function deleteBanner(id){if(!confirm('Delete this banner?'))return;saveBanners(loadBanners().filter(function(x){return x.id!==id;}));renderBanners();checkUnpublishedBanners();toast('Deleted');}
-function toggleBannerActive(id){var banners=loadBanners();var b=banners.find(function(x){return x.id===id;});if(!b)return;b.active=!b.active;saveBanners(banners);renderBanners();checkUnpublishedBanners();}
-function moveBanner(id,dir){
-  var banners=loadBanners().sort(function(a,b){return(a.order||0)-(b.order||0);});
-  var idx=banners.findIndex(function(x){return x.id===id;});var swapIdx=idx+dir;
-  if(idx<0||swapIdx<0||swapIdx>=banners.length)return;
-  var tmp=banners[idx].order;banners[idx].order=banners[swapIdx].order;banners[swapIdx].order=tmp;
-  saveBanners(banners);renderBanners();checkUnpublishedBanners();
-}
 
 // CHECKOUT MODE — reads/writes /api/checkout-mode, which persists to
 // Vercel KV. This is what checkout.html checks on every page load to
@@ -1148,41 +1059,98 @@ function testGHConnection(){
 function toggleGHSetup(){ghSetupOpen=!ghSetupOpen;var body=document.getElementById('ghSetupBody');if(body)body.style.display=ghSetupOpen?'block':'none';}
 function publishToGitHub(){
   if(!GH_TOKEN||!GH_USER_V||!GH_REPO){toast('Set up GitHub first','error');return;}
-  var prods=loadProds(),banners=loadBanners();
-  if(!prods.length&&!banners.length){toast('Nothing to publish!','error');return;}
+  var prods=loadProds();if(!prods.length){toast('No products to publish!','error');return;}
   var btn=document.getElementById('publishBtn');setPS('info','Connecting to GitHub...');if(btn){btn.disabled=true;btn.textContent='Publishing...';}
-  var cleanProds=prods.map(function(p){var photos=(p.photos||[]).filter(function(u){return u&&u.indexOf('data:image')<0;});return Object.assign({},p,{photos:photos});});
+  var clean=prods.map(function(p){var photos=(p.photos||[]).filter(function(u){return u&&u.indexOf('data:image')<0;});return Object.assign({},p,{photos:photos});});
+  var jsContent='/* Shanmuga Mens Wear Products — '+clean.length+' items — Updated '+new Date().toLocaleString('en-IN')+' */\n/* 2026 Shanmuga Mens Wear. All rights reserved. */\n\nvar SMW_DEFAULT_PRODUCTS = '+JSON.stringify(clean,null,2)+';\n';
+  var encoded;try{encoded=btoa(unescape(encodeURIComponent(jsContent)));}catch(e){toast('Encoding error','error');if(btn){btn.disabled=false;btn.textContent='Publish to Website Now';}return;}
+  var apiUrl='https://api.github.com/repos/'+GH_USER_V+'/'+GH_REPO+'/contents/smw-products.js';
   var headers={'Authorization':'token '+GH_TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'};
-  function putFile(path,jsContent){
-    var apiUrl='https://api.github.com/repos/'+GH_USER_V+'/'+GH_REPO+'/contents/'+path;
-    var encoded;try{encoded=btoa(unescape(encodeURIComponent(jsContent)));}catch(e){return Promise.reject(new Error('Encoding error'));}
-    return fetch(apiUrl+'?ref='+GH_BRANCH,{headers:headers})
-      .then(function(r){if(r.status===404)return{sha:null};if(!r.ok)return r.json().then(function(d){throw new Error(d.message||('HTTP '+r.status));});return r.json();})
-      .then(function(data){var body={message:'Update '+path+' — '+new Date().toLocaleDateString('en-IN'),content:encoded,branch:GH_BRANCH};if(data.sha)body.sha=data.sha;return fetch(apiUrl,{method:'PUT',headers:headers,body:JSON.stringify(body)});})
-      .then(function(r){if(r.ok)return r.json();return r.json().then(function(d){throw new Error(d.message||('HTTP '+r.status));});});
-  }
-  setPS('info','Uploading '+cleanProds.length+' products...');
-  var prodJS='/* Shanmuga Mens Wear Products — '+cleanProds.length+' items — Updated '+new Date().toLocaleString('en-IN')+' */\n/* 2026 Shanmuga Mens Wear. All rights reserved. */\n\nvar SMW_DEFAULT_PRODUCTS = '+JSON.stringify(cleanProds,null,2)+';\n';
-  var bannerJS='/* Shanmuga Mens Wear Banners — '+banners.length+' items — Updated '+new Date().toLocaleString('en-IN')+' */\n\nvar SMW_DEFAULT_BANNERS = '+JSON.stringify(banners,null,2)+';\n';
-  putFile('smw-products.js',prodJS)
-    .then(function(){setPS('info','Uploading '+banners.length+' banner(s)...');return putFile('smw-banners.js',bannerJS);})
-    .then(function(){
-      localStorage.setItem('smw_last_pub_count',cleanProds.length);
-      localStorage.setItem('smw_last_pub_banner_count',banners.length);
-      if(btn){btn.disabled=false;btn.textContent='Published!';}
-      setPS('ok',cleanProds.length+' products & '+banners.length+' banner(s) published!\n\nVercel updates in ~30 seconds.\nVisit: '+VERCEL_URL);
-      toast('Published live!','success');
-      logAct('Published '+cleanProds.length+' products, '+banners.length+' banners','var(--green)');
-      addPubLog(cleanProds.length);checkUnpublished();checkUnpublishedBanners();
-    })
-    .catch(function(err){
-      if(btn){btn.disabled=false;btn.textContent='Publish to Website Now';}
-      var msg=err.message||'Unknown error';
-      if(msg.indexOf('Bad credentials')>=0)msg='Token invalid. Generate a new one.';
-      else if(msg.indexOf('Not Found')>=0)msg='Repo not found. Check username and repo name.';
-      setPS('err','Publish failed: '+msg);toast('Publish failed: '+msg,'error');
-    });
+  setPS('info','Fetching current file...');
+  fetch(apiUrl+'?ref='+GH_BRANCH,{headers:headers})
+  .then(function(r){if(r.status===404)return{sha:null};if(!r.ok)return r.json().then(function(d){throw new Error(d.message||('HTTP '+r.status));});return r.json();})
+  .then(function(data){
+    setPS('info','Uploading '+clean.length+' products...');
+    var body={message:'Update products ('+clean.length+' items) — '+new Date().toLocaleDateString('en-IN'),content:encoded,branch:GH_BRANCH};
+    if(data.sha)body.sha=data.sha;
+    return fetch(apiUrl,{method:'PUT',headers:headers,body:JSON.stringify(body)});
+  })
+  .then(function(r){
+    if(r.ok||r.status===200||r.status===201){
+      return r.json().then(function(){
+        localStorage.setItem('smw_last_pub_count',clean.length);
+        if(btn){btn.disabled=false;btn.textContent='Published!';}
+        setPS('ok',clean.length+' products published!\n\nVercel updates in ~30 seconds.\nVisit: '+VERCEL_URL);
+        syncLiveStockAfterPublish(clean);
+        toast(clean.length+' products live!','success');
+        logAct('Published '+clean.length+' products','var(--green)');
+        addPubLog(clean.length);checkUnpublished();
+      });
+    }else{return r.json().then(function(d){throw new Error(d.message||('HTTP '+r.status));});}
+  })
+  .catch(function(err){
+    if(btn){btn.disabled=false;btn.textContent='Publish to Website Now';}
+    var msg=err.message||'Unknown error';
+    if(msg.indexOf('Bad credentials')>=0)msg='Token invalid. Generate a new one.';
+    else if(msg.indexOf('Not Found')>=0)msg='Repo not found. Check username and repo name.';
+    setPS('err','Publish failed: '+msg);toast('Publish failed: '+msg,'error');
+  });
 }
+// After a Publish, the numbers in smw-products.js are the new "starting
+// point" — reset the live KV overlay to match so stock display isn't
+// stuck showing yesterday's sales-adjusted numbers on top of a fresh
+// publish. Runs quietly; failures here don't affect the publish itself.
+function syncLiveStockAfterPublish(products){
+  var withSizes=products.filter(function(p){return p.sizes&&p.sizes.length;});
+  withSizes.reduce(function(chain,p){
+    return chain.then(function(){
+      return fetch(ORDERS_API_BASE+'/stock',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'set',productId:p.id,sizeStock:p.sizeStock||{}})}).catch(function(){});
+    });
+  },Promise.resolve()).then(function(){refreshLiveStock(function(){if(document.getElementById('page-products').classList.contains('active'))renderProds();});});
+}
+
+// LOG A WHATSAPP SALE — quick manual stock decrement for orders taken
+// outside the site checkout.
+function openWaSale(){
+  var prods=loadProds().filter(function(p){return p.sizes&&p.sizes.length;});
+  var sel=document.getElementById('wa-product');
+  sel.innerHTML=prods.map(function(p){return'<option value="'+p.id+'">'+escHTML(p.name)+'</option>';}).join('');
+  document.getElementById('waSaleMsg').textContent='';
+  document.getElementById('wa-qty').value=1;
+  document.getElementById('waSaleOverlay').style.display='flex';
+  waProductChanged();
+}
+function closeWaSale(){document.getElementById('waSaleOverlay').style.display='none';}
+function waProductChanged(){
+  var pid=parseInt(document.getElementById('wa-product').value);
+  var p=loadProds().find(function(x){return x.id===pid;});
+  var szSel=document.getElementById('wa-size');
+  if(!p){szSel.innerHTML='';return;}
+  var mSz=mergedSizeStock(p);
+  szSel.innerHTML=(p.sizes||[]).map(function(s){var q=mSz[s];return'<option value="'+s+'">'+s+(q!=null?' ('+q+' in stock)':'')+'</option>';}).join('');
+}
+function submitWaSale(){
+  var pid=parseInt(document.getElementById('wa-product').value);
+  var size=document.getElementById('wa-size').value;
+  var qty=parseInt(document.getElementById('wa-qty').value)||0;
+  var msg=document.getElementById('waSaleMsg');
+  if(!pid||!size||qty<=0){msg.style.color='var(--red)';msg.textContent='Pick a product, size and quantity.';return;}
+  var p=loadProds().find(function(x){return x.id===pid;});
+  var mSz=p?mergedSizeStock(p):{};
+  var baseQty=(p&&p.sizeStock&&p.sizeStock[size]!=null)?p.sizeStock[size]:0;
+  var btn=document.getElementById('waSaleBtn');btn.disabled=true;btn.textContent='Saving...';
+  fetch(ORDERS_API_BASE+'/stock',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'decrement',productId:pid,size:size,qty:qty,baseQty:baseQty})})
+  .then(function(r){if(!r.ok)return r.json().then(function(d){throw new Error(d.error||('HTTP '+r.status));});return r.json();})
+  .then(function(d){
+    btn.disabled=false;btn.textContent='Reduce Stock';
+    toast('Stock updated — '+(p?p.name:'product')+' size '+size+' now '+d.newQty,'success');
+    logAct('WhatsApp sale: '+(p?p.name:'#'+pid)+' size '+size+' x'+qty,'var(--blue)');
+    closeWaSale();
+    refreshLiveStock(function(){if(document.getElementById('page-products').classList.contains('active'))renderProds();});
+  })
+  .catch(function(err){btn.disabled=false;btn.textContent='Reduce Stock';msg.style.color='var(--red)';msg.textContent=err.message||'Could not update stock.';});
+}
+
 function setPS(type,msg){
   var el=document.getElementById('publishStatus');if(!el)return;el.style.display='block';
   var bg={ok:'var(--green-bg)',err:'var(--red-bg)',info:'var(--blue-bg)'};var tc={ok:'var(--green)',err:'var(--red)',info:'var(--blue)'};
@@ -1268,12 +1236,11 @@ window.addEventListener('pageshow',function(e){
 // INIT
 function initApp(){
   syncFromPublished();
-  syncBannersFromPublished();
   loadProds().forEach(function(p){if(p.id>=nextId)nextId=p.id+1;});
   loadCloudConfig();loadGHConfig();loadCheckoutMode();
   buildSizeChips();buildBadgeChips();
-  renderProds();renderCoupons();renderNotifs();renderRevs();updateExpCount();
-  checkUnpublished();checkUnpublishedBanners();startTimer();logAct('Admin logged in','var(--green)');
+  renderProds();renderCoupons();renderNotifs();renderRevs();updateExpCount();refreshLiveStock(renderProds);
+  checkUnpublished();startTimer();logAct('Admin logged in','var(--green)');
   fetchOrdersFromServer().then(function(orders){
     var seen=parseInt(localStorage.getItem('smw_orders_seen_count')||'0');
     var unread=Math.max(0,orders.length-seen);
@@ -1319,14 +1286,59 @@ function renderImgGrid(){
 }
 
 // SIZE & BADGE CHIPS
-function buildSizeChips(){var el=document.getElementById('sizeChips');if(!el)return;el.innerHTML=ALL_SIZES.map(function(sz){return'<button class="s-chip" onclick="toggleSz(this,\''+sz+'\')">'+sz+'</button>';}).join('');}
-function toggleSz(btn,size){var i=selSizes.indexOf(size);if(i>=0){selSizes.splice(i,1);btn.classList.remove('on');}else{selSizes.push(size);btn.classList.add('on');}}
-function resetSzChips(){selSizes=[];document.querySelectorAll('.s-chip').forEach(function(c){c.classList.remove('on');});}
-function applySz(){document.querySelectorAll('.s-chip').forEach(function(c){if(selSizes.indexOf(c.textContent.trim())>=0)c.classList.add('on');else c.classList.remove('on');});}
+function buildSizeChips(){var el=document.getElementById('sizeStockList');if(!el)return;el.innerHTML=ALL_SIZES.map(function(sz){return'<span class="sz-row" data-sz="'+sz+'"><button type="button" class="s-chip" onclick="toggleSz(this,\''+sz+'\')">'+sz+'</button><input type="number" class="sz-stock-input" id="szstock-'+sz+'" placeholder="Qty" min="0" style="display:none" oninput="updateSzStock(\''+sz+'\')"></span>';}).join('');syncStockField();}
+function toggleSz(btn,size){
+  var i=selSizes.indexOf(size);var inp=document.getElementById('szstock-'+size);
+  if(i>=0){selSizes.splice(i,1);btn.classList.remove('on');delete sizeStockMap[size];if(inp){inp.style.display='none';inp.value='';inp.classList.remove('zero');}}
+  else{selSizes.push(size);btn.classList.add('on');if(inp){inp.style.display='inline-block';inp.value=sizeStockMap[size]!=null?sizeStockMap[size]:0;sizeStockMap[size]=parseInt(inp.value)||0;inp.focus();}}
+  syncStockField();
+}
+function updateSzStock(size){var inp=document.getElementById('szstock-'+size);if(!inp)return;var v=parseInt(inp.value)||0;sizeStockMap[size]=v;inp.classList.toggle('zero',v===0);syncStockField();}
+function resetSzChips(){selSizes=[];sizeStockMap={};document.querySelectorAll('#sizeStockList .s-chip').forEach(function(c){c.classList.remove('on');});document.querySelectorAll('.sz-stock-input').forEach(function(i){i.style.display='none';i.value='';i.classList.remove('zero');});syncStockField();}
+function applySz(){
+  document.querySelectorAll('#sizeStockList .sz-row').forEach(function(row){
+    var sz=row.getAttribute('data-sz'),chip=row.querySelector('.s-chip'),inp=row.querySelector('.sz-stock-input');
+    if(selSizes.indexOf(sz)>=0){chip.classList.add('on');if(inp){inp.style.display='inline-block';var v=sizeStockMap[sz]!=null?sizeStockMap[sz]:0;inp.value=v;inp.classList.toggle('zero',v===0);}}
+    else{chip.classList.remove('on');if(inp){inp.style.display='none';inp.value='';inp.classList.remove('zero');}}
+  });
+  syncStockField();
+}
+function syncStockField(){
+  var f=document.getElementById('f-stock'),hint=document.getElementById('f-stock-hint');if(!f)return;
+  if(selSizes.length>0){
+    var total=selSizes.reduce(function(sum,s){return sum+(parseInt(sizeStockMap[s])||0);},0);
+    f.value=total;f.readOnly=true;f.style.opacity=.65;if(hint)hint.style.display='block';
+  }else{
+    f.readOnly=false;f.style.opacity=1;if(hint)hint.style.display='none';
+  }
+}
 function buildBadgeChips(){var el=document.getElementById('badgeChips');if(!el)return;el.innerHTML=ALL_BADGES.map(function(b){return'<button class="b-chip" onclick="pickBadge(this,\''+b.val+'\')">'+b.label+'</button>';}).join('');var first=el.querySelector('.b-chip');if(first)first.classList.add('sel-none');}
 function pickBadge(btn,val){selBadge=val;document.getElementById('f-badge').value=val;document.querySelectorAll('.b-chip').forEach(function(c){c.className='b-chip';});var m={'':'sel-none','new':'sel-new','sale':'sel-sale','offer':'sel-offer'};btn.classList.add(m[val]||'sel-none');}
 function resetBadgeChips(){selBadge='';document.getElementById('f-badge').value='';document.querySelectorAll('.b-chip').forEach(function(c){c.className='b-chip';});var first=document.querySelector('#badgeChips .b-chip');if(first)first.classList.add('sel-none');}
 function applyBadge(){document.querySelectorAll('.b-chip').forEach(function(c){c.className='b-chip';});var m={'':'sel-none','new':'sel-new','sale':'sel-sale','offer':'sel-offer'};ALL_BADGES.forEach(function(b){if(b.val===selBadge){document.querySelectorAll('#badgeChips .b-chip').forEach(function(c){if(c.textContent.trim()===b.label)c.classList.add(m[b.val]||'sel-none');});}});}
+
+// LIVE STOCK (from Vercel KV — sales via Razorpay checkout or a
+// logged WhatsApp sale reduce this without needing a re-publish).
+var liveStock={};
+function refreshLiveStock(cb){
+  var prods=loadProds();
+  var ids=prods.filter(function(p){return p.sizes&&p.sizes.length;}).map(function(p){return p.id;});
+  if(!ids.length){liveStock={};if(cb)cb();return;}
+  fetch(ORDERS_API_BASE+'/stock?ids='+ids.join(','),{credentials:'include'})
+  .then(function(r){return r.ok?r.json():{stock:{}};})
+  .then(function(d){liveStock=(d&&d.stock)||{};if(cb)cb();})
+  .catch(function(){if(cb)cb();});
+}
+function mergedSizeStock(p){
+  var base=p.sizeStock||{},live=liveStock[p.id]||{},out={};
+  (p.sizes||[]).forEach(function(s){out[s]=live[s]!=null?live[s]:(base[s]!=null?base[s]:null);});
+  return out;
+}
+function mergedTotalStock(p){
+  if(!p.sizes||!p.sizes.length)return parseInt(p.stock)||0;
+  var m=mergedSizeStock(p);
+  return Object.keys(m).reduce(function(sum,s){return sum+(parseInt(m[s])||0);},0);
+}
 
 // PRODUCTS RENDER
 function renderProds(){
@@ -1348,7 +1360,8 @@ function renderProds(){
     var hasSale=p.sale&&parseFloat(p.sale)<parseFloat(p.orig);
     var priceH=hasSale?'<strong style="color:var(--red)">'+fmtRs(p.sale)+'</strong> <span style="text-decoration:line-through;color:var(--text2);font-size:11px">'+fmtRs(p.orig)+'</span>':'<strong>'+fmtRs(p.orig)+'</strong>';
     var imgH=img?'<img src="'+escHTML(img)+'" style="width:50px;height:62px;object-fit:cover;border-radius:5px;border:1px solid var(--border)" onerror="this.style.opacity=\'0.2\'">':'<div style="width:50px;height:62px;border-radius:5px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px">👕</div>';
-    return'<tr><td style="font-weight:800;color:var(--text2)">'+(i+1)+'</td><td>'+imgH+'</td><td><strong>'+escHTML(p.name)+'</strong>'+(p.tagline?'<div style="font-size:11px;color:var(--text2)">'+escHTML(p.tagline)+'</div>':'')+'</td><td><span class="tag '+catTagClass(p.cat)+'">'+catLabel(p.cat)+'</span></td><td>'+priceH+'</td><td>'+stockHTML(p)+'<div style="font-size:11px;color:var(--text2)">'+(parseInt(p.stock)||0)+' units</div></td><td>'+(badgeHTML(p.badge)||'<span style="color:var(--text2);font-size:12px">—</span>')+'</td><td style="font-size:12px;color:var(--text2)">'+((p.sizes&&p.sizes.length)?p.sizes.join(', '):'—')+'</td><td><div style="display:flex;gap:5px"><button class="btn btn-outline btn-xs" onclick="viewProd('+p.id+')">View</button><button class="btn btn-warning btn-xs" onclick="startEdit('+p.id+')">Edit</button><button class="btn btn-danger btn-xs" onclick="delProd('+p.id+')">Del</button></div></td></tr>';
+    var liveTotal=mergedTotalStock(p),mSz=mergedSizeStock(p);
+    return'<tr><td style="font-weight:800;color:var(--text2)">'+(i+1)+'</td><td>'+imgH+'</td><td><strong>'+escHTML(p.name)+'</strong>'+(p.tagline?'<div style="font-size:11px;color:var(--text2)">'+escHTML(p.tagline)+'</div>':'')+'</td><td><span class="tag '+catTagClass(p.cat)+'">'+catLabel(p.cat)+'</span></td><td>'+priceH+'</td><td>'+stockHTML(p,liveTotal)+'<div style="font-size:11px;color:var(--text2)">'+liveTotal+' units</div></td><td>'+(badgeHTML(p.badge)||'<span style="color:var(--text2);font-size:12px">—</span>')+'</td><td style="font-size:12px;color:var(--text2)">'+((p.sizes&&p.sizes.length)?p.sizes.map(function(s){var q=mSz[s];return q!=null?(s+(q<=0?' <span style="color:var(--red);font-weight:700">(0)</span>':' ('+q+')')):s;}).join(', '):'—')+'</td><td><div style="display:flex;gap:5px"><button class="btn btn-outline btn-xs" onclick="viewProd('+p.id+')">View</button><button class="btn btn-warning btn-xs" onclick="startEdit('+p.id+')">Edit</button><button class="btn btn-danger btn-xs" onclick="delProd('+p.id+')">Del</button></div></td></tr>';
   }).join('');
 }
 
@@ -1361,7 +1374,7 @@ function viewProd(id){
   var prH=hasSale?'<span class="pv-sale">'+fmtRs(p.sale)+'</span><span class="pv-orig">'+fmtRs(p.orig)+'</span>':'<span class="pv-reg">'+fmtRs(p.orig)+'</span>';
   var galH='';
   if(imgs.length){galH='<div class="pv-gallery"><img class="pv-main" id="pvMain" src="'+escHTML(imgs[0])+'" alt="">';if(imgs.length>1)galH+='<div class="pv-thumbs">'+imgs.map(function(s,i){return'<img class="pv-thumb'+(i===0?' active':'')+'" src="'+escHTML(s)+'" onclick="switchPvImg(this,\''+escHTML(s)+'\')">';}).join('')+'</div>';galH+='</div>';}
-  var sizH=(p.sizes&&p.sizes.length)?p.sizes.map(function(s){return'<span class="pv-sz">'+escHTML(s)+'</span>';}).join(''):'';
+  var sizH=(p.sizes&&p.sizes.length)?p.sizes.map(function(s){var q=p.sizeStock&&p.sizeStock[s]!=null?parseInt(p.sizeStock[s]):null;var out=q!=null&&q<=0;return'<span class="pv-sz"'+(out?' style="color:var(--red);border-color:var(--red);text-decoration:line-through"':'')+'>'+escHTML(s)+(q!=null?' ('+q+')':'')+'</span>';}).join(''):'';
   document.getElementById('viewContent').innerHTML='<div class="pv-wrap">'+galH+'<div class="pv-body"><div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px"><div><div class="pv-name">'+escHTML(p.name)+'</div>'+(p.tagline?'<div style="font-size:13px;color:var(--text2);font-style:italic">'+escHTML(p.tagline)+'</div>':'')+'</div><div style="display:flex;gap:6px">'+stockHTML(p)+(badgeHTML(p.badge)||'')+'</div></div><div class="pv-price">'+prH+'</div>'+(sizH?'<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:5px">Sizes</div><div class="pv-sizes">'+sizH+'</div></div>':'')+(p.description?'<div style="font-size:13px;color:var(--text2);line-height:1.65;margin-top:10px">'+escHTML(p.description)+'</div>':'')+'</div></div>';
   goto('view');
 }
@@ -1385,6 +1398,7 @@ function startEdit(id){
   resetForm();
   document.getElementById('f-editId').value=id;document.getElementById('f-name').value=p.name||'';document.getElementById('f-cat').value=p.cat||'';document.getElementById('f-tagline').value=p.tagline||'';document.getElementById('f-desc').value=p.description||'';document.getElementById('f-fabric').value=p.fabric||'';document.getElementById('f-fit').value=p.fit||'';document.getElementById('f-orig').value=p.orig||'';document.getElementById('f-sale').value=p.sale||'';document.getElementById('f-stock').value=p.stock||'';document.getElementById('f-threshold').value=p.threshold||5;document.getElementById('f-status').value=p.status||'instock';document.getElementById('f-visible').checked=p.visible!==false;document.getElementById('f-lowstock').checked=p.lowStock||false;
   currentImgs=(p.photos&&p.photos.length)?p.photos.slice():[];selSizes=(p.sizes&&p.sizes.length)?p.sizes.slice():[];selBadge=p.badge||'';
+  sizeStockMap={};selSizes.forEach(function(s){sizeStockMap[s]=(p.sizeStock&&p.sizeStock[s]!=null)?parseInt(p.sizeStock[s])||0:(parseInt(p.stock)||0);});
   renderImgGrid();applySz();applyBadge();goto('add');document.getElementById('addTitle').textContent='Edit Product';document.getElementById('addSub').textContent='Update product details';
 }
 function saveProduct(){
@@ -1392,7 +1406,10 @@ function saveProduct(){
   if(!name){toast('Enter product name','error');return;}if(!cat){toast('Select a category','error');return;}if(!orig){toast('Enter original price','error');return;}if(uploading){toast('Wait for upload to finish','error');return;}
   var saleVal=parseFloat(document.getElementById('f-sale').value)||0;
   var prods=loadProds();var eid=parseInt(document.getElementById('f-editId').value)||0;
-  var obj={id:eid>0?eid:nextId++,name:name,cat:cat,tagline:document.getElementById('f-tagline').value.trim(),description:document.getElementById('f-desc').value.trim(),fabric:document.getElementById('f-fabric').value.trim(),fit:document.getElementById('f-fit').value.trim(),orig:orig,sale:(saleVal>0&&saleVal<orig)?saleVal:null,stock:parseInt(document.getElementById('f-stock').value)||0,threshold:parseInt(document.getElementById('f-threshold').value)||5,status:document.getElementById('f-status').value,visible:document.getElementById('f-visible').checked,lowStock:document.getElementById('f-lowstock').checked,badge:selBadge,sizes:selSizes.slice(),photos:currentImgs.slice()};
+  var szStock=null,totalStock;
+  if(selSizes.length>0){szStock={};selSizes.forEach(function(s){szStock[s]=parseInt(sizeStockMap[s])||0;});totalStock=selSizes.reduce(function(sum,s){return sum+szStock[s];},0);}
+  else{totalStock=parseInt(document.getElementById('f-stock').value)||0;}
+  var obj={id:eid>0?eid:nextId++,name:name,cat:cat,tagline:document.getElementById('f-tagline').value.trim(),description:document.getElementById('f-desc').value.trim(),fabric:document.getElementById('f-fabric').value.trim(),fit:document.getElementById('f-fit').value.trim(),orig:orig,sale:(saleVal>0&&saleVal<orig)?saleVal:null,stock:totalStock,threshold:parseInt(document.getElementById('f-threshold').value)||5,status:document.getElementById('f-status').value,visible:document.getElementById('f-visible').checked,lowStock:document.getElementById('f-lowstock').checked,badge:selBadge,sizes:selSizes.slice(),sizeStock:szStock,photos:currentImgs.slice()};
   if(eid>0){var idx=prods.findIndex(function(x){return x.id===eid;});if(idx>=0)prods[idx]=obj;else prods.push(obj);toast('Updated: '+name,'success');logAct('Updated: '+name,'var(--blue)');}
   else{prods.push(obj);toast('Added: '+name,'success');logAct('Added: '+name,'var(--blue)');}
   saveProds(prods);updateExpCount();checkUnpublished();resetForm();goto('products');
