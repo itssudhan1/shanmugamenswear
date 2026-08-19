@@ -177,6 +177,8 @@ nav{position:sticky;top:0;z-index:200;background:var(--black);display:flex;align
 .size-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
 .size-btn{min-width:50px;height:50px;padding:0 12px;border:1.5px solid var(--stone);background:transparent;font-family:var(--sans);font-size:13px;color:var(--black);transition:all .2s var(--spring)}
 .size-btn:hover{border-color:var(--black);transform:translateY(-2px)}.size-btn.active{background:var(--black);color:var(--white);border-color:var(--black);transform:translateY(-2px)}
+.size-btn.out-of-stock{opacity:.35;cursor:not-allowed;text-decoration:line-through;border-style:dashed}.size-btn.out-of-stock:hover{transform:none;border-color:var(--stone)}
+.size-stock-note{font-size:10px;color:var(--mid);margin:-2px 0 10px;letter-spacing:.04em}.size-stock-note.warn{color:var(--red)}
 .size-guide{font-size:11px;color:var(--mid);text-decoration:underline;text-underline-offset:3px;margin-bottom:20px;display:inline-block;letter-spacing:.05em;transition:color .2s}
 .size-guide:hover{color:var(--black)}
 .qty-row{display:flex;align-items:center;margin-bottom:20px}
@@ -449,7 +451,7 @@ window.addEventListener('pageshow',function(){var pt=document.getElementById('pa
 
 /* CART */
 var cart=JSON.parse(localStorage.getItem('smw_cart')||'[]');
-var qty=1,selectedSize='',currentProduct=null;
+var qty=1,selectedSize='',currentProduct=null,currentSizeStock={};
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');}
 function saveCart(){localStorage.setItem('smw_cart',JSON.stringify(cart));}
 function fmtPrice(n){return 'Rs.'+Number(n).toLocaleString('en-IN');}
@@ -488,10 +490,15 @@ function goToCheckout(){
   location.href='checkout.html';
 }
 
+function sizeStockAvailable(size){var q=currentSizeStock[size];return q==null?Infinity:(parseInt(q)||0);}
 function doAddToCart(){
   if(!currentProduct)return;
+  var avail=sizeStockAvailable(selectedSize);
+  if(avail<=0){showToast('Sorry, size '+selectedSize+' is out of stock.');return;}
   var price=currentProduct.sale&&currentProduct.sale<currentProduct.orig?currentProduct.sale:currentProduct.orig;
   var existing=cart.find(function(x){return x.id===currentProduct.id&&x.size===selectedSize;});
+  var alreadyInCart=existing?existing.qty:0;
+  if(alreadyInCart+qty>avail){showToast('Only '+avail+' left in size '+selectedSize+'.');return;}
   if(existing){existing.qty+=qty;}
   else{cart.push({uid:currentProduct.id+'_'+selectedSize+'_'+Date.now(),id:currentProduct.id,name:currentProduct.name,price:price,size:selectedSize,photo:(currentProduct.photos&&currentProduct.photos[0])||'',qty:qty});}
   saveCart();updateCartUI();
@@ -504,8 +511,12 @@ function doAddToCart(){
 /* BUY NOW — adds to cart then goes straight to checkout */
 function doBuyNow(){
   if(!currentProduct)return;
+  var avail=sizeStockAvailable(selectedSize);
+  if(avail<=0){showToast('Sorry, size '+selectedSize+' is out of stock.');return;}
   var price=currentProduct.sale&&currentProduct.sale<currentProduct.orig?currentProduct.sale:currentProduct.orig;
   var existing=cart.find(function(x){return x.id===currentProduct.id&&x.size===selectedSize;});
+  var alreadyInCart=existing?existing.qty:0;
+  if(alreadyInCart+qty>avail){showToast('Only '+avail+' left in size '+selectedSize+'.');return;}
   if(existing){existing.qty+=qty;}
   else{cart.push({uid:currentProduct.id+'_'+selectedSize+'_'+Date.now(),id:currentProduct.id,name:currentProduct.name,price:price,size:selectedSize,photo:(currentProduct.photos&&currentProduct.photos[0])||'',qty:qty});}
   saveCart();
@@ -617,9 +628,13 @@ function loadProduct(){
   var displayPrice=hasSale?p.sale:p.orig;
   var saveAmt=hasSale?p.orig-p.sale:0;
   var sizes=(p.sizes&&p.sizes.length)?p.sizes:['S','M','L','XL'];
-  selectedSize=sizes[0];
+  currentSizeStock=p.sizeStock||{};
+  function szQty(s){return currentSizeStock[s]!=null?parseInt(currentSizeStock[s])||0:null;} /* null = no per-size tracking, treat as available */
+  function szOut(s){var q=szQty(s);return q!==null&&q<=0;}  var firstAvail=sizes.find(function(s){return !szOut(s);});
+  var allOut=firstAvail===undefined;
+  selectedSize=allOut?sizes[0]:firstAvail;
   var ss=document.getElementById('stickySize');
-  sizes.forEach(function(s){var o=document.createElement('option');o.textContent=s;ss.appendChild(o);});
+  sizes.forEach(function(s){var o=document.createElement('option');o.textContent=s+(szOut(s)?' (Out of Stock)':'');o.value=s;o.disabled=szOut(s);if(s===selectedSize)o.selected=true;ss.appendChild(o);});
 
   document.getElementById('productInfo').innerHTML=
     '<p class="p-cat">'+(catMap[p.cat]||'Mens Wear')+'</p>'+
@@ -631,16 +646,17 @@ function loadProduct(){
       (hasSale?'<span class="price-was">'+fmtPrice(p.orig)+'</span><span class="price-save">Save '+fmtPrice(saveAmt)+'</span>':'')+
     '</div>'+
     '<div class="rating-row"><span class="stars">★★★★★</span><span class="rating-text">4.8 · Verified purchase</span></div>'+
-    '<p class="sec-label">Size — <span id="sizeLabel">'+selectedSize+'</span></p>'+
-    '<div class="size-grid" id="sizeGrid">'+sizes.map(function(s,i){return '<button class="size-btn'+(i===0?' active':'')+'" onclick="selectSize(this,\''+s+'\')">'+s+'</button>';}).join('')+'</div>'+
+    '<p class="sec-label">Size — <span id="sizeLabel">'+(allOut?'Out of Stock':selectedSize)+'</span></p>'+
+    '<div class="size-grid" id="sizeGrid">'+sizes.map(function(s){var out=szOut(s);return '<button class="size-btn'+(s===selectedSize?' active':'')+(out?' out-of-stock':'')+'" '+(out?'disabled ':'')+'onclick="selectSize(this,\''+s+'\')">'+s+'</button>';}).join('')+'</div>'+
+    '<p class="size-stock-note'+(allOut?' warn':'')+'" id="sizeStockNote"></p>'+
     '<a href="support.html" class="size-guide">View size guide →</a>'+
     '<p class="sec-label">Quantity</p>'+
     '<div class="qty-row"><div class="qty-control"><button class="qty-btn" onclick="changeQty(-1)">−</button><span class="qty-num" id="qtyNum">1</span><button class="qty-btn" onclick="changeQty(1)">+</button></div></div>'+
     '<div class="cta-stack">'+
-      '<button class="btn-primary" id="addBtn" onclick="doAddToCart()">'+
-        '<span class="btn-primary-inner"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>Add to Cart</span>'+
+      '<button class="btn-primary" id="addBtn" onclick="doAddToCart()"'+(allOut?' disabled style="opacity:.4;cursor:not-allowed"':'')+'>'+
+        '<span class="btn-primary-inner"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>'+(allOut?'Out of Stock':'Add to Cart')+'</span>'+
       '</button>'+
-      '<button class="btn-buy-now" onclick="doBuyNow()">'+
+      '<button class="btn-buy-now" onclick="doBuyNow()"'+(allOut?' disabled style="opacity:.4;cursor:not-allowed"':'')+'>'+
         '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>'+
         'Buy Now — Checkout Instantly'+
       '</button>'+
@@ -661,6 +677,7 @@ function loadProduct(){
       '<div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">Returns &amp; Exchanges <span class="acc-icon">+</span></div><div class="acc-body"><div class="acc-content">Hassle-free returns within 3 days of delivery. Item must be unworn with tags. Contact us on WhatsApp +91 94426 89858.</div></div></div>'+
       '<div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">Shipping <span class="acc-icon">+</span></div><div class="acc-body"><div class="acc-content">Orders dispatched within 24–48 hrs. Delivery in 3–5 business days. Free shipping on orders above Rs.1999.</div></div></div>'+
     '</div>';
+  updateSizeStockNote();
 
   document.getElementById('stickyName').textContent=p.name;
   document.getElementById('stickyPrice').textContent=fmtPrice(displayPrice);
@@ -684,13 +701,75 @@ function loadProduct(){
       '</div>';
     }).join('');
   }
+
+  refreshLiveStockForProduct(p);
+}
+
+// Live stock (adjusted by real sales) layered on top of the static
+// sizeStock numbers baked into smw-products.js at publish time. Runs
+// after the page has already rendered with the static numbers, then
+// patches the size buttons/dropdown in place if anything changed —
+// avoids blocking the initial render on a network round trip.
+function refreshLiveStockForProduct(p){
+  if(!p.sizes||!p.sizes.length)return;
+  fetch('https://shanmugamenswear.vercel.app/api/stock?ids='+p.id)
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){
+      if(!d||!d.stock)return;
+      var live=d.stock[p.id]!=null?d.stock[p.id]:d.stock[String(p.id)];
+      if(!live)return;
+      currentSizeStock=Object.assign({},currentSizeStock,live);
+      applyLiveStockToSizeUI(p.sizes);
+    })
+    .catch(function(){});
+}
+function applyLiveStockToSizeUI(sizes){
+  var grid=document.getElementById('sizeGrid');if(!grid)return;
+  var stillOk=currentSizeStock[selectedSize]==null||(parseInt(currentSizeStock[selectedSize])||0)>0;
+  grid.querySelectorAll('.size-btn').forEach(function(btn){
+    var s=btn.textContent.trim();
+    var q=currentSizeStock[s];
+    var out=q!=null&&(parseInt(q)||0)<=0;
+    btn.classList.toggle('out-of-stock',out);
+    if(out)btn.setAttribute('disabled','');else btn.removeAttribute('disabled');
+  });
+  var ss=document.getElementById('stickySize');
+  if(ss){Array.prototype.forEach.call(ss.options,function(o){var q=currentSizeStock[o.value];var out=q!=null&&(parseInt(q)||0)<=0;o.disabled=out;o.textContent=o.value+(out?' (Out of Stock)':'');});}
+  if(!stillOk){
+    var next=sizes.find(function(s){var q=currentSizeStock[s];return q==null||(parseInt(q)||0)>0;});
+    if(next){var btn=Array.prototype.find.call(grid.querySelectorAll('.size-btn'),function(b){return b.textContent.trim()===next;});selectSize(btn,next);}
+  }else{
+    updateSizeStockNote();
+  }
 }
 
 function showNotFound(){document.getElementById('productLayout').style.display='none';document.getElementById('notFound').style.display='block';}
 
 /* UI */
-function selectSize(btn,size){selectedSize=size;document.querySelectorAll('.size-btn').forEach(function(b){b.classList.toggle('active',b===btn);});document.getElementById('sizeLabel').textContent=size;}
-function changeQty(d){qty=Math.max(1,Math.min(10,qty+d));document.getElementById('qtyNum').textContent=qty;}
+function selectSize(btn,size){
+  if(btn&&btn.classList.contains('out-of-stock'))return;
+  selectedSize=size;
+  document.querySelectorAll('.size-btn').forEach(function(b){b.classList.toggle('active',b===btn);});
+  document.getElementById('sizeLabel').textContent=size;
+  var ss=document.getElementById('stickySize');if(ss)ss.value=size;
+  updateSizeStockNote();
+}
+function updateSizeStockNote(){
+  var note=document.getElementById('sizeStockNote');if(!note)return;
+  var q=currentSizeStock[selectedSize];
+  if(q==null){note.textContent='';return;}
+  q=parseInt(q)||0;
+  if(q<=0){note.textContent='This size is out of stock.';note.classList.add('warn');}
+  else if(q<=5){note.textContent='Only '+q+' left in this size — order soon.';note.classList.add('warn');}
+  else{note.textContent='';note.classList.remove('warn');}
+}
+function changeQty(d){
+  var max=10;
+  var q=currentSizeStock[selectedSize];
+  if(q!=null)max=Math.min(10,parseInt(q)||0);
+  qty=Math.max(1,Math.min(max||1,qty+d));
+  document.getElementById('qtyNum').textContent=qty;
+}
 function toggleAcc(h){var item=h.closest('.acc-item'),was=item.classList.contains('open');document.querySelectorAll('.acc-item').forEach(function(el){el.classList.remove('open');});if(!was)item.classList.add('open');}
 function toggleCart(){document.getElementById('cartDrawer').classList.toggle('open');document.getElementById('mobOverlay').classList.toggle('open');}
 function openDrawer(){document.getElementById('mobDrawer').classList.add('open');document.getElementById('mobOverlay').classList.add('open');}
