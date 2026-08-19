@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const { kv } = require('@vercel/kv');
 const { verifyIdToken } = require('./_lib/firebaseAdmin');
+const { decrementStock } = require('./stock');
 
 module.exports = async function handler(req, res) {
   const allowedOrigins = [
@@ -115,6 +116,18 @@ module.exports = async function handler(req, res) {
       await kv.lpush('orders:by-uid:' + decoded.uid, orderId);
     }
 
+    // --- Reduce per-size stock ---
+    // Only do this the first time this order actually has real items —
+    // NOT on every call. A webhook stub is created with empty items, so
+    // `existing.items` being empty (or existing being absent entirely)
+    // means this is the first time we're seeing the real cart. A true
+    // duplicate resend (order already had items) is already caught by
+    // the early "duplicate" return above, so it never reaches here.
+    const alreadyHadItems = existing && existing.items && existing.items.length > 0;
+    if (!alreadyHadItems && Array.isArray(cart) && cart.length) {
+      await reduceStockForCart(cart);
+    }
+
     return res.status(200).json({ verified: true, order });
   } catch (err) {
     console.error('verify-payment storage error:', err);
@@ -128,3 +141,63 @@ module.exports = async function handler(req, res) {
     });
   }
 };
+
+// NOTE: this assumes each cart item carries the product's catalog id
+// under one of item.productId / item.id / item.pid, plus item.size and
+// item.qty (matching what admin.html already displays for order items:
+// it.name, it.size, it.qty). If checkout.html's cart objects use a
+// different field name for the product id, update PRODUCT_ID_KEYS below
+// or this will silently skip decrementing for every item.
+const PRODUCT_ID_KEYS = ['productId', 'id', 'pid'];
+
+async function reduceStockForCart(cart) {
+  const baseStockMap = await fetchBaseSizeStock();
+  for (const item of cart) {
+    try {
+      if (!item || !item.size) continue; // not a size-tracked item — skip
+      const qty = parseInt(item.qty, 10) || 0;
+      if (qty <= 0) continue;
+      let pid = null;
+      for (const k of PRODUCT_ID_KEYS) {
+        if (item[k] != null) { pid = item[k]; break; }
+      }
+      if (pid == null) {
+        console.warn('reduceStockForCart: could not find a product id on cart item', item);
+        continue;
+      }
+      const baseQty = baseStockMap[pid] && baseStockMap[pid][item.size] != null
+        ? baseStockMap[pid][item.size]
+        : undefined;
+      await decrementStock(String(pid), item.size, qty, baseQty);
+    } catch (err) {
+      // A stock-update failure should never fail the order itself —
+      // the payment already succeeded. Just log it for follow-up.
+      console.error('Stock decrement failed for cart item', item, err);
+    }
+  }
+}
+
+// Live stock (KV) only tracks ADJUSTMENTS. The starting number for a
+// size that has never been sold yet lives in smw-products.js on GitHub,
+// so on the very first sale of a size we fetch that file to know what
+// to count down from. Cheap to call — it's a small static file, and
+// only runs on the first decrement of a given size (after that, KV
+// already holds the running total and this fallback is never used).
+async function fetchBaseSizeStock() {
+  try {
+    const r = await fetch('https://shanmugamenswear.vercel.app/smw-products.js');
+    if (!r.ok) return {};
+    const text = await r.text();
+    const match = text.match(/SMW_DEFAULT_PRODUCTS\s*=\s*(\[[\s\S]*\]);/);
+    if (!match) return {};
+    const products = JSON.parse(match[1]);
+    const map = {};
+    products.forEach(function (p) {
+      if (p && p.sizeStock) map[p.id] = p.sizeStock;
+    });
+    return map;
+  } catch (err) {
+    console.error('Could not fetch base product stock for fallback:', err);
+    return {};
+  }
+}
