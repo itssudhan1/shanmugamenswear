@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const { kv } = require('@vercel/kv');
 const { verifyIdToken } = require('./_lib/firebaseAdmin');
-const { decrementStock } = require('./stock');
+const { decrementStock, fetchBaseSizeStock } = require('./stock');
 
 module.exports = async function handler(req, res) {
   const allowedOrigins = [
@@ -177,27 +177,6 @@ async function reduceStockForCart(cart) {
   }
 }
 
-// Live stock (KV) only tracks ADJUSTMENTS. The starting number for a
-// size that has never been sold yet lives in smw-products.js on GitHub,
-// so on the very first sale of a size we fetch that file to know what
-// to count down from. Cheap to call — it's a small static file, and
-// only runs on the first decrement of a given size (after that, KV
-// already holds the running total and this fallback is never used).
-async function fetchBaseSizeStock() {
-  try {
-    const r = await fetch('https://shanmugamenswear.vercel.app/smw-products.js');
-    if (!r.ok) return {};
-    const text = await r.text();
-    const match = text.match(/SMW_DEFAULT_PRODUCTS\s*=\s*(\[[\s\S]*\]);/);
-    if (!match) return {};
-    const products = JSON.parse(match[1]);
-    const map = {};
-    products.forEach(function (p) {
-      if (p && p.sizeStock) map[p.id] = p.sizeStock;
-    });
-    return map;
-  } catch (err) {
-    console.error('Could not fetch base product stock for fallback:', err);
-    return {};
-  }
-}
+// Live stock (KV) only tracks ADJUSTMENTS — the starting number lives in
+// smw-products.js. fetchBaseSizeStock() (shared with create-whatsapp-order.js)
+// handles that fallback; see api/stock.js.
