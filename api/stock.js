@@ -122,3 +122,29 @@ async function decrementStock(productId, size, qty, baseQtyFallback) {
 }
 
 module.exports.decrementStock = decrementStock;
+
+// Live stock (KV) only tracks ADJUSTMENTS. The starting number for a
+// size that has never been sold yet lives in smw-products.js on GitHub,
+// so on the very first sale of a size we fetch that file to know what
+// to count down from. Shared by verify-payment.js (Razorpay) and
+// create-whatsapp-order.js (customer-facing WhatsApp checkout) so both
+// paths use the exact same fallback logic.
+async function fetchBaseSizeStock() {
+  try {
+    const r = await fetch('https://shanmugamenswear.vercel.app/smw-products.js');
+    if (!r.ok) return {};
+    const text = await r.text();
+    const match = text.match(/SMW_DEFAULT_PRODUCTS\s*=\s*(\[[\s\S]*\]);/);
+    if (!match) return {};
+    const products = JSON.parse(match[1]);
+    const map = {};
+    products.forEach(function (p) {
+      if (p && p.sizeStock) map[p.id] = p.sizeStock;
+    });
+    return map;
+  } catch (err) {
+    console.error('Could not fetch base product stock for fallback:', err);
+    return {};
+  }
+}
+module.exports.fetchBaseSizeStock = fetchBaseSizeStock;
