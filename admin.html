@@ -280,6 +280,7 @@ input:checked+.slider::before{transform:translateX(18px)}
   <div class="ph">
     <div class="ph-left"><h1>Orders</h1><div class="sub" id="orderSub">Loading...</div></div>
     <div class="ph-right">
+      <button class="btn btn-outline btn-sm" onclick="openWaSale()">Log WhatsApp Order</button>
       <button class="btn btn-outline btn-sm" onclick="renderOrders()">Refresh</button>
       <button class="btn btn-danger btn-sm" onclick="clearOrders()">Clear All</button>
     </div>
@@ -292,6 +293,11 @@ input:checked+.slider::before{transform:translateX(18px)}
   </div>
   <div class="search-bar">
     <input type="text" id="orderSearch" placeholder="Search by name, phone, order ID" oninput="renderOrdersFromCache()">
+    <select id="orderSourceFilter" onchange="renderOrdersFromCache()">
+      <option value="">All Sources</option>
+      <option value="whatsapp">WhatsApp</option>
+      <option value="razorpay">Razorpay</option>
+    </select>
     <select id="orderStatusFilter" onchange="renderOrdersFromCache()">
       <option value="">All Shipping Status</option>
       <option value="pending">Pending</option>
@@ -337,17 +343,32 @@ input:checked+.slider::before{transform:translateX(18px)}
     </table>
   </div>
 </div>
-<div id="waSaleOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center">
-  <div style="background:var(--surface);border-radius:12px;padding:24px;width:360px;max-width:92vw">
-    <h3 style="margin:0 0 4px">Log a WhatsApp Sale</h3>
-    <div class="hint" style="margin-bottom:14px">Reduces live stock for this size right away. Doesn't touch smw-products.js — your Publish numbers are unaffected until you next edit and republish.</div>
-    <div class="fg"><label>Product</label><select id="wa-product" onchange="waProductChanged()"></select></div>
-    <div class="fg"><label>Size</label><select id="wa-size"></select></div>
-    <div class="fg"><label>Quantity sold</label><input type="number" id="wa-qty" value="1" min="1"></div>
+<div id="waSaleOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center;overflow:auto;padding:20px">
+  <div style="background:var(--surface);border-radius:12px;padding:24px;width:480px;max-width:94vw;max-height:90vh;overflow:auto">
+    <h3 style="margin:0 0 4px">Log a WhatsApp Order</h3>
+    <div class="hint" style="margin-bottom:14px">Creates a real order (shows up in Orders, printable bill) and reduces live stock for each item right away.</div>
+    <div class="g2">
+      <div class="fg"><label>Customer Name</label><input type="text" id="wa-cname" placeholder="Optional"></div>
+      <div class="fg"><label>Phone</label><input type="text" id="wa-cphone" placeholder="Optional"></div>
+    </div>
+    <div class="fg"><label>Address</label><input type="text" id="wa-caddr" placeholder="Optional"></div>
+    <div style="border-top:1px solid var(--border);margin:10px 0 12px;padding-top:12px">
+      <label style="font-size:12px;font-weight:700;display:block;margin-bottom:8px">Items</label>
+      <div class="g2">
+        <div class="fg"><label>Product</label><select id="wa-product" onchange="waProductChanged()"></select></div>
+        <div class="fg"><label>Size</label><select id="wa-size"></select></div>
+      </div>
+      <div class="g2">
+        <div class="fg"><label>Quantity</label><input type="number" id="wa-qty" value="1" min="1"></div>
+        <div class="fg" style="display:flex;align-items:flex-end"><button type="button" class="btn btn-outline btn-sm" style="width:100%" onclick="waAddItem()">+ Add Item</button></div>
+      </div>
+      <div id="waItemsList" style="margin-top:6px"></div>
+      <div id="waItemsTotal" style="text-align:right;font-weight:800;margin-top:8px;display:none">Total: <span id="waItemsTotalVal"></span></div>
+    </div>
     <div id="waSaleMsg" style="font-size:12px;margin-bottom:10px"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button class="btn btn-outline btn-sm" onclick="closeWaSale()">Cancel</button>
-      <button class="btn btn-primary btn-sm" id="waSaleBtn" onclick="submitWaSale()">Reduce Stock</button>
+      <button class="btn btn-primary btn-sm" id="waSaleBtn" onclick="submitWaSale()">Create Order</button>
     </div>
   </div>
 </div>
@@ -780,6 +801,7 @@ function renderOrdersFromCache(orders){
   orders=orders||cachedOrders;
   var q=(document.getElementById('orderSearch')||{value:''}).value.toLowerCase();
   var sf=(document.getElementById('orderStatusFilter')||{value:''}).value;
+  var srcf=(document.getElementById('orderSourceFilter')||{value:''}).value;
   var totalRev=0,pending=0,delivered=0;
   orders.forEach(function(o){
     var t=o.totals||o;
@@ -795,6 +817,7 @@ function renderOrdersFromCache(orders){
   if(sub)sub.textContent=orders.length+' order'+(orders.length!==1?'s':'')+' received';
   var filtered=orders.filter(function(o){
     if(sf&&(o.shippingStatus||'pending')!==sf)return false;
+    if(srcf){var osrc=o.source==='whatsapp'?'whatsapp':'razorpay';if(osrc!==srcf)return false;}
     if(q){
       var c=o.customer||{};
       var hay=(c.name||(c.fname?(c.fname+' '+(c.lname||'')):''))+' '+(c.phone||'')+' '+(c.email||'')+' '+o.id+' '+(o.paymentId||'');
@@ -818,12 +841,13 @@ function renderOrdersFromCache(orders){
       return '<div class="order-item-row"><div><div class="order-item-name">'+escHTML(it.name)+'</div><div class="order-item-meta">Size: '+escHTML(it.size||'—')+' &nbsp;•&nbsp; Qty: '+it.qty+'</div></div><div style="font-weight:700">'+fmtRs(it.total||(it.price*it.qty))+'</div></div>';
     }).join('');
     var curStatus=o.shippingStatus||'pending';
-    var srcTag=o.source==='webhook-recovery'?'<span class="tag to">Recovered</span>':'<span class="tag tg">Paid</span>';
+    var srcTag=o.source==='whatsapp'?'<span class="tag tb">WhatsApp</span>':(o.source==='webhook-recovery'?'<span class="tag to">Razorpay · Recovered</span>':'<span class="tag tg">Razorpay</span>');
     return '<div class="order-card">'+
       '<div class="order-card-head">'+
         '<div><div class="order-id">'+escHTML(o.id)+'</div><div class="order-date">'+escHTML(o.dateStr||o.date||'')+'</div></div>'+
         '<span class="tag '+shipTagClass(curStatus)+'">'+shipTagLabel(curStatus)+'</span>'+srcTag+
         '<div style="margin-left:auto;display:flex;gap:8px">'+
+          '<button class="btn btn-outline btn-xs" onclick="printOrder(\''+escHTML(o.id)+'\')">Print Bill</button>'+
           '<button class="btn btn-outline btn-xs" onclick="showOrderDetail(\''+escHTML(o.id)+'\')">View Details</button>'+
           '<button class="btn btn-danger btn-xs" onclick="deleteOrder(\''+escHTML(o.id)+'\')">Delete</button>'+
         '</div>'+
@@ -1109,16 +1133,21 @@ function syncLiveStockAfterPublish(products){
   },Promise.resolve()).then(function(){refreshLiveStock(function(){if(document.getElementById('page-products').classList.contains('active'))renderProds();});});
 }
 
-// LOG A WHATSAPP SALE — quick manual stock decrement for orders taken
-// outside the site checkout.
+// LOG A WHATSAPP ORDER — creates a real order (visible in Orders, with
+// a printable bill) and reduces live stock, for sales taken outside the
+// site checkout.
+var waCart=[];
 function openWaSale(){
+  waCart=[];
   var prods=loadProds().filter(function(p){return p.sizes&&p.sizes.length;});
   var sel=document.getElementById('wa-product');
   sel.innerHTML=prods.map(function(p){return'<option value="'+p.id+'">'+escHTML(p.name)+'</option>';}).join('');
   document.getElementById('waSaleMsg').textContent='';
   document.getElementById('wa-qty').value=1;
+  document.getElementById('wa-cname').value='';document.getElementById('wa-cphone').value='';document.getElementById('wa-caddr').value='';
   document.getElementById('waSaleOverlay').style.display='flex';
   waProductChanged();
+  renderWaItems();
 }
 function closeWaSale(){document.getElementById('waSaleOverlay').style.display='none';}
 function waProductChanged(){
@@ -1129,26 +1158,90 @@ function waProductChanged(){
   var mSz=mergedSizeStock(p);
   szSel.innerHTML=(p.sizes||[]).map(function(s){var q=mSz[s];return'<option value="'+s+'">'+s+(q!=null?' ('+q+' in stock)':'')+'</option>';}).join('');
 }
-function submitWaSale(){
+function waAddItem(){
   var pid=parseInt(document.getElementById('wa-product').value);
   var size=document.getElementById('wa-size').value;
   var qty=parseInt(document.getElementById('wa-qty').value)||0;
   var msg=document.getElementById('waSaleMsg');
-  if(!pid||!size||qty<=0){msg.style.color='var(--red)';msg.textContent='Pick a product, size and quantity.';return;}
   var p=loadProds().find(function(x){return x.id===pid;});
-  var mSz=p?mergedSizeStock(p):{};
-  var baseQty=(p&&p.sizeStock&&p.sizeStock[size]!=null)?p.sizeStock[size]:0;
+  if(!p||!size||qty<=0){msg.style.color='var(--red)';msg.textContent='Pick a product, size and quantity.';return;}
+  msg.textContent='';
+  var price=(p.sale&&parseFloat(p.sale)<parseFloat(p.orig))?parseFloat(p.sale):parseFloat(p.orig);
+  var baseQty=(p.sizeStock&&p.sizeStock[size]!=null)?p.sizeStock[size]:0;
+  waCart.push({productId:p.id,name:p.name,size:size,qty:qty,price:price,total:price*qty,baseQty:baseQty});
+  document.getElementById('wa-qty').value=1;
+  renderWaItems();
+}
+function waRemoveItem(idx){waCart.splice(idx,1);renderWaItems();}
+function renderWaItems(){
+  var el=document.getElementById('waItemsList');
+  el.innerHTML=waCart.map(function(it,i){
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">'+
+      '<span>'+escHTML(it.name)+' <span style="color:var(--text2)">— Size '+escHTML(it.size)+' × '+it.qty+'</span></span>'+
+      '<span style="display:flex;align-items:center;gap:8px"><strong>'+fmtRs(it.total)+'</strong><button type="button" class="btn btn-danger btn-xs" onclick="waRemoveItem('+i+')">✕</button></span>'+
+    '</div>';
+  }).join('');
+  var totEl=document.getElementById('waItemsTotal'),totVal=document.getElementById('waItemsTotalVal');
+  if(waCart.length){var sum=waCart.reduce(function(s,it){return s+it.total;},0);totEl.style.display='block';totVal.textContent=fmtRs(sum);}
+  else{totEl.style.display='none';}
+}
+function submitWaSale(){
+  var msg=document.getElementById('waSaleMsg');
+  if(!waCart.length){msg.style.color='var(--red)';msg.textContent='Add at least one item.';return;}
   var btn=document.getElementById('waSaleBtn');btn.disabled=true;btn.textContent='Saving...';
-  fetch(ORDERS_API_BASE+'/stock',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'decrement',productId:pid,size:size,qty:qty,baseQty:baseQty})})
+  var total=waCart.reduce(function(s,it){return s+it.total;},0);
+  var payload={
+    customer:{name:document.getElementById('wa-cname').value.trim(),phone:document.getElementById('wa-cphone').value.trim(),address:document.getElementById('wa-caddr').value.trim()},
+    items:waCart.map(function(it){return{productId:it.productId,name:it.name,size:it.size,qty:it.qty,price:it.price,total:it.total,baseQty:it.baseQty};}),
+    totals:{total:total,shipping:0}
+  };
+  fetch(ORDERS_API_BASE+'/create-manual-order',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
   .then(function(r){if(!r.ok)return r.json().then(function(d){throw new Error(d.error||('HTTP '+r.status));});return r.json();})
   .then(function(d){
-    btn.disabled=false;btn.textContent='Reduce Stock';
-    toast('Stock updated — '+(p?p.name:'product')+' size '+size+' now '+d.newQty,'success');
-    logAct('WhatsApp sale: '+(p?p.name:'#'+pid)+' size '+size+' x'+qty,'var(--blue)');
+    btn.disabled=false;btn.textContent='Create Order';
+    toast('WhatsApp order '+(d.order&&d.order.id?d.order.id:'')+' created','success');
+    logAct('WhatsApp order created: '+fmtRs(total),'var(--blue)');
     closeWaSale();
     refreshLiveStock(function(){if(document.getElementById('page-products').classList.contains('active'))renderProds();});
+    if(document.getElementById('page-orders').classList.contains('active'))renderOrders();
   })
-  .catch(function(err){btn.disabled=false;btn.textContent='Reduce Stock';msg.style.color='var(--red)';msg.textContent=err.message||'Could not update stock.';});
+  .catch(function(err){btn.disabled=false;btn.textContent='Create Order';msg.style.color='var(--red)';msg.textContent=err.message||'Could not create order.';});
+}
+
+// PRINT BILL — opens a plain, printable invoice for an order in a new tab.
+function printOrder(orderId){
+  var o=(cachedOrders||[]).find(function(x){return x.id===orderId;});
+  if(!o){toast('Order not found','error');return;}
+  var c=o.customer||{};
+  var custName=c.name||(c.fname?(c.fname+' '+(c.lname||'')):'—');
+  var t=o.totals||o;
+  var total=t.total!=null?t.total:(o.total||0);
+  var shipping=t.shipping!=null?t.shipping:(o.shipping||0);
+  var itemsRows=(o.items||[]).map(function(it){
+    return '<tr><td>'+escHTML(it.name)+'</td><td>'+escHTML(it.size||'—')+'</td><td>'+it.qty+'</td><td style="text-align:right">'+fmtRs(it.price||((it.total||0)/(it.qty||1)))+'</td><td style="text-align:right">'+fmtRs(it.total||(it.price*it.qty))+'</td></tr>';
+  }).join('');
+  var srcLabel=o.source==='whatsapp'?'WhatsApp Order':'Razorpay (Online)';
+  var html='<!doctype html><html><head><meta charset="utf-8"><title>Bill — '+escHTML(o.id)+'</title>'+
+    '<style>body{font-family:Arial,Helvetica,sans-serif;color:#111;padding:32px;max-width:640px;margin:0 auto}'+
+    'h1{font-size:20px;margin:0 0 2px}.sub{color:#666;font-size:12px;margin-bottom:18px}'+
+    'table{width:100%;border-collapse:collapse;margin:16px 0}th,td{padding:8px 6px;border-bottom:1px solid #ddd;font-size:13px;text-align:left}'+
+    '.tot{text-align:right;font-size:16px;font-weight:700;margin-top:8px}'+
+    '.meta{display:flex;justify-content:space-between;font-size:12px;color:#444;margin-bottom:4px}'+
+    '@media print{button{display:none}}</style></head><body>'+
+    '<h1>Shanmuga Mens Wear</h1><div class="sub">Order Receipt</div>'+
+    '<div class="meta"><span><strong>Order ID:</strong> '+escHTML(o.id)+'</span><span>'+escHTML(o.dateStr||o.date||'')+'</span></div>'+
+    '<div class="meta"><span><strong>Source:</strong> '+srcLabel+'</span><span><strong>Status:</strong> '+escHTML(o.shippingStatus||'pending')+'</span></div>'+
+    '<div class="meta"><span><strong>Customer:</strong> '+escHTML(custName)+'</span><span>'+escHTML(c.phone||'')+'</span></div>'+
+    (c.address?'<div class="meta"><span><strong>Address:</strong> '+escHTML(c.address)+'</span></div>':'')+
+    '<table><thead><tr><th>Item</th><th>Size</th><th>Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Total</th></tr></thead><tbody>'+itemsRows+'</tbody></table>'+
+    (shipping>0?'<div style="text-align:right;font-size:12px;color:#666">Shipping: '+fmtRs(shipping)+'</div>':'')+
+    '<div class="tot">Total: '+fmtRs(total)+'</div>'+
+    '<button onclick="window.print()" style="margin-top:20px;padding:8px 16px;font-size:13px">Print</button>'+
+    '</body></html>';
+  var w=window.open('','_blank');
+  if(!w){toast('Please allow pop-ups to print','error');return;}
+  w.document.open();w.document.write(html);w.document.close();
+  w.onload=function(){w.print();};
 }
 
 function setPS(type,msg){
