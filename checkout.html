@@ -1095,10 +1095,11 @@ async function initiatePayment(){
   }
 }
 
-/* ── WHATSAPP-ONLY ORDER FLOW (no Razorpay, no backend order created) ──
-   Saves the order locally (so it shows in "My Orders" as pending),
-   shows the success modal, and opens WhatsApp with the order details
-   so the customer can confirm + arrange payment with you directly. */
+/* ── WHATSAPP-ONLY ORDER FLOW (no Razorpay) ──
+   Saves the order server-side (so it shows up in admin's Orders tab and
+   stock reserves right away), saves it locally (so it shows in "My
+   Orders"), shows the success modal, and opens WhatsApp with the order
+   details so the customer can confirm + arrange payment with you directly. */
 function placeWhatsAppOrder(currentUser){
   var btn = document.getElementById('payBtn');
   btn.disabled = true; btn.classList.add('loading');
@@ -1132,6 +1133,34 @@ function placeWhatsAppOrder(currentUser){
     subtotal: getSubtotal(), discount: discountAmount, coupon: appliedCoupon,
     shipping: shippingCost, total: total
   };
+
+  // Save the order server-side too — so it shows up in admin's Orders
+  // tab (tagged "WhatsApp") and the size sold gets reserved right away.
+  // Best-effort: if this fails (network hiccup etc.), we still let the
+  // order proceed via WhatsApp — the shop owner gets it either way, it
+  // just won't auto-appear in admin/won't auto-reduce stock that time.
+  (async function(){
+    try {
+      var idToken = currentUser ? await currentUser.getIdToken() : null;
+      await fetch('/api/create-whatsapp-order', {
+        method: 'POST',
+        headers: Object.assign(
+          { 'Content-Type': 'application/json' },
+          idToken ? { 'Authorization': 'Bearer ' + idToken } : {}
+        ),
+        body: JSON.stringify({
+          orderId: orderId,
+          customer: lastOrderData.customer,
+          items: cartBackup.map(function(x){
+            return { productId: x.id, name: x.name, size: x.size || '', qty: x.qty, price: x.price, total: x.price * x.qty };
+          }),
+          totals: { subtotal: getSubtotal(), discount: discountAmount, coupon: appliedCoupon, shipping: shippingCost, total: total }
+        })
+      });
+    } catch (e) {
+      console.error('create-whatsapp-order failed (order will still go via WhatsApp):', e);
+    }
+  })();
 
   // Save order locally so it shows in "My Orders" (status: pending confirmation)
   if (currentUser && window.SMW) {
