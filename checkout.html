@@ -1142,13 +1142,14 @@ function placeWhatsAppOrder(currentUser){
   (async function(){
     try {
       var idToken = currentUser ? await currentUser.getIdToken() : null;
-      var waRes = await fetch('/api/create-whatsapp-order', {
+      var waRes = await fetch('/api/log-order', {
         method: 'POST',
         headers: Object.assign(
           { 'Content-Type': 'application/json' },
           idToken ? { 'Authorization': 'Bearer ' + idToken } : {}
         ),
         body: JSON.stringify({
+          isAdmin: false,
           orderId: orderId,
           customer: lastOrderData.customer,
           items: cartBackup.map(function(x){
@@ -1159,13 +1160,13 @@ function placeWhatsAppOrder(currentUser){
       });
       if (!waRes.ok) {
         var errBody = await waRes.text();
-        console.error('create-whatsapp-order rejected (' + waRes.status + '):', errBody);
+        console.error('log-order rejected (' + waRes.status + '):', errBody);
         showToast('Order sent via WhatsApp, but syncing to admin failed (' + waRes.status + '). Please tell the shop owner to log it manually.', true);
       } else {
-        console.log('create-whatsapp-order: order saved to admin OK —', orderId);
+        console.log('log-order: order saved to admin OK —', orderId);
       }
     } catch (e) {
-      console.error('create-whatsapp-order failed (order will still go via WhatsApp):', e);
+      console.error('log-order failed (order will still go via WhatsApp):', e);
       showToast('Order sent via WhatsApp, but could not sync to admin. Please tell the shop owner to log it manually.', true);
     }
   })();
