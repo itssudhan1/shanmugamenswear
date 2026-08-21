@@ -1191,11 +1191,12 @@ function submitWaSale(){
   var btn=document.getElementById('waSaleBtn');btn.disabled=true;btn.textContent='Saving...';
   var total=waCart.reduce(function(s,it){return s+it.total;},0);
   var payload={
+    isAdmin:true,
     customer:{name:document.getElementById('wa-cname').value.trim(),phone:document.getElementById('wa-cphone').value.trim(),address:document.getElementById('wa-caddr').value.trim()},
     items:waCart.map(function(it){return{productId:it.productId,name:it.name,size:it.size,qty:it.qty,price:it.price,total:it.total,baseQty:it.baseQty};}),
     totals:{total:total,shipping:0}
   };
-  fetch(ORDERS_API_BASE+'/create-manual-order',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+  fetch(ORDERS_API_BASE+'/log-order',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
   .then(function(r){if(!r.ok)return r.json().then(function(d){throw new Error(d.error||('HTTP '+r.status));});return r.json();})
   .then(function(d){
     btn.disabled=false;btn.textContent='Create Order';
@@ -1267,10 +1268,10 @@ function doLogin(){
   if(!u||!p){showErr('Enter username and password.');return;}
   var btn=document.getElementById('loginBtn');
   if(btn){btn.disabled=true;btn.textContent='Signing in…';}
-  fetch(ORDERS_API_BASE+'/admin-login',{
+  fetch(ORDERS_API_BASE+'/admin-auth',{
     method:'POST',credentials:'include',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({username:u,password:p})
+    body:JSON.stringify({action:'login',username:u,password:p})
   }).then(function(res){
     return res.json().then(function(d){return{ok:res.ok,data:d};});
   }).then(function(r){
@@ -1294,7 +1295,7 @@ function showErr(msg){var el=document.getElementById('loginErr');el.textContent=
 
 function doLogout(){
   if(!confirm('Sign out?'))return;
-  fetch(ORDERS_API_BASE+'/admin-logout',{method:'POST',credentials:'include'}).finally(forceLogout);
+  fetch(ORDERS_API_BASE+'/admin-auth',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'logout'})}).finally(forceLogout);
 }
 
 function forceLogout(){
@@ -1306,7 +1307,7 @@ function forceLogout(){
 // On page load, check whether a valid session already exists (e.g. the
 // admin refreshed the page) so they aren't forced to log in again every time.
 function checkExistingSession(){
-  fetch(ORDERS_API_BASE+'/admin-session',{credentials:'include',cache:'no-store'})
+  fetch(ORDERS_API_BASE+'/admin-auth',{credentials:'include',cache:'no-store'})
     .then(function(res){return res.json();})
     .then(function(d){
       if(d&&d.authenticated){
@@ -1586,10 +1587,10 @@ function changePw(){
   function fail(t){msg.className='pw-msg err';msg.style.display='block';msg.textContent=t;}
   if(nw.length<8){fail('Min 8 characters');return;}
   if(nw!==cf){fail('Passwords do not match');return;}
-  fetch(ORDERS_API_BASE+'/admin-change-password',{
+  fetch(ORDERS_API_BASE+'/admin-auth',{
     method:'POST',credentials:'include',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({currentPassword:cur,newPassword:nw})
+    body:JSON.stringify({action:'change-password',currentPassword:cur,newPassword:nw})
   }).then(function(res){return res.json().then(function(d){return{ok:res.ok,data:d};});})
   .then(function(r){
     if(!r.ok){fail((r.data&&r.data.error)||'Could not update password');return;}
