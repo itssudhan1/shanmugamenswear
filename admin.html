@@ -1221,26 +1221,47 @@ function printOrder(orderId){
   var t=o.totals||o;
   var total=t.total!=null?t.total:(o.total||0);
   var shipping=t.shipping!=null?t.shipping:(o.shipping||0);
+  var itemCount=(o.items||[]).length;
+  var unitCount=(o.items||[]).reduce(function(s,it){return s+(parseInt(it.qty)||0);},0);
   var itemsRows=(o.items||[]).map(function(it){
-    return '<tr><td>'+escHTML(it.name)+'</td><td>'+escHTML(it.size||'—')+'</td><td>'+it.qty+'</td><td style="text-align:right">'+fmtRs(it.price||((it.total||0)/(it.qty||1)))+'</td><td style="text-align:right">'+fmtRs(it.total||(it.price*it.qty))+'</td></tr>';
+    var price=it.price||((it.total||0)/(it.qty||1));
+    var lineTotal=it.total||(it.price*it.qty);
+    return '<tr><td colspan="4" class="item-name">'+escHTML(it.name)+(it.size?' <span class="item-size">Size: '+escHTML(it.size)+'</span>':'')+'</td></tr>'+
+      '<tr><td></td><td class="r">'+it.qty+'</td><td class="r">'+fmtRs(price)+'</td><td class="r">'+fmtRs(lineTotal)+'</td></tr>';
   }).join('');
-  var srcLabel=o.source==='whatsapp'?'WhatsApp Order':'Razorpay (Online)';
   var html='<!doctype html><html><head><meta charset="utf-8"><title>Bill — '+escHTML(o.id)+'</title>'+
-    '<style>body{font-family:Arial,Helvetica,sans-serif;color:#111;padding:32px;max-width:640px;margin:0 auto}'+
-    'h1{font-size:20px;margin:0 0 2px}.sub{color:#666;font-size:12px;margin-bottom:18px}'+
-    'table{width:100%;border-collapse:collapse;margin:16px 0}th,td{padding:8px 6px;border-bottom:1px solid #ddd;font-size:13px;text-align:left}'+
-    '.tot{text-align:right;font-size:16px;font-weight:700;margin-top:8px}'+
-    '.meta{display:flex;justify-content:space-between;font-size:12px;color:#444;margin-bottom:4px}'+
+    '<style>body{font-family:\'Courier New\',monospace;color:#111;padding:18px;max-width:300px;margin:0 auto;font-size:12px}'+
+    'h1{font-size:16px;margin:0;text-align:center;letter-spacing:.05em}'+
+    '.sub{text-align:center;font-size:10px;color:#444;margin-bottom:2px}'+
+    '.dashed{border-top:1px dashed #999;margin:8px 0}'+
+    '.meta{font-size:11px;margin-bottom:2px}'+
+    'table{width:100%;border-collapse:collapse;margin:8px 0}'+
+    'td{padding:2px 0;font-size:11px;vertical-align:top}'+
+    '.r{text-align:right}'+
+    '.item-name{padding-top:6px;font-weight:700}'+
+    '.item-size{font-weight:400;color:#555}'+
+    'thead td{font-weight:700;border-bottom:1px dashed #999;padding-bottom:4px}'+
+    '.tot-row{display:flex;justify-content:space-between;font-size:11px;margin:2px 0}'+
+    '.grand{display:flex;justify-content:space-between;font-size:14px;font-weight:800;margin-top:6px}'+
+    '.thanks{text-align:center;margin-top:16px;font-weight:700;font-size:13px}'+
     '@media print{button{display:none}}</style></head><body>'+
-    '<h1>Shanmuga Mens Wear</h1><div class="sub">Order Receipt</div>'+
-    '<div class="meta"><span><strong>Order ID:</strong> '+escHTML(o.id)+'</span><span>'+escHTML(o.dateStr||o.date||'')+'</span></div>'+
-    '<div class="meta"><span><strong>Source:</strong> '+srcLabel+'</span><span><strong>Status:</strong> '+escHTML(o.shippingStatus||'pending')+'</span></div>'+
-    '<div class="meta"><span><strong>Customer:</strong> '+escHTML(custName)+'</span><span>'+escHTML(c.phone||'')+'</span></div>'+
-    (c.address?'<div class="meta"><span><strong>Address:</strong> '+escHTML(c.address)+'</span></div>':'')+
-    '<table><thead><tr><th>Item</th><th>Size</th><th>Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Total</th></tr></thead><tbody>'+itemsRows+'</tbody></table>'+
-    (shipping>0?'<div style="text-align:right;font-size:12px;color:#666">Shipping: '+fmtRs(shipping)+'</div>':'')+
-    '<div class="tot">Total: '+fmtRs(total)+'</div>'+
-    '<button onclick="window.print()" style="margin-top:20px;padding:8px 16px;font-size:13px">Print</button>'+
+    '<h1>Shanmuga Mens Wear</h1>'+
+    '<div class="sub">'+escHTML(SHOP_FROM_ADDRESS.address)+'</div>'+
+    '<div class="sub">'+escHTML(SHOP_FROM_ADDRESS.phone)+'</div>'+
+    '<div class="dashed"></div>'+
+    '<div class="meta"><strong>Order:</strong> '+escHTML(o.id)+'</div>'+
+    '<div class="meta"><strong>Date:</strong> '+escHTML(o.dateStr||o.date||'')+'</div>'+
+    '<div class="meta"><strong>Customer:</strong> '+escHTML(custName)+'</div>'+
+    (c.phone?'<div class="meta"><strong>Phone:</strong> '+escHTML(c.phone)+'</div>':'')+
+    '<div class="dashed"></div>'+
+    '<table><thead><tr><td>Item</td><td class="r">Qty</td><td class="r">Price</td><td class="r">Amt</td></tr></thead><tbody>'+itemsRows+'</tbody></table>'+
+    '<div class="dashed"></div>'+
+    '<div class="tot-row"><span>Total Items: '+itemCount+'</span><span>Qty: '+unitCount+'</span></div>'+
+    (shipping>0?'<div class="tot-row"><span>Shipping</span><span>'+fmtRs(shipping)+'</span></div>':'')+
+    '<div class="grand"><span>Total</span><span>'+fmtRs(total)+'</span></div>'+
+    '<div class="dashed"></div>'+
+    '<div class="thanks">Thank you, Shop Again!</div>'+
+    '<button onclick="window.print()" style="margin-top:20px;padding:8px 16px;font-size:13px;width:100%">Print</button>'+
     '</body></html>';
   var w=window.open('','_blank');
   if(!w){toast('Please allow pop-ups to print','error');return;}
