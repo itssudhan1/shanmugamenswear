@@ -319,6 +319,7 @@ input:checked+.slider::before{transform:translateX(18px)}
     <div class="ph-left"><h1>Products</h1><div class="sub" id="prodSub">Loading...</div></div>
     <div class="ph-right">
       <button class="btn btn-outline btn-sm" onclick="openWaSale()">Log WhatsApp Sale</button>
+      <button class="btn btn-outline btn-sm" onclick="openBulkStock()">Bulk Update Stock (CSV)</button>
       <button class="btn btn-success btn-sm" onclick="goto('deploy')">Publish to Site</button>
       <button class="btn btn-primary btn-sm" onclick="gotoAdd()">+ Add Product</button>
     </div>
@@ -709,6 +710,11 @@ input:checked+.slider::before{transform:translateX(18px)}
         <div class="fg"><label>Confirm New Password</label><input type="password" id="pw-confirm"></div>
         <button class="btn btn-primary btn-sm" onclick="changePw()">Update Password</button>
       </div>
+      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin:20px 0 12px">Data Backup</div>
+      <div class="card">
+        <div class="hint" style="margin-bottom:12px">Download every product (with current stock) and every order as a single file — keep it somewhere safe.</div>
+        <button class="btn btn-outline btn-sm" onclick="downloadBackup()">Download Backup (JSON)</button>
+      </div>
     </div>
     <div><div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:12px">Activity Log</div>
       <div class="card" id="actLog" style="max-height:400px;overflow-y:auto"><p style="color:var(--text2);font-size:12px">No activity yet.</p></div>
@@ -734,6 +740,22 @@ input:checked+.slider::before{transform:translateX(18px)}
     <div class="modal-foot">
       <button class="btn btn-outline" onclick="closeMod('couponMod')">Cancel</button>
       <button class="btn btn-primary" onclick="createCouponMod()">Create</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="bulkStockMod">
+  <div class="modal-box">
+    <h3>Bulk Update Stock</h3>
+    <div class="hint" style="margin-bottom:12px">Download the current stock as a spreadsheet, edit the "Stock" numbers, then upload it back here. Matches rows by Product ID + Size — don't change those columns.</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button class="btn btn-outline btn-sm" onclick="downloadStockTemplate()">1. Download Current Stock (CSV)</button>
+    </div>
+    <div class="fg"><label>2. Upload edited CSV</label><input type="file" id="bulkStockFile" accept=".csv" onchange="handleBulkStockFile(event)"></div>
+    <div id="bulkStockMsg" style="font-size:12px;margin:8px 0"></div>
+    <div id="bulkStockPreview" style="max-height:260px;overflow-y:auto;font-size:12px;margin-bottom:8px"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeMod('bulkStockMod')">Cancel</button>
+      <button class="btn btn-primary" id="bulkStockApplyBtn" onclick="applyBulkStock()" disabled>Apply Updates</button>
     </div>
   </div>
 </div>
@@ -1139,6 +1161,115 @@ function syncLiveStockAfterPublish(products){
       return fetch(ORDERS_API_BASE+'/stock',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'set',productId:p.id,sizeStock:p.sizeStock||{}})}).catch(function(){});
     });
   },Promise.resolve()).then(function(){refreshLiveStock(function(){if(document.getElementById('page-products').classList.contains('active'))renderProds();});});
+}
+
+// BULK STOCK UPDATE VIA CSV
+function csvCell(v){v=String(v==null?'':v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function openBulkStock(){
+  var f=document.getElementById('bulkStockFile');if(f)f.value='';
+  document.getElementById('bulkStockMsg').textContent='';
+  document.getElementById('bulkStockPreview').innerHTML='';
+  document.getElementById('bulkStockApplyBtn').disabled=true;
+  bulkStockRows=[];
+  openMod('bulkStockMod');
+}
+function downloadStockTemplate(){
+  var prods=loadProds().filter(function(p){return p.sizes&&p.sizes.length;});
+  var rows=[['Product ID','Product Name','Size','Stock']];
+  prods.forEach(function(p){
+    var mSz=mergedSizeStock(p);
+    p.sizes.forEach(function(s){rows.push([p.id,p.name,s,mSz[s]!=null?mSz[s]:0]);});
+  });
+  if(rows.length===1){toast('No sized products to export yet','error');return;}
+  var csv=rows.map(function(r){return r.map(csvCell).join(',');}).join('\r\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='shanmuga-stock-'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+var bulkStockRows=[];
+function handleBulkStockFile(e){
+  var file=e.target.files&&e.target.files[0];
+  var msg=document.getElementById('bulkStockMsg'),prev=document.getElementById('bulkStockPreview'),btn=document.getElementById('bulkStockApplyBtn');
+  msg.textContent='';prev.innerHTML='';btn.disabled=true;bulkStockRows=[];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      var wb=XLSX.read(ev.target.result,{type:'string'});
+      var sheet=wb.Sheets[wb.SheetNames[0]];
+      var rows=XLSX.utils.sheet_to_json(sheet,{defval:''});
+      if(!rows.length){msg.style.color='var(--red)';msg.textContent='No rows found in file.';return;}
+      var prods=loadProds();
+      var parsed=rows.map(function(r){
+        var pid=parseInt(r['Product ID']);var size=String(r['Size']||'').trim();var newStock=parseInt(r['Stock']);
+        var p=prods.find(function(x){return x.id===pid;});
+        var valid=p&&size&&p.sizes&&p.sizes.indexOf(size)>=0&&!isNaN(newStock)&&newStock>=0;
+        var oldStock=p?(mergedSizeStock(p)[size]!=null?mergedSizeStock(p)[size]:0):null;
+        return{productId:pid,name:p?p.name:'(unknown product)',size:size,newStock:newStock,oldStock:oldStock,valid:valid,changed:valid&&oldStock!==newStock};
+      });
+      bulkStockRows=parsed.filter(function(r){return r.valid;});
+      var invalidCount=parsed.length-bulkStockRows.length;
+      var changedCount=bulkStockRows.filter(function(r){return r.changed;}).length;
+      prev.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr style="text-align:left;border-bottom:1px solid var(--border)"><th style="padding:4px">Product</th><th style="padding:4px">Size</th><th style="padding:4px">Old</th><th style="padding:4px">New</th></tr></thead><tbody>'+
+        parsed.map(function(r){
+          var color=!r.valid?'var(--red)':(r.changed?'var(--green)':'var(--text2)');
+          return'<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px">'+escHTML(r.name)+'</td><td style="padding:4px">'+escHTML(r.size)+'</td><td style="padding:4px">'+(r.oldStock!=null?r.oldStock:'—')+'</td><td style="padding:4px;color:'+color+';font-weight:700">'+(r.valid?r.newStock:'invalid row')+'</td></tr>';
+        }).join('')+'</tbody></table>';
+      msg.style.color=invalidCount>0?'var(--red)':'var(--text2)';
+      msg.textContent=changedCount+' size(s) will change'+(invalidCount>0?', '+invalidCount+' row(s) skipped (bad product ID/size)':'')+'.';
+      btn.disabled=changedCount===0;
+    }catch(err){msg.style.color='var(--red)';msg.textContent='Could not read that file — make sure it\'s the CSV template.';}
+  };
+  reader.readAsText(file);
+}
+function applyBulkStock(){
+  var changed=bulkStockRows.filter(function(r){return r.changed;});
+  if(!changed.length)return;
+  var btn=document.getElementById('bulkStockApplyBtn');btn.disabled=true;btn.textContent='Applying...';
+  var prods=loadProds();
+  var touchedIds={};
+  changed.forEach(function(r){
+    var p=prods.find(function(x){return x.id===r.productId;});
+    if(!p)return;
+    if(!p.sizeStock)p.sizeStock={};
+    p.sizeStock[r.size]=r.newStock;
+    p.stock=p.sizes.reduce(function(sum,s){return sum+(parseInt(p.sizeStock[s])||0);},0);
+    touchedIds[p.id]=p;
+  });
+  saveProds(prods);
+  var touched=Object.values(touchedIds);
+  touched.reduce(function(chain,p){
+    return chain.then(function(){
+      return fetch(ORDERS_API_BASE+'/stock',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'set',productId:p.id,sizeStock:p.sizeStock})}).catch(function(){});
+    });
+  },Promise.resolve()).then(function(){
+    btn.textContent='Apply Updates';
+    toast(changed.length+' size(s) updated across '+touched.length+' product(s)','success');
+    logAct('Bulk stock update: '+changed.length+' size(s) across '+touched.length+' product(s)','var(--blue)');
+    closeMod('bulkStockMod');
+    checkUnpublished();
+    refreshLiveStock(function(){if(document.getElementById('page-products').classList.contains('active'))renderProds();});
+  });
+}
+
+// BACKUP — everything needed to restore the shop: full product catalog
+// (with live stock merged in) plus every saved order, as one JSON file.
+function downloadBackup(){
+  toast('Preparing backup…','info');
+  fetchOrdersFromServer().then(function(orders){
+    var prods=loadProds().map(function(p){
+      var copy=Object.assign({},p);
+      if(p.sizes&&p.sizes.length)copy.sizeStock=mergedSizeStock(p);
+      return copy;
+    });
+    var backup={exportedAt:new Date().toISOString(),shop:'Shanmuga Mens Wear',products:prods,orders:orders||[]};
+    var blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download='shanmuga-backup-'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    toast('Backup downloaded','success');
+  }).catch(function(){toast('Could not fetch orders for backup','error');});
 }
 
 // LOG A WHATSAPP ORDER — creates a real order (visible in Orders, with
@@ -1903,4 +2034,3 @@ function startTimer(){
 </script>
 </body>
 </html>
-
