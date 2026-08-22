@@ -255,6 +255,7 @@ input:checked+.slider::before{transform:translateX(18px)}
   <div class="s-brand"><span class="name">SHANMUGA</span><span class="badge">ADMIN</span></div>
   <div class="s-section">Orders</div>
   <button class="nav-btn" id="nav-orders" onclick="goto('orders')">Orders <span class="nbadge" id="nb-orders" style="display:none">0</span></button>
+  <button class="nav-btn" id="nav-customers" onclick="goto('customers')">Customer Lookup</button>
   <div class="s-section">Insights</div>
   <button class="nav-btn" id="nav-analytics" onclick="goto('analytics')">Analytics &amp; AI Insights</button>
   <div class="s-section">Catalogue</div>
@@ -379,6 +380,14 @@ input:checked+.slider::before{transform:translateX(18px)}
       <button class="btn btn-primary btn-sm" id="waSaleBtn" onclick="submitWaSale()">Create Order</button>
     </div>
   </div>
+</div>
+<div class="page" id="page-customers">
+  <div class="ph"><div class="ph-left"><h1>Customer Lookup</h1><div class="sub">Search a customer's full order history by phone number</div></div></div>
+  <div class="search-bar">
+    <input type="text" id="custLookupPhone" placeholder="Enter phone number (e.g. 9876543210)" onkeydown="if(event.key==='Enter')lookupCustomer()">
+    <button class="btn btn-primary btn-sm" onclick="lookupCustomer()">Search</button>
+  </div>
+  <div id="custLookupResult"></div>
 </div>
 <div class="page" id="page-add">
   <div class="ph">
@@ -929,6 +938,60 @@ function renderOrdersFromCache(orders){
   if(nb){nb.textContent=unread;nb.style.display=unread>0?'':'none';}
 }
 
+// CUSTOMER LOOKUP — search full order history by phone number.
+function normPhone(p){return String(p||'').replace(/\D/g,'').slice(-10);}
+function lookupCustomer(){
+  var raw=document.getElementById('custLookupPhone').value;
+  var target=normPhone(raw);
+  var resEl=document.getElementById('custLookupResult');
+  if(!target||target.length<6){resEl.innerHTML='<div class="no-orders"><h3>Enter a valid phone number</h3><p>Type at least 6 digits and search again.</p></div>';return;}
+  resEl.innerHTML='<div class="no-orders"><h3>Searching…</h3></div>';
+  fetchOrdersFromServer().then(function(orders){
+    var matches=(orders||[]).filter(function(o){
+      var c=o.customer||{};
+      return normPhone(c.phone)===target;
+    });
+    if(!matches.length){
+      resEl.innerHTML='<div class="no-orders"><h3>No orders found</h3><p>No order on file has a customer phone matching that number.</p></div>';
+      return;
+    }
+    matches.sort(function(a,b){return new Date(b.date||b.dateStr||0)-new Date(a.date||a.dateStr||0);});
+    var custName=(matches[0].customer&&matches[0].customer.name)||'—';
+    var custAddr=(matches[0].customer&&matches[0].customer.address)||'';
+    var totalSpent=matches.reduce(function(s,o){var t=o.totals||o;return s+(t.total!=null?t.total:(o.total||0));},0);
+    var firstDate=matches[matches.length-1].dateStr||matches[matches.length-1].date||'—';
+    var lastDate=matches[0].dateStr||matches[0].date||'—';
+    var summary='<div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">'+
+      '<div class="stat-card dark"><div class="s-lbl">Customer</div><div class="s-val" style="font-size:16px">'+escHTML(custName)+'</div></div>'+
+      '<div class="stat-card"><div class="s-lbl">Total Orders</div><div class="s-val">'+matches.length+'</div></div>'+
+      '<div class="stat-card"><div class="s-lbl">Total Spent</div><div class="s-val" style="color:var(--green);font-size:20px">'+fmtRs(totalSpent)+'</div></div>'+
+      '<div class="stat-card"><div class="s-lbl">First → Last Order</div><div class="s-val" style="font-size:12px">'+escHTML(firstDate)+' → '+escHTML(lastDate)+'</div></div>'+
+    '</div>'+(custAddr?'<div class="hint" style="margin-bottom:16px"><strong>Last known address:</strong> '+escHTML(custAddr)+'</div>':'');
+    var cards=matches.map(function(o){
+      var c=o.customer||{};
+      var t=o.totals||o;
+      var total=t.total!=null?t.total:(o.total||0);
+      var itemsHTML=(o.items||[]).map(function(it){
+        return '<div class="order-item-row"><div><div class="order-item-name">'+escHTML(it.name)+'</div><div class="order-item-meta">Size: '+escHTML(it.size||'—')+' &nbsp;•&nbsp; Qty: '+it.qty+'</div></div><div style="font-weight:700">'+fmtRs(it.total||(it.price*it.qty))+'</div></div>';
+      }).join('');
+      var curStatus=o.shippingStatus||'pending';
+      var srcTag=o.source==='whatsapp'?'<span class="tag tb">WhatsApp</span>':(o.source==='webhook-recovery'?'<span class="tag to">Razorpay · Recovered</span>':'<span class="tag tg">Razorpay</span>');
+      return '<div class="order-card">'+
+        '<div class="order-card-head">'+
+          '<div><div class="order-id">'+escHTML(o.id)+'</div><div class="order-date">'+escHTML(o.dateStr||o.date||'')+'</div></div>'+
+          '<span class="tag '+shipTagClass(curStatus)+'">'+shipTagLabel(curStatus)+'</span>'+srcTag+
+          '<div style="margin-left:auto;display:flex;gap:8px">'+
+            '<button class="btn btn-outline btn-xs" onclick="printOrder(\''+escHTML(o.id)+'\')">Print Bill</button>'+
+            '<button class="btn btn-outline btn-xs" onclick="showOrderDetail(\''+escHTML(o.id)+'\')">View Details</button>'+
+          '</div>'+
+        '</div>'+
+        '<div class="order-card-body">'+itemsHTML+'<div style="text-align:right;font-weight:800;margin-top:8px">Total: '+fmtRs(total)+'</div></div>'+
+      '</div>';
+    }).join('');
+    resEl.innerHTML=summary+cards;
+  }).catch(function(){resEl.innerHTML='<div class="no-orders"><h3>Could not load orders</h3><p>Try again.</p></div>';});
+}
+
 function updateShipStatus(orderId,status){
   fetch(ORDERS_API_BASE+'/order-update',{method:'PATCH',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:orderId,shippingStatus:status})})
     .then(function(res){if(!res.ok)return res.json().then(function(d){throw new Error(d.error||('HTTP '+res.status));});return res.json();})
@@ -991,7 +1054,7 @@ function clearOrders(){
 }
 
 // NAV
-var PAGE_TITLES={orders:'Orders',products:'Products',add:'Add Product',view:'Product Details',deploy:'Publish to Website',offers:'Offers & Coupons',reviews:'Reviews',notifications:'Notifications',security:'Security',analytics:'Analytics & AI Insights'};
+var PAGE_TITLES={orders:'Orders',customers:'Customer Lookup',products:'Products',add:'Add Product',view:'Product Details',deploy:'Publish to Website',offers:'Offers & Coupons',reviews:'Reviews',notifications:'Notifications',security:'Security',analytics:'Analytics & AI Insights'};
 function goto(pg){
   document.querySelectorAll('.page').forEach(function(e){e.classList.remove('active');});
   document.querySelectorAll('.nav-btn').forEach(function(e){e.classList.remove('active');});
