@@ -1,4 +1,4 @@
-/* Shanmuga Mens Wear Products — 3 items — Updated 21/8/2026, 10:26:20 pm */
+/* Shanmuga Mens Wear Products — 4 items — Updated 22/8/2026, 11:11:52 am */
 /* 2026 Shanmuga Mens Wear. All rights reserved. */
 
 var SMW_DEFAULT_PRODUCTS = [
@@ -101,6 +101,40 @@ var SMW_DEFAULT_PRODUCTS = [
       "https://res.cloudinary.com/do2topls5/image/upload/v1783872499/sl6w4q6aoxpl3pgwcknu.jpg",
       "https://res.cloudinary.com/do2topls5/image/upload/v1783872513/itwuevpnlin0crudpk9m.jpg",
       "https://res.cloudinary.com/do2topls5/image/upload/v1783872514/wbj2tacw9boh0sp9lgcd.jpg"
+    ]
+  },
+  {
+    "id": 201,
+    "name": "Classic Grey Shirt",
+    "cat": "shirts",
+    "tagline": "Premium cotton, regular fit",
+    "description": "A classic grey shirt for everyday wear",
+    "fabric": "100% Cotton",
+    "fit": "Regular Fit",
+    "orig": 899,
+    "sale": 799,
+    "stock": 10,
+    "threshold": 5,
+    "status": "instock",
+    "visible": true,
+    "lowStock": false,
+    "badge": "New",
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "sizeStock": {
+      "S": 3,
+      "M": 3,
+      "L": 2,
+      "XL": 2
+    },
+    "photos": [
+      "https://res.cloudinary.com/do2topls5/image/upload/v1787377281/xlrn6kl1lak0qsqqlsri.png",
+      "https://res.cloudinary.com/do2topls5/image/upload/v1787377285/xtnwyliowkortej08dwu.png",
+      "https://res.cloudinary.com/do2topls5/image/upload/v1787377288/xqwti3fpqymfnvcswufb.png"
     ]
   }
 ];
