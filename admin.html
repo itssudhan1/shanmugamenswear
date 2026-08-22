@@ -237,6 +237,7 @@ input:checked+.slider::before{transform:translateX(18px)}
 .seg-card .seg-lbl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-top:4px}
 .mini-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 <div id="loginScreen">
@@ -281,6 +282,7 @@ input:checked+.slider::before{transform:translateX(18px)}
     <div class="ph-left"><h1>Orders</h1><div class="sub" id="orderSub">Loading...</div></div>
     <div class="ph-right">
       <button class="btn btn-outline btn-sm" onclick="openWaSale()">Log WhatsApp Order</button>
+      <button class="btn btn-outline btn-sm" onclick="exportSalesReport()">Export Report (Excel)</button>
       <button class="btn btn-outline btn-sm" onclick="renderOrders()">Refresh</button>
       <button class="btn btn-danger btn-sm" onclick="clearOrders()">Clear All</button>
     </div>
@@ -848,6 +850,7 @@ function renderOrdersFromCache(orders){
         '<span class="tag '+shipTagClass(curStatus)+'">'+shipTagLabel(curStatus)+'</span>'+srcTag+
         '<div style="margin-left:auto;display:flex;gap:8px">'+
           '<button class="btn btn-outline btn-xs" onclick="printOrder(\''+escHTML(o.id)+'\')">Print Bill</button>'+
+          '<button class="btn btn-outline btn-xs" onclick="printLabel(\''+escHTML(o.id)+'\')">Print Label</button>'+
           '<button class="btn btn-outline btn-xs" onclick="showOrderDetail(\''+escHTML(o.id)+'\')">View Details</button>'+
           '<button class="btn btn-danger btn-xs" onclick="deleteOrder(\''+escHTML(o.id)+'\')">Delete</button>'+
         '</div>'+
@@ -1243,6 +1246,101 @@ function printOrder(orderId){
   if(!w){toast('Please allow pop-ups to print','error');return;}
   w.document.open();w.document.write(html);w.document.close();
   w.onload=function(){w.print();};
+}
+
+// PRINT COURIER LABEL — From (fixed shop address) / To (customer address).
+var SHOP_FROM_ADDRESS={
+  name:'Shanmuga City Center',
+  address:'Vaniyan kovil street, Thirupathur, Sivagangai Dt, Tamil Nadu — 630211',
+  phone:'+91 94426 89858'
+};
+function printLabel(orderId){
+  var o=(cachedOrders||[]).find(function(x){return x.id===orderId;});
+  if(!o){toast('Order not found','error');return;}
+  var c=o.customer||{};
+  var custName=c.name||(c.fname?(c.fname+' '+(c.lname||'')):'—');
+  var t=o.totals||o;
+  var total=t.total!=null?t.total:(o.total||0);
+  var itemCount=(o.items||[]).reduce(function(s,it){return s+(parseInt(it.qty)||0);},0);
+  var codLine=(o.status&&/pending/i.test(o.status))?'<div class="cod">COD: '+fmtRs(total)+'</div>':'<div class="paid">PREPAID</div>';
+  var html='<!doctype html><html><head><meta charset="utf-8"><title>Label — '+escHTML(o.id)+'</title>'+
+    '<style>body{font-family:Arial,Helvetica,sans-serif;color:#111;padding:24px;max-width:420px;margin:0 auto}'+
+    '.label-box{border:2px solid #111;border-radius:6px;padding:18px;margin-bottom:14px}'+
+    '.tag{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#666;margin-bottom:6px}'+
+    '.name{font-size:16px;font-weight:800;margin-bottom:4px}'+
+    '.addr{font-size:13px;line-height:1.6;color:#222}'+
+    '.phone{font-size:13px;margin-top:6px;font-weight:600}'+
+    '.divider{border-top:2px dashed #999;margin:16px 0}'+
+    '.meta-row{display:flex;justify-content:space-between;font-size:12px;color:#444;margin-bottom:10px}'+
+    '.cod{background:#fff3cd;border:1px solid #f0c419;padding:8px 12px;border-radius:6px;font-weight:800;font-size:14px;text-align:center;margin-top:10px}'+
+    '.paid{background:#dcfce7;border:1px solid #16a34a;padding:8px 12px;border-radius:6px;font-weight:800;font-size:14px;text-align:center;margin-top:10px;color:#16a34a}'+
+    '@media print{button{display:none}}</style></head><body>'+
+    '<div class="meta-row"><span><strong>Order:</strong> '+escHTML(o.id)+'</span><span>'+escHTML(o.dateStr||o.date||'')+'</span></div>'+
+    '<div class="label-box"><div class="tag">From</div><div class="name">'+escHTML(SHOP_FROM_ADDRESS.name)+'</div><div class="addr">'+escHTML(SHOP_FROM_ADDRESS.address)+'</div><div class="phone">'+escHTML(SHOP_FROM_ADDRESS.phone)+'</div></div>'+
+    '<div class="divider"></div>'+
+    '<div class="label-box"><div class="tag">To</div><div class="name">'+escHTML(custName)+'</div><div class="addr">'+escHTML(c.address||'—')+'</div><div class="phone">'+escHTML(c.phone?('+91'+c.phone):'')+'</div></div>'+
+    '<div class="meta-row" style="margin-top:10px"><span>'+itemCount+' item(s)</span><span>Wt: —</span></div>'+
+    codLine+
+    '<button onclick="window.print()" style="margin-top:20px;padding:8px 16px;font-size:13px;width:100%">Print</button>'+
+    '</body></html>';
+  var w=window.open('','_blank');
+  if(!w){toast('Please allow pop-ups to print','error');return;}
+  w.document.open();w.document.write(html);w.document.close();
+  w.onload=function(){w.print();};
+}
+
+// EXPORT SALES REPORT — weekly + monthly summary as a downloadable .xlsx,
+// built entirely in the browser from the orders already loaded (no new
+// server endpoint needed).
+function isoWeekLabel(d){
+  var date=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  var day=date.getUTCDay()||7;
+  date.setUTCDate(date.getUTCDate()+4-day);
+  var yearStart=new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  var weekNo=Math.ceil((((date-yearStart)/86400000)+1)/7);
+  return date.getUTCFullYear()+'-W'+(weekNo<10?'0':'')+weekNo;
+}
+function monthLabel(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+}
+function exportSalesReport(){
+  if(typeof XLSX==='undefined'){toast('Excel library did not load — check your internet and try again','error');return;}
+  fetchOrdersFromServer().then(function(orders){
+    orders=orders||[];
+    if(!orders.length){toast('No orders to export yet','error');return;}
+    var weekly={},monthly={};
+    orders.forEach(function(o){
+      var d=new Date(o.date||o.dateStr||Date.now());
+      if(isNaN(d.getTime()))d=new Date();
+      var t=o.totals||o;
+      var total=parseFloat(t.total!=null?t.total:(o.total||0))||0;
+      var units=(o.items||[]).reduce(function(s,it){return s+(parseInt(it.qty)||0);},0);
+      var wk=isoWeekLabel(d),mo=monthLabel(d);
+      if(!weekly[wk])weekly[wk]={period:wk,orders:0,revenue:0,units:0};
+      weekly[wk].orders++;weekly[wk].revenue+=total;weekly[wk].units+=units;
+      if(!monthly[mo])monthly[mo]={period:mo,orders:0,revenue:0,units:0};
+      monthly[mo].orders++;monthly[mo].revenue+=total;monthly[mo].units+=units;
+    });
+    var weeklyRows=Object.values(weekly).sort(function(a,b){return a.period<b.period?-1:1;})
+      .map(function(r){return{Week:r.period,Orders:r.orders,'Units Sold':r.units,'Revenue (Rs)':Math.round(r.revenue)};});
+    var monthlyRows=Object.values(monthly).sort(function(a,b){return a.period<b.period?-1:1;})
+      .map(function(r){return{Month:r.period,Orders:r.orders,'Units Sold':r.units,'Revenue (Rs)':Math.round(r.revenue)};});
+    var allRows=orders.map(function(o){
+      var t=o.totals||o;
+      return{
+        'Order ID':o.id,Date:o.dateStr||o.date||'',Source:o.source==='whatsapp'?'WhatsApp':'Razorpay',
+        Status:o.shippingStatus||'pending',Customer:(o.customer&&o.customer.name)||'',
+        Phone:(o.customer&&o.customer.phone)||'',Items:(o.items||[]).length,
+        'Revenue (Rs)':Math.round(parseFloat(t.total!=null?t.total:(o.total||0))||0)
+      };
+    });
+    var wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(weeklyRows),'Weekly');
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(monthlyRows),'Monthly');
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(allRows),'All Orders');
+    XLSX.writeFile(wb,'shanmuga-sales-report-'+new Date().toISOString().slice(0,10)+'.xlsx');
+    toast('Report downloaded','success');
+  }).catch(function(){toast('Could not load orders for the report','error');});
 }
 
 function setPS(type,msg){
