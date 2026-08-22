@@ -281,6 +281,10 @@ input:checked+.slider::before{transform:translateX(18px)}
   <div class="ph">
     <div class="ph-left"><h1>Orders</h1><div class="sub" id="orderSub">Loading...</div></div>
     <div class="ph-right">
+      <select id="billPaperWidth" onchange="setBillPaperWidth(this.value)" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);font-size:12px;font-weight:600" title="Printer paper width">
+        <option value="80">80mm paper</option>
+        <option value="50">50mm paper</option>
+      </select>
       <button class="btn btn-outline btn-sm" onclick="openWaSale()">Log WhatsApp Order</button>
       <button class="btn btn-outline btn-sm" onclick="exportSalesReport()">Export Report (Excel)</button>
       <button class="btn btn-outline btn-sm" onclick="renderOrders()">Refresh</button>
@@ -961,6 +965,7 @@ function goto(pg){
   if(pg==='orders'){
     localStorage.setItem('smw_orders_seen_count',String(cachedOrders.length));
     var nb=document.getElementById('nb-orders');if(nb){nb.style.display='none';}
+    var pw=document.getElementById('billPaperWidth');if(pw)pw.value=String(getBillPaperWidth());
     renderOrders();
   }
 }
@@ -1213,6 +1218,12 @@ function submitWaSale(){
 }
 
 // PRINT BILL — opens a plain, printable invoice for an order in a new tab.
+// PAPER WIDTH — persisted so it stays set between visits. Printable
+// width is slightly less than the roll width to leave small margins.
+function getBillPaperWidth(){return parseInt(localStorage.getItem('smw_bill_paper_width')||'80');}
+function setBillPaperWidth(v){localStorage.setItem('smw_bill_paper_width',v);}
+function printableWidthMM(){return getBillPaperWidth()===50?44:72;}
+
 function printOrder(orderId){
   var o=(cachedOrders||[]).find(function(x){return x.id===orderId;});
   if(!o){toast('Order not found','error');return;}
@@ -1230,7 +1241,8 @@ function printOrder(orderId){
       '<tr><td></td><td class="r">'+it.qty+'</td><td class="r">'+fmtRs(price)+'</td><td class="r">'+fmtRs(lineTotal)+'</td></tr>';
   }).join('');
   var html='<!doctype html><html><head><meta charset="utf-8"><title>Bill — '+escHTML(o.id)+'</title>'+
-    '<style>body{font-family:\'Courier New\',monospace;color:#111;padding:18px;max-width:300px;margin:0 auto;font-size:12px}'+
+    '<style>@page{size:'+getBillPaperWidth()+'mm auto;margin:0}'+
+    'body{font-family:\'Courier New\',monospace;color:#111;width:'+printableWidthMM()+'mm;padding:3mm 4mm;margin:0 auto;font-size:'+(getBillPaperWidth()===50?'9px':'11px')+';box-sizing:border-box}'+
     'h1{font-size:16px;margin:0;text-align:center;letter-spacing:.05em}'+
     '.sub{text-align:center;font-size:10px;color:#444;margin-bottom:2px}'+
     '.dashed{border-top:1px dashed #999;margin:8px 0}'+
@@ -1891,3 +1903,4 @@ function startTimer(){
 </script>
 </body>
 </html>
+
