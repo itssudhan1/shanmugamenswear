@@ -1259,10 +1259,6 @@ function printLabel(orderId){
   if(!o){toast('Order not found','error');return;}
   var c=o.customer||{};
   var custName=c.name||(c.fname?(c.fname+' '+(c.lname||'')):'—');
-  var t=o.totals||o;
-  var total=t.total!=null?t.total:(o.total||0);
-  var itemCount=(o.items||[]).reduce(function(s,it){return s+(parseInt(it.qty)||0);},0);
-  var codLine=(o.status&&/pending/i.test(o.status))?'<div class="cod">COD: '+fmtRs(total)+'</div>':'<div class="paid">PREPAID</div>';
   var html='<!doctype html><html><head><meta charset="utf-8"><title>Label — '+escHTML(o.id)+'</title>'+
     '<style>body{font-family:Arial,Helvetica,sans-serif;color:#111;padding:24px;max-width:420px;margin:0 auto}'+
     '.label-box{border:2px solid #111;border-radius:6px;padding:18px;margin-bottom:14px}'+
@@ -1272,15 +1268,11 @@ function printLabel(orderId){
     '.phone{font-size:13px;margin-top:6px;font-weight:600}'+
     '.divider{border-top:2px dashed #999;margin:16px 0}'+
     '.meta-row{display:flex;justify-content:space-between;font-size:12px;color:#444;margin-bottom:10px}'+
-    '.cod{background:#fff3cd;border:1px solid #f0c419;padding:8px 12px;border-radius:6px;font-weight:800;font-size:14px;text-align:center;margin-top:10px}'+
-    '.paid{background:#dcfce7;border:1px solid #16a34a;padding:8px 12px;border-radius:6px;font-weight:800;font-size:14px;text-align:center;margin-top:10px;color:#16a34a}'+
     '@media print{button{display:none}}</style></head><body>'+
     '<div class="meta-row"><span><strong>Order:</strong> '+escHTML(o.id)+'</span><span>'+escHTML(o.dateStr||o.date||'')+'</span></div>'+
     '<div class="label-box"><div class="tag">From</div><div class="name">'+escHTML(SHOP_FROM_ADDRESS.name)+'</div><div class="addr">'+escHTML(SHOP_FROM_ADDRESS.address)+'</div><div class="phone">'+escHTML(SHOP_FROM_ADDRESS.phone)+'</div></div>'+
     '<div class="divider"></div>'+
     '<div class="label-box"><div class="tag">To</div><div class="name">'+escHTML(custName)+'</div><div class="addr">'+escHTML(c.address||'—')+'</div><div class="phone">'+escHTML(c.phone?('+91'+c.phone):'')+'</div></div>'+
-    '<div class="meta-row" style="margin-top:10px"><span>'+itemCount+' item(s)</span><span>Wt: —</span></div>'+
-    codLine+
     '<button onclick="window.print()" style="margin-top:20px;padding:8px 16px;font-size:13px;width:100%">Print</button>'+
     '</body></html>';
   var w=window.open('','_blank');
