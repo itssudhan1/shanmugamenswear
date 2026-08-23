@@ -238,6 +238,7 @@ input:checked+.slider::before{transform:translateX(18px)}
 .mini-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="smw-content.js"></script>
 </head>
 <body>
 <div id="loginScreen">
@@ -261,6 +262,7 @@ input:checked+.slider::before{transform:translateX(18px)}
   <div class="s-section">Catalogue</div>
   <button class="nav-btn active" id="nav-products" onclick="goto('products')">Products</button>
   <button class="nav-btn" id="nav-add" onclick="gotoAdd()">Add Product</button>
+  <button class="nav-btn" id="nav-content" onclick="goto('content')">Website Content</button>
   <div class="s-section">Marketing</div>
   <button class="nav-btn" id="nav-offers" onclick="goto('offers')">Offers &amp; Coupons</button>
   <button class="nav-btn" id="nav-reviews" onclick="goto('reviews')">Reviews</button>
@@ -499,6 +501,110 @@ input:checked+.slider::before{transform:translateX(18px)}
     <button class="btn btn-primary" style="padding:10px 28px;font-size:14px" onclick="saveProduct()">Save &amp; Publish</button>
   </div>
   <input type="hidden" id="f-editId" value="">
+</div>
+<div class="page" id="page-content">
+  <div class="ph">
+    <div class="ph-left"><h1>Website Content</h1><div class="sub">Edit homepage text, images, and contact info — no coding needed</div></div>
+    <div class="ph-right">
+      <button class="btn btn-outline btn-sm" onclick="resetContentForm()">Reset Changes</button>
+      <button class="btn btn-primary btn-sm" onclick="saveContentDraft()">Save</button>
+      <button class="btn btn-success btn-sm" onclick="publishContentToGitHub()" id="contentPublishBtn">Publish to Website</button>
+    </div>
+  </div>
+  <div id="contentPubStatus" style="display:none;margin-bottom:16px"></div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Marquee Ticker</div>
+    <div class="hint" style="margin-bottom:10px">Up to 4 short messages that scroll across the top red bar.</div>
+    <div class="g2">
+      <div class="fg"><label>Message 1</label><input type="text" id="c-marquee1"></div>
+      <div class="fg"><label>Message 2</label><input type="text" id="c-marquee2"></div>
+    </div>
+    <div class="g2">
+      <div class="fg"><label>Message 3</label><input type="text" id="c-marquee3"></div>
+      <div class="fg"><label>Message 4</label><input type="text" id="c-marquee4"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Hero Section</div>
+    <div class="g2">
+      <div class="fg"><label>Title Line 1</label><input type="text" id="c-heroLine1"></div>
+      <div class="fg"><label>Title Line 2</label><input type="text" id="c-heroLine2"></div>
+    </div>
+    <div class="fg"><label>Title Line 3</label><input type="text" id="c-heroLine3"></div>
+    <div class="fg"><label>Subtitle</label><input type="text" id="c-heroSubtitle"></div>
+    <div class="fg"><label>Background Video URL</label><input type="text" id="c-heroVideo" placeholder="images/hero-video.mp4"></div>
+    <div class="g2">
+      <div class="fg"><label>Primary Button Text</label><input type="text" id="c-heroBtnPrimaryText"></div>
+      <div class="fg"><label>Secondary Button Text</label><input type="text" id="c-heroBtnSecondaryText"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Counter Strip</div>
+    <div class="g2">
+      <div class="fg"><label>Counter 1 Number</label><input type="number" id="c-counter1Num"></div>
+      <div class="fg"><label>Counter 1 Label</label><input type="text" id="c-counter1Label"></div>
+    </div>
+    <div class="g2">
+      <div class="fg"><label>Counter 2 Number</label><input type="number" id="c-counter2Num"></div>
+      <div class="fg"><label>Counter 2 Label</label><input type="text" id="c-counter2Label"></div>
+    </div>
+    <div class="g2">
+      <div class="fg"><label>Counter 3 Number</label><input type="number" id="c-counter3Num"></div>
+      <div class="fg"><label>Counter 3 Label</label><input type="text" id="c-counter3Label"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Collections (Category Cards)</div>
+    <div class="hint" style="margin-bottom:10px">Image URLs must already be hosted (Cloudinary, etc.) — this doesn't upload files.</div>
+    <div class="fg"><label>Shirts — Image URL</label><input type="text" id="c-cat1Img"></div>
+    <div class="g2">
+      <div class="fg"><label>Shirts — Label</label><input type="text" id="c-cat1Label"></div>
+      <div class="fg"><label>Shirts — Subtext</label><input type="text" id="c-cat1Sub"></div>
+    </div>
+    <div class="fg" style="margin-top:10px"><label>Pants — Image URL</label><input type="text" id="c-cat2Img"></div>
+    <div class="g2">
+      <div class="fg"><label>Pants — Label</label><input type="text" id="c-cat2Label"></div>
+      <div class="fg"><label>Pants — Subtext</label><input type="text" id="c-cat2Sub"></div>
+    </div>
+    <div class="fg" style="margin-top:10px"><label>T-Shirts — Image URL</label><input type="text" id="c-cat3Img"></div>
+    <div class="g2">
+      <div class="fg"><label>T-Shirts — Label</label><input type="text" id="c-cat3Label"></div>
+      <div class="fg"><label>T-Shirts — Subtext</label><input type="text" id="c-cat3Sub"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Features Strip</div>
+    <div class="g3" style="display:grid;grid-template-columns:80px 1fr 1.5fr;gap:10px">
+      <div class="fg"><label>Icon</label><input type="text" id="c-feat1Icon"></div>
+      <div class="fg"><label>Title</label><input type="text" id="c-feat1Title"></div>
+      <div class="fg"><label>Subtext</label><input type="text" id="c-feat1Sub"></div>
+    </div>
+    <div class="g3" style="display:grid;grid-template-columns:80px 1fr 1.5fr;gap:10px;margin-top:10px">
+      <div class="fg"><label>Icon</label><input type="text" id="c-feat2Icon"></div>
+      <div class="fg"><label>Title</label><input type="text" id="c-feat2Title"></div>
+      <div class="fg"><label>Subtext</label><input type="text" id="c-feat2Sub"></div>
+    </div>
+    <div class="g3" style="display:grid;grid-template-columns:80px 1fr 1.5fr;gap:10px;margin-top:10px">
+      <div class="fg"><label>Icon</label><input type="text" id="c-feat3Icon"></div>
+      <div class="fg"><label>Title</label><input type="text" id="c-feat3Title"></div>
+      <div class="fg"><label>Subtext</label><input type="text" id="c-feat3Sub"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">Footer &amp; Contact</div>
+    <div class="fg"><label>Tagline</label><input type="text" id="c-footerTagline"></div>
+    <div class="fg"><label>Store Address (one line each)</label><textarea id="c-footerAddress" rows="5" style="width:100%;padding:.75rem 1rem;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;background:var(--surface2);color:var(--text)"></textarea></div>
+    <div class="g2">
+      <div class="fg"><label>Store Hours</label><input type="text" id="c-footerHours"></div>
+      <div class="fg"><label>WhatsApp Number (with country code, no +)</label><input type="text" id="c-whatsappNumber" placeholder="919442689858"></div>
+    </div>
+  </div>
 </div>
 <div class="page" id="page-view">
   <div class="ph">
@@ -1054,7 +1160,7 @@ function clearOrders(){
 }
 
 // NAV
-var PAGE_TITLES={orders:'Orders',customers:'Customer Lookup',products:'Products',add:'Add Product',view:'Product Details',deploy:'Publish to Website',offers:'Offers & Coupons',reviews:'Reviews',notifications:'Notifications',security:'Security',analytics:'Analytics & AI Insights'};
+var PAGE_TITLES={orders:'Orders',customers:'Customer Lookup',products:'Products',add:'Add Product',content:'Website Content',view:'Product Details',deploy:'Publish to Website',offers:'Offers & Coupons',reviews:'Reviews',notifications:'Notifications',security:'Security',analytics:'Analytics & AI Insights'};
 function goto(pg){
   document.querySelectorAll('.page').forEach(function(e){e.classList.remove('active');});
   document.querySelectorAll('.nav-btn').forEach(function(e){e.classList.remove('active');});
@@ -1064,6 +1170,7 @@ function goto(pg){
   if(pg==='products'){renderProds();checkUnpublished();refreshLiveStock(renderProds);}
   if(pg==='deploy'){updateExpCount();loadCheckoutMode();}
   if(pg==='analytics'){renderAnalytics();}
+  if(pg==='content'){populateContentForm();}
   if(pg==='orders'){
     localStorage.setItem('smw_orders_seen_count',String(cachedOrders.length));
     var nb=document.getElementById('nb-orders');if(nb){nb.style.display='none';}
@@ -1230,6 +1337,82 @@ function publishToGitHub(){
     setPS('err','Publish failed: '+msg);toast('Publish failed: '+msg,'error');
   });
 }
+// WEBSITE CONTENT — same "defaults + localStorage overlay + GitHub
+// publish" pattern as products/banners, just for homepage text/images.
+var CONTENT_FIELDS=['marquee1','marquee2','marquee3','marquee4','heroLine1','heroLine2','heroLine3','heroSubtitle','heroVideo','heroBtnPrimaryText','heroBtnSecondaryText','counter1Num','counter1Label','counter2Num','counter2Label','counter3Num','counter3Label','cat1Img','cat1Label','cat1Sub','cat2Img','cat2Label','cat2Sub','cat3Img','cat3Label','cat3Sub','feat1Icon','feat1Title','feat1Sub','feat2Icon','feat2Title','feat2Sub','feat3Icon','feat3Title','feat3Sub','footerTagline','footerAddress','footerHours','whatsappNumber'];
+function loadContent(){
+  var defaults=(typeof SMW_DEFAULT_CONTENT!=='undefined'&&SMW_DEFAULT_CONTENT)?SMW_DEFAULT_CONTENT:{};
+  var stored={};
+  try{var raw=localStorage.getItem('smw_content');if(raw)stored=JSON.parse(raw)||{};}catch(e){stored={};}
+  return Object.assign({},defaults,stored);
+}
+function populateContentForm(){
+  var c=loadContent();
+  CONTENT_FIELDS.forEach(function(k){
+    var el=document.getElementById('c-'+k);
+    if(el&&c[k]!=null)el.value=k==='footerAddress'?c[k]:c[k];
+  });
+}
+function saveContentDraft(){
+  var obj={};
+  CONTENT_FIELDS.forEach(function(k){
+    var el=document.getElementById('c-'+k);if(!el)return;
+    obj[k]=el.type==='number'?(parseFloat(el.value)||0):el.value;
+  });
+  localStorage.setItem('smw_content',JSON.stringify(obj));
+  toast('Content saved — click Publish to make it live','success');
+  showContentPubStatus('info','Saved locally. Click "Publish to Website" to make these changes live for customers.');
+}
+function resetContentForm(){
+  if(!confirm('Discard unsaved changes and reset to the currently published content?'))return;
+  localStorage.removeItem('smw_content');
+  populateContentForm();
+  document.getElementById('contentPubStatus').style.display='none';
+  toast('Reset to published content','success');
+}
+function showContentPubStatus(type,msg){
+  var el=document.getElementById('contentPubStatus');if(!el)return;
+  el.style.display='block';
+  var bg={ok:'var(--green-bg)',err:'var(--red-bg)',info:'var(--blue-bg)'};var tc={ok:'var(--green)',err:'var(--red)',info:'var(--blue)'};
+  el.style.background=bg[type];el.style.color=tc[type];el.style.borderRadius='8px';el.style.padding='12px 16px';el.style.fontSize='13px';el.style.fontWeight='600';el.textContent=msg;
+}
+function publishContentToGitHub(){
+  if(!GH_TOKEN||!GH_USER_V||!GH_REPO){toast('Set up GitHub first (see Publish to Website page)','error');return;}
+  saveContentDraft();
+  var content=loadContent();
+  var btn=document.getElementById('contentPublishBtn');
+  showContentPubStatus('info','Connecting to GitHub...');if(btn){btn.disabled=true;btn.textContent='Publishing...';}
+  var jsContent='// HOMEPAGE CONTENT — edited from admin.html\'s "Website Content" page.\n// Updated '+new Date().toLocaleString('en-IN')+'\nvar SMW_DEFAULT_CONTENT = '+JSON.stringify(content,null,2)+';\n';
+  var encoded;try{encoded=btoa(unescape(encodeURIComponent(jsContent)));}catch(e){toast('Encoding error','error');if(btn){btn.disabled=false;btn.textContent='Publish to Website';}return;}
+  var apiUrl='https://api.github.com/repos/'+GH_USER_V+'/'+GH_REPO+'/contents/smw-content.js';
+  var headers={'Authorization':'token '+GH_TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'};
+  fetch(apiUrl+'?ref='+GH_BRANCH,{headers:headers})
+  .then(function(r){if(r.status===404)return{sha:null};if(!r.ok)return r.json().then(function(d){throw new Error(d.message||('HTTP '+r.status));});return r.json();})
+  .then(function(data){
+    showContentPubStatus('info','Uploading content...');
+    var body={message:'Update homepage content — '+new Date().toLocaleDateString('en-IN'),content:encoded,branch:GH_BRANCH};
+    if(data.sha)body.sha=data.sha;
+    return fetch(apiUrl,{method:'PUT',headers:headers,body:JSON.stringify(body)});
+  })
+  .then(function(r){
+    if(r.ok||r.status===200||r.status===201){
+      return r.json().then(function(){
+        if(btn){btn.disabled=false;btn.textContent='Published!';setTimeout(function(){btn.textContent='Publish to Website';},2500);}
+        showContentPubStatus('ok','Content published! Vercel updates in ~30 seconds.');
+        toast('Homepage content is live!','success');
+        logAct('Published homepage content changes','var(--green)');
+      });
+    }else{return r.json().then(function(d){throw new Error(d.message||('HTTP '+r.status));});}
+  })
+  .catch(function(err){
+    if(btn){btn.disabled=false;btn.textContent='Publish to Website';}
+    var msg=err.message||'Unknown error';
+    if(msg.indexOf('Bad credentials')>=0)msg='Token invalid. Generate a new one.';
+    else if(msg.indexOf('Not Found')>=0)msg='Repo not found. Check username and repo name.';
+    showContentPubStatus('err','Publish failed: '+msg);toast('Publish failed: '+msg,'error');
+  });
+}
+
 // After a Publish, the numbers in smw-products.js are the new "starting
 // point" — reset the live KV overlay to match so stock display isn't
 // stuck showing yesterday's sales-adjusted numbers on top of a fresh
