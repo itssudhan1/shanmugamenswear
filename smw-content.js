@@ -1,0 +1,60 @@
+// HOMEPAGE CONTENT — edited from admin.html's "Website Content" page.
+// This file is the PUBLISHED baseline (like smw-products.js is for
+// products). Any admin edits not yet published live only in the
+// browser's localStorage ('smw_content') until "Publish" commits this
+// file to GitHub with the new values baked in.
+var SMW_DEFAULT_CONTENT = {
+  // Marquee ticker (top red bar) — up to 4 short messages
+  marquee1: "New Arrivals",
+  marquee2: "Free Shipping Above Rs.1999",
+  marquee3: "Easy 3-Day Returns",
+  marquee4: "100% Quality products",
+
+  // Hero section
+  heroLine1: "DRESS",
+  heroLine2: "YOUR",
+  heroLine3: "BEST.",
+  heroSubtitle: "Premium men's wear crafted for the streets of Tamil Nadu.",
+  heroVideo: "images/hero-video.mp4",
+  heroBtnPrimaryText: "Shop Now",
+  heroBtnSecondaryText: "View Collection",
+
+  // Counter strip
+  counter1Num: 500,
+  counter1Label: "Products",
+  counter2Num: 100000,
+  counter2Label: "Happy Customers",
+  counter3Num: 15,
+  counter3Label: "Years of Excellence",
+
+  // "Our Collections" category cards
+  cat1Img: "images/shirts.jpg",
+  cat1Label: "Shirts",
+  cat1Sub: "Formal, Casual & Party wear",
+  cat2Img: "images/pants.jpg",
+  cat2Label: "Pants",
+  cat2Sub: "Formal, Casual & Jeans",
+  cat3Img: "images/tshirts.jpg",
+  cat3Label: "T-Shirts",
+  cat3Sub: "Casual, Polo & Oversized",
+
+  // Features strip
+  feat1Icon: "🚚",
+  feat1Title: "Free Delivery",
+  feat1Sub: "On orders above Rs.1999",
+  feat2Icon: "↩️",
+  feat2Title: "Easy Returns",
+  feat2Sub: "3-day hassle-free returns",
+  feat3Icon: "✅",
+  feat3Title: "Quality Promise",
+  feat3Sub: "100% genuine fabric",
+
+  // Footer
+  footerTagline: "Premium men's clothing for every occasion. Shirts, pants, and t-shirts crafted with care.",
+  footerAddress: "Shanmuga City Center\nVaniyan kovil street\nThirupathur, Sivagangai Dt\nTamil Nadu\nPincode: 630211",
+  footerHours: "Mon–Sun: 9am – 9pm",
+
+  // WhatsApp number — applied to every wa.me link on the site (mobile
+  // menu, footer, floating button)
+  whatsappNumber: "919442689858"
+};
