@@ -13,6 +13,8 @@
 <script src="smw-products.js"></script>
 <!-- BANNER DATA — edit smw-banners.js to update homepage offer banners -->
 <script src="smw-banners.js"></script>
+<!-- CONTENT DATA — edit smw-content.js to update homepage text/images -->
+<script src="smw-content.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -292,7 +294,7 @@ footer{background:var(--black);color:var(--white);padding:4rem 2rem 2rem}
 <div class="page-transition" id="pageTransition"></div>
 
 <div class="marquee" aria-hidden="true">
-  <div class="marquee-track">
+  <div class="marquee-track" id="marqueeTrack">
     <span>New Arrivals</span><span>Free Shipping Above Rs.1999</span><span>Easy 3-Day Returns</span><span>100% Quality products</span>
     <span>New Arrivals</span><span>Free Shipping Above Rs.1999</span><span>Easy 3-Day Returns</span><span>100% Quality products</span>
   </div>
@@ -375,7 +377,7 @@ footer{background:var(--black);color:var(--white);padding:4rem 2rem 2rem}
     <a href="login.html" class="mob-login-row" id="mobLoginRow" onclick="closeAll()"><span class="mob-login-icon" id="mobLoginIconWrap"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#111110" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span id="mobLoginText">Log in</span></a>
     <div class="mob-socials">
       <a href="#" class="mob-social-icon" title="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111110" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="#111110"/></svg></a>
-      <a href="https://wa.me/919442689858" class="mob-social-icon" title="WhatsApp"><svg width="18" height="18" viewBox="0 0 24 24" fill="#111110"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
+      <a href="https://wa.me/919442689858" class="mob-social-icon" id="mobWaLink" title="WhatsApp"><svg width="18" height="18" viewBox="0 0 24 24" fill="#111110"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
     </div>
   </div>
 </div>
@@ -407,9 +409,9 @@ footer{background:var(--black);color:var(--white);padding:4rem 2rem 2rem}
   <div class="hero-overlay"></div>
   <div class="hero-content">
     
-    <h1 class="hero-h1"><span class="hero-h1-line">DRESS</span><span class="hero-h1-line">YOUR</span><span class="hero-h1-line">BEST.</span></h1>
-    <p class="hero-sub">Premium men's wear crafted for the streets of Tamil Nadu.</p>
-    <div class="hero-ctas"><a class="btn-solid" href="#shop">Shop Now</a><a class="btn-outline" href="#collection">View Collection</a></div>
+    <h1 class="hero-h1"><span class="hero-h1-line" id="heroLine1">DRESS</span><span class="hero-h1-line" id="heroLine2">YOUR</span><span class="hero-h1-line" id="heroLine3">BEST.</span></h1>
+    <p class="hero-sub" id="heroSub">Premium men's wear crafted for the streets of Tamil Nadu.</p>
+    <div class="hero-ctas"><a class="btn-solid" href="#shop" id="heroBtnPrimary">Shop Now</a><a class="btn-outline" href="#collection" id="heroBtnSecondary">View Collection</a></div>
   </div>
   <div class="hero-scroll-hint" aria-hidden="true"><div class="hero-scroll-line"></div><span class="hero-scroll-text">Scroll</span></div>
 </section>
@@ -430,19 +432,19 @@ footer{background:var(--black);color:var(--white);padding:4rem 2rem 2rem}
         <div class="cat-img-wrap">
           <img src="images/shirts.jpg" alt="Shirts" loading="lazy" onerror="this.style.background='#c8c4bc'"/>
         </div>
-        <div class="cat-card-shine"></div><div class="cat-label">Shirts <span>Formal, Casual &amp; Party wear</span></div>
+        <div class="cat-card-shine"></div><div class="cat-label"><span class="cat-label-main">Shirts</span> <span class="cat-label-sub">Formal, Casual &amp; Party wear</span></div>
       </div>
       <div class="cat-card" onclick="switchTab('pants')" role="button" tabindex="0">
         <div class="cat-img-wrap">
           <img src="images/pants.jpg" alt="Pants" loading="lazy" onerror="this.style.background='#8a8680'"/>
         </div>
-        <div class="cat-card-shine"></div><div class="cat-label">Pants <span>Formal, Casual &amp; Jeans</span></div>
+        <div class="cat-card-shine"></div><div class="cat-label"><span class="cat-label-main">Pants</span> <span class="cat-label-sub">Formal, Casual &amp; Jeans</span></div>
       </div>
       <div class="cat-card" onclick="switchTab('tshirts')" role="button" tabindex="0">
         <div class="cat-img-wrap">
           <img src="images/tshirts.jpg" alt="T-Shirts" loading="lazy" onerror="this.style.background='#e8e6e1'"/>
         </div>
-        <div class="cat-card-shine"></div><div class="cat-label">T-Shirts <span>Casual, Polo &amp; Oversized</span></div>
+        <div class="cat-card-shine"></div><div class="cat-label"><span class="cat-label-main">T-Shirts</span> <span class="cat-label-sub">Casual, Polo &amp; Oversized</span></div>
       </div>
     </div>
   </div>
@@ -482,17 +484,17 @@ footer{background:var(--black);color:var(--white);padding:4rem 2rem 2rem}
 <footer id="contact">
   <div class="footer-inner">
     <div class="footer-grid reveal">
-      <div class="footer-brand"><span class="brand-name">SHANMUGA</span><span class="brand-sub">MENS WEAR</span><p class="footer-tagline">Premium men's clothing for every occasion. Shirts, pants, and t-shirts crafted with care.</p></div>
+      <div class="footer-brand"><span class="brand-name">SHANMUGA</span><span class="brand-sub">MENS WEAR</span><p class="footer-tagline" id="footerTagline">Premium men's clothing for every occasion. Shirts, pants, and t-shirts crafted with care.</p></div>
       <div class="footer-col" onclick="toggleFooterCol(this)"><h4>Shop</h4><ul><li><a href="#shop">New Arrivals</a></li><li><a href="#shop" onclick="switchTab('shirts')">Shirts</a></li><li><a href="#shop" onclick="switchTab('tshirts')">T-Shirts</a></li><li><a href="#shop" onclick="switchTab('pants')">Pants</a></li><li><a href="#shop">Sale</a></li></ul></div>
       <div class="footer-col" onclick="toggleFooterCol(this)"><h4>Customer Support</h4><ul><li><a href="support.html">Size Guide</a></li><li><a href="support.html#returns">Returns &amp; Exchanges</a></li><li><a href="support.html#faq">FAQ</a></li></ul></div>
-      <div class="footer-col" onclick="toggleFooterCol(this)"><h4>Contact</h4><ul><li><a href="https://wa.me/919442689858">WhatsApp</a></li><li><a href="">Instagram</a></li><li><a href="#">Visit Store</a></li></ul></div>
-      <div class="footer-address-wrap" onclick="toggleFooterAddress(this)"><h4>Our Store</h4><p class="footer-address">Shanmuga City Center<br>Vaniyan kovil street <br> Thirupathur,sivagangai dt<br>Tamil Nadu<br>Pincode: 630211<br>+91 94426 89858<br>Mon–sun: 9am – 9pm</p></div>
+      <div class="footer-col" onclick="toggleFooterCol(this)"><h4>Contact</h4><ul><li><a href="https://wa.me/919442689858" id="footerWaLink">WhatsApp</a></li><li><a href="https://www.instagram.com/shanmugamenswear?igsh=azYweHM3cW94NWxp">Instagram</a></li><li><a href="#">Visit Store</a></li></ul></div>
+      <div class="footer-address-wrap" onclick="toggleFooterAddress(this)"><h4>Our Store</h4><p class="footer-address" id="footerAddress">Shanmuga City Center<br>Vaniyan kovil street <br> Thirupathur,sivagangai dt<br>Tamil Nadu<br>Pincode: 630211<br>+91 94426 89858<br>Mon–sun: 9am – 9pm</p></div>
     </div>
     <div class="footer-bottom"><span>© 2026 Shanmuga Mens Wear. All rights reserved.</span><span>Privacy Policy · Terms</span></div>
   </div>
 </footer>
 
-<a class="whatsapp-fab" href="https://wa.me/919442689858" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
+<a class="whatsapp-fab" href="https://wa.me/919442689858" id="fabWaLink" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
   <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
 
@@ -521,6 +523,80 @@ function getBannersAll(){
   var adminIds={};stored.forEach(function(b){if(b.id)adminIds[b.id]=true;});
   var merged=defaults.filter(function(b){return !adminIds[b.id];}).concat(stored);
   return merged.filter(function(b){return b.active!==false;}).sort(function(a,b){return(a.order||0)-(b.order||0);});
+}
+
+/* CONTENT (homepage text/images) — same merge pattern as products/banners:
+   smw-content.js ships the published defaults, localStorage holds any
+   admin edits not yet published. Object.assign so per-field admin edits
+   override just that field, not the whole object. */
+function getContentAll(){
+  var defaults=(typeof SMW_DEFAULT_CONTENT!=='undefined'&&SMW_DEFAULT_CONTENT)?SMW_DEFAULT_CONTENT:{};
+  var stored={};
+  try{var raw=localStorage.getItem('smw_content');if(raw)stored=JSON.parse(raw)||{};}catch(e){stored={};}
+  return Object.assign({},defaults,stored);
+}
+
+function applyContent(){
+  var c=getContentAll();
+
+  // Marquee
+  var mq=[c.marquee1,c.marquee2,c.marquee3,c.marquee4].filter(Boolean);
+  if(mq.length){
+    var track=document.getElementById('marqueeTrack');
+    if(track)track.innerHTML=mq.concat(mq).map(function(t){return '<span>'+t+'</span>';}).join('');
+  }
+
+  // Hero
+  if(document.getElementById('heroLine1')&&c.heroLine1!=null)document.getElementById('heroLine1').textContent=c.heroLine1;
+  if(document.getElementById('heroLine2')&&c.heroLine2!=null)document.getElementById('heroLine2').textContent=c.heroLine2;
+  if(document.getElementById('heroLine3')&&c.heroLine3!=null)document.getElementById('heroLine3').textContent=c.heroLine3;
+  if(document.getElementById('heroSub')&&c.heroSubtitle!=null)document.getElementById('heroSub').textContent=c.heroSubtitle;
+  if(document.getElementById('heroBtnPrimary')&&c.heroBtnPrimaryText!=null)document.getElementById('heroBtnPrimary').textContent=c.heroBtnPrimaryText;
+  if(document.getElementById('heroBtnSecondary')&&c.heroBtnSecondaryText!=null)document.getElementById('heroBtnSecondary').textContent=c.heroBtnSecondaryText;
+  var heroVid=document.getElementById('heroImg');
+  if(heroVid&&c.heroVideo&&heroVid.getAttribute('src')!==c.heroVideo){heroVid.setAttribute('src',c.heroVideo);}
+
+  // Counters
+  var counterNums=document.querySelectorAll('.counter-num');
+  var counterLabels=document.querySelectorAll('.counter-label');
+  [[c.counter1Num,c.counter1Label],[c.counter2Num,c.counter2Label],[c.counter3Num,c.counter3Label]].forEach(function(pair,i){
+    if(counterNums[i]&&pair[0]!=null)counterNums[i].setAttribute('data-target',pair[0]);
+    if(counterLabels[i]&&pair[1]!=null)counterLabels[i].textContent=pair[1];
+  });
+
+  // Category cards
+  var catCards=document.querySelectorAll('.cat-card');
+  [[c.cat1Img,c.cat1Label,c.cat1Sub],[c.cat2Img,c.cat2Label,c.cat2Sub],[c.cat3Img,c.cat3Label,c.cat3Sub]].forEach(function(trio,i){
+    var card=catCards[i];if(!card)return;
+    var img=card.querySelector('img');if(img&&trio[0])img.setAttribute('src',trio[0]);
+    var main=card.querySelector('.cat-label-main');if(main&&trio[1]!=null)main.textContent=trio[1];
+    var sub=card.querySelector('.cat-label-sub');if(sub&&trio[2]!=null)sub.textContent=trio[2];
+  });
+
+  // Features
+  var featItems=document.querySelectorAll('.feat-item');
+  [[c.feat1Icon,c.feat1Title,c.feat1Sub],[c.feat2Icon,c.feat2Title,c.feat2Sub],[c.feat3Icon,c.feat3Title,c.feat3Sub]].forEach(function(trio,i){
+    var item=featItems[i];if(!item)return;
+    var icon=item.querySelector('.feat-icon');if(icon&&trio[0]!=null)icon.textContent=trio[0];
+    var title=item.querySelector('.feat-title');if(title&&trio[1]!=null)title.textContent=trio[1];
+    var sub=item.querySelector('.feat-sub');if(sub&&trio[2]!=null)sub.textContent=trio[2];
+  });
+
+  // Footer
+  if(document.getElementById('footerTagline')&&c.footerTagline!=null)document.getElementById('footerTagline').textContent=c.footerTagline;
+  if(document.getElementById('footerAddress')&&c.footerAddress!=null){
+    var lines=String(c.footerAddress).split('\n').filter(Boolean);
+    if(c.footerHours)lines.push(c.footerHours);
+    document.getElementById('footerAddress').innerHTML=lines.map(esc).join('<br>');
+  }
+
+  // WhatsApp number, applied everywhere it appears
+  if(c.whatsappNumber){
+    var waLink='https://wa.me/'+c.whatsappNumber;
+    ['mobWaLink','footerWaLink','fabWaLink'].forEach(function(id){
+      var el=document.getElementById(id);if(el)el.setAttribute('href',waLink);
+    });
+  }
 }
 
 (function(){
@@ -686,6 +762,7 @@ function goToCheckout(){
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAll();});
 
+applyContent();
 updateCartUI();
 var searchParam=new URLSearchParams(location.search).get('search');
 if(searchParam){var ql=searchParam.toLowerCase();var matched=getProductsAll().filter(function(p){return(p.name||'').toLowerCase().indexOf(ql)>=0||(CAT_MAP[p.cat]||'').toLowerCase().indexOf(ql)>=0;});renderProducts(matched);document.getElementById('prodCount').textContent=matched.length+' results for "'+searchParam+'"';setTimeout(function(){document.getElementById('shop').scrollIntoView({behavior:'smooth'});},300);}
@@ -695,6 +772,7 @@ renderPromoBanners();
 window.addEventListener('storage',function(e){
   if(e.key==='smw_products'){var prods=getProductsAll();renderProducts(currentTab==='all'?prods:prods.filter(function(p){return p.cat===currentTab;}));}
   if(e.key==='smw_banners'){renderPromoBanners();}
+  if(e.key==='smw_content'){applyContent();}
 });
 
 /* ── COPYRIGHT PROTECTION ── */
