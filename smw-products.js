@@ -1,4 +1,4 @@
-/* Shanmuga Mens Wear Products — 4 items — Updated 22/8/2026, 10:38:53 pm */
+/* Shanmuga Mens Wear Products — 4 items — Updated 25/8/2026, 7:59:01 pm */
 /* 2026 Shanmuga Mens Wear. All rights reserved. */
 
 var SMW_DEFAULT_PRODUCTS = [
@@ -12,23 +12,25 @@ var SMW_DEFAULT_PRODUCTS = [
     "fit": "regular fit",
     "orig": 1199,
     "sale": 849,
-    "stock": 20,
-    "threshold": 5,
+    "stock": 10,
+    "threshold": 1,
     "status": "instock",
     "visible": true,
     "lowStock": false,
-    "badge": "",
+    "badge": "offer",
     "sizes": [
+      "XS",
+      "S",
       "M",
       "L",
-      "XL",
-      "S"
+      "XL"
     ],
     "sizeStock": {
-      "M": 5,
-      "L": 5,
-      "XL": 5,
-      "S": 5
+      "XS": 2,
+      "S": 2,
+      "M": 2,
+      "L": 2,
+      "XL": 2
     },
     "photos": [
       "https://res.cloudinary.com/do2topls5/image/upload/v1775839926/dliscmryhwvfye5q2nnv.webp",
@@ -84,12 +86,12 @@ var SMW_DEFAULT_PRODUCTS = [
     "fit": "OVERSIED",
     "orig": 699,
     "sale": 399,
-    "stock": 0,
+    "stock": 15,
     "threshold": 5,
     "status": "lowstock",
     "visible": true,
     "lowStock": false,
-    "badge": "",
+    "badge": "sale",
     "sizes": [
       "XS",
       "S",
@@ -97,6 +99,13 @@ var SMW_DEFAULT_PRODUCTS = [
       "L",
       "XL"
     ],
+    "sizeStock": {
+      "XS": 3,
+      "S": 3,
+      "M": 3,
+      "L": 3,
+      "XL": 3
+    },
     "photos": [
       "https://res.cloudinary.com/do2topls5/image/upload/v1783872499/sl6w4q6aoxpl3pgwcknu.jpg",
       "https://res.cloudinary.com/do2topls5/image/upload/v1783872513/itwuevpnlin0crudpk9m.jpg",
