@@ -344,12 +344,12 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
         <div class="field-row">
           <div class="field" id="f-fname">
             <label>First Name *</label>
-            <input type="text" id="fname" placeholder="Sudhan" autocomplete="given-name">
+            <input type="text" id="fname" placeholder="First name" autocomplete="given-name">
             <span class="err-msg">Please enter your first name</span>
           </div>
           <div class="field" id="f-lname">
             <label>Last Name *</label>
-            <input type="text" id="lname" placeholder="Kumar" autocomplete="family-name">
+            <input type="text" id="lname" placeholder="Last name" autocomplete="family-name">
             <span class="err-msg">Please enter your last name</span>
           </div>
         </div>
@@ -360,7 +360,7 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
         </div>
         <div class="field" id="f-phone">
           <label>Phone Number * (10 digits)</label>
-          <input type="tel" id="phone" placeholder="9876543210" autocomplete="tel" maxlength="10">
+          <input type="tel" id="phone" placeholder="10-digit mobile number" autocomplete="tel" maxlength="10">
           <span class="err-msg">Please enter a valid 10-digit phone number</span>
         </div>
       </div>
@@ -377,17 +377,17 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
         <div class="saved-addr-list" id="savedAddrList" style="display:none"></div>
         <div class="field" id="f-address">
           <label>Street Address *</label>
-          <input type="text" id="address" placeholder="Main Road, Near Bus Stand" autocomplete="street-address">
+          <input type="text" id="address" placeholder="House no., street, locality" autocomplete="street-address">
           <span class="err-msg">Please enter your address</span>
         </div>
         <div class="field">
           <label>Apartment / Suite (Optional)</label>
-          <input type="text" id="apt" placeholder="Flat 2B, Second Floor">
+          <input type="text" id="apt" placeholder="Apartment, floor, landmark">
         </div>
         <div class="field-row">
           <div class="field" id="f-city">
             <label>City *</label>
-            <input type="text" id="city" placeholder="Karaikudi" autocomplete="address-level2">
+            <input type="text" id="city" placeholder="City" autocomplete="address-level2">
             <span class="err-msg">Please enter your city</span>
           </div>
           <div class="field" id="f-state">
@@ -417,7 +417,7 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
         <div class="field-row">
           <div class="field" id="f-pincode">
             <label>PIN Code *</label>
-            <input type="text" id="pincode" placeholder="630001" maxlength="6" autocomplete="postal-code">
+            <input type="text" id="pincode" placeholder="6-digit PIN code" maxlength="6" autocomplete="postal-code">
             <span class="err-msg">Please enter a valid 6-digit PIN</span>
           </div>
           <div class="field">
@@ -535,7 +535,7 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
 
     <div class="coupon-wrap">
       <div class="coupon-row">
-        <input class="coupon-input" type="text" id="couponInput" placeholder="Discount code (e.g. SAVE10)">
+        <input class="coupon-input" type="text" id="couponInput" placeholder="Discount code">
         <button class="coupon-btn" onclick="applyCoupon()">Apply</button>
       </div>
       <div class="coupon-msg" id="couponMsg"></div>
@@ -843,37 +843,31 @@ function selectShipping(radio){
   updateTotals();
 }
 
-/* ── COUPON ── */
-var VALID_COUPONS = { 'SAVE10': {type:'percent',val:10}, 'WELCOME': {type:'percent',val:5}, 'SMW20': {type:'percent',val:20}, 'FLAT50': {type:'flat',val:50} };
+/* ── COUPON ──
+   Coupons come ONLY from the admin panel (Offers & Coupons →
+   localStorage 'smw_coupons'). There is no built-in/hardcoded coupon
+   list here anymore — if admin shows "No coupons yet", no code will
+   work at checkout until one is created there. */
 function applyCoupon(){
   var code = document.getElementById('couponInput').value.trim().toUpperCase();
   var msgEl = document.getElementById('couponMsg');
   if (!code) { msgEl.className = 'coupon-msg err'; msgEl.textContent = 'Please enter a coupon code.'; return; }
   if (appliedCoupon === code) { msgEl.className = 'coupon-msg ok'; msgEl.textContent = '✓ Coupon already applied!'; return; }
 
-  // Also check admin-created coupons stored in localStorage
   var adminCoupons = [];
   try { adminCoupons = JSON.parse(localStorage.getItem('smw_coupons') || '[]'); } catch(e){}
   var adminFound = adminCoupons.find(function(c){ return c.code === code && c.active !== false; });
+
   if (adminFound) {
     appliedCoupon = code;
     discountAmount = adminFound.type === 'percent' ? Math.round(getSubtotal() * adminFound.val / 100) : Math.min(adminFound.val, getSubtotal());
-    msgEl.className = 'coupon-msg ok';
-    msgEl.textContent = '✓ Coupon applied! You save ' + fmt(discountAmount);
-    updateTotals(); return;
-  }
-
-  if (VALID_COUPONS[code]) {
-    var c = VALID_COUPONS[code];
-    appliedCoupon = code;
-    discountAmount = c.type === 'percent' ? Math.round(getSubtotal() * c.val / 100) : Math.min(c.val, getSubtotal());
     msgEl.className = 'coupon-msg ok';
     msgEl.textContent = '✓ Coupon applied! You save ' + fmt(discountAmount);
     updateTotals();
   } else {
     discountAmount = 0; appliedCoupon = '';
     msgEl.className = 'coupon-msg err';
-    msgEl.textContent = '✗ Invalid code. Try SAVE10, WELCOME, or SMW20.';
+    msgEl.textContent = '✗ Invalid or expired coupon code.';
     updateTotals();
   }
 }
@@ -1142,14 +1136,13 @@ function placeWhatsAppOrder(currentUser){
   (async function(){
     try {
       var idToken = currentUser ? await currentUser.getIdToken() : null;
-      var waRes = await fetch('/api/log-order', {
+      await fetch('/api/create-whatsapp-order', {
         method: 'POST',
         headers: Object.assign(
           { 'Content-Type': 'application/json' },
           idToken ? { 'Authorization': 'Bearer ' + idToken } : {}
         ),
         body: JSON.stringify({
-          isAdmin: false,
           orderId: orderId,
           customer: lastOrderData.customer,
           items: cartBackup.map(function(x){
@@ -1158,16 +1151,8 @@ function placeWhatsAppOrder(currentUser){
           totals: { subtotal: getSubtotal(), discount: discountAmount, coupon: appliedCoupon, shipping: shippingCost, total: total }
         })
       });
-      if (!waRes.ok) {
-        var errBody = await waRes.text();
-        console.error('log-order rejected (' + waRes.status + '):', errBody);
-        showToast('Order sent via WhatsApp, but syncing to admin failed (' + waRes.status + '). Please tell the shop owner to log it manually.', true);
-      } else {
-        console.log('log-order: order saved to admin OK —', orderId);
-      }
     } catch (e) {
-      console.error('log-order failed (order will still go via WhatsApp):', e);
-      showToast('Order sent via WhatsApp, but could not sync to admin. Please tell the shop owner to log it manually.', true);
+      console.error('create-whatsapp-order failed (order will still go via WhatsApp):', e);
     }
   })();
 
