@@ -852,6 +852,7 @@ input:checked+.slider::before{transform:translateX(18px)}
     <div class="fg"><label>Coupon Code</label><input type="text" id="mc-code" placeholder="FESTIVE30" style="text-transform:uppercase;font-weight:700"></div>
     <div class="fg"><label>Type</label><select id="mc-type"><option value="percent">Percentage (%)</option><option value="flat">Flat Amount (Rs.)</option></select></div>
     <div class="fg"><label>Discount Value</label><input type="number" id="mc-val" placeholder="30" min="1"></div>
+    <div class="fg"><label>Min Order (Rs.)</label><input type="number" id="mc-min" placeholder="0" min="0"></div>
     <div class="fg"><label>Expiry Date</label><input type="date" id="mc-exp"></div>
     <div class="modal-foot">
       <button class="btn btn-outline" onclick="closeMod('couponMod')">Cancel</button>
@@ -909,7 +910,11 @@ var nextId=200;
 var currentImgs=[],selSizes=[],sizeStockMap={},selBadge='',viewingId=-1,revFilter='all',uploading=false;
 var ALL_SIZES=['XS','S','M','L','XL','XXL','28','30','32','34','36','38'];
 var ALL_BADGES=[{val:'',label:'None',cls:'sel-none'},{val:'new',label:'New',cls:'sel-new'},{val:'sale',label:'Sale',cls:'sel-sale'},{val:'offer',label:'Offer',cls:'sel-offer'}];
-var coupons=[{code:'SAVE10',type:'percent',val:10,min:0,expiry:'31 Dec 2026',uses:0,active:true},{code:'WELCOME',type:'percent',val:5,min:0,expiry:'31 Dec 2026',uses:0,active:true},{code:'SMW20',type:'percent',val:20,min:999,expiry:'31 Dec 2026',uses:0,active:true}];
+// COUPONS — persisted to localStorage under 'smw_coupons' so checkout.html
+// (a separate page, same origin) can read them live. This is the single
+// source of truth: admin reads/writes the same key it renders from, and
+// checkout.html only ever reads it — never admin's in-memory array.
+var coupons=[];
 var notifs=[];
 var reviews=[
   {init:'R',name:'Rahul Menon',prod:'Classic Blue Oxford Shirt',date:'2 days ago',stars:5,text:'Absolutely love this shirt! Premium cotton and perfect fit.',status:'pending'},
@@ -1171,6 +1176,7 @@ function goto(pg){
   if(pg==='deploy'){updateExpCount();loadCheckoutMode();}
   if(pg==='analytics'){renderAnalytics();}
   if(pg==='content'){populateContentForm();}
+  if(pg==='offers'){loadCoupons();renderCoupons();}
   if(pg==='orders'){
     localStorage.setItem('smw_orders_seen_count',String(cachedOrders.length));
     var nb=document.getElementById('nb-orders');if(nb){nb.style.display='none';}
@@ -1948,7 +1954,7 @@ window.addEventListener('pageshow',function(e){
 function initApp(){
   syncFromPublished();
   loadProds().forEach(function(p){if(p.id>=nextId)nextId=p.id+1;});
-  loadCloudConfig();loadGHConfig();loadCheckoutMode();
+  loadCloudConfig();loadGHConfig();loadCheckoutMode();loadCoupons();
   buildSizeChips();buildBadgeChips();
   renderProds();renderCoupons();renderNotifs();renderRevs();updateExpCount();refreshLiveStock(renderProds);
   checkUnpublished();startTimer();logAct('Admin logged in','var(--green)');
@@ -2154,27 +2160,45 @@ function doImport(input){
 }
 function clearProds(){if(!confirm('Delete ALL products? Cannot be undone!'))return;saveProds([]);renderProds();updateExpCount();checkUnpublished();toast('All cleared');logAct('All products cleared','var(--red)');}
 
-// COUPONS
+// COUPONS — persisted to localStorage ('smw_coupons') so checkout.html
+// can read them live, without any redeploy. loadCoupons() is called on
+// initApp() and whenever the Offers page is opened, so a coupon created
+// or deleted in one admin tab is picked up the next time this page (or
+// checkout.html) reads localStorage.
+function loadCoupons(){
+  try{
+    var raw=localStorage.getItem('smw_coupons');
+    coupons=raw?JSON.parse(raw):[];
+    if(!Array.isArray(coupons))coupons=[];
+  }catch(e){coupons=[];}
+}
+function saveCoupons(){
+  try{localStorage.setItem('smw_coupons',JSON.stringify(coupons));}
+  catch(e){toast('Storage error: '+e.message,'error');}
+}
+function fmtExpiry(exp){return exp?new Date(exp).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'No expiry';}
 function renderCoupons(){
   var active=coupons.filter(function(c){return c.active;}).length;
   var cc=document.getElementById('couponCount');if(cc)cc.textContent=active+' active';
   var el=document.getElementById('couponList');if(!el)return;
   if(!coupons.length){el.innerHTML='<p style="color:var(--text2)">No coupons yet.</p>';return;}
-  el.innerHTML=coupons.map(function(c,i){var d=c.type==='percent'?c.val+'% off':'Rs.'+c.val+' off';return'<div class="coupon-card"'+(!c.active?' style="opacity:.6"':'')+'><div class="coupon-code">'+escHTML(c.code)+'</div><div class="coupon-meta">'+d+(c.min?' • Min Rs.'+c.min:'')+' • Expires '+c.expiry+'</div><div class="coupon-meta">Used: '+c.uses+'x</div><div style="position:absolute;top:12px;right:12px">'+(c.active?'<span class="tag tg">Active</span>':'<span class="tag tr">Inactive</span>')+'</div><div style="display:flex;gap:7px;margin-top:10px">'+(c.active?'<button class="btn btn-danger btn-sm" onclick="togCoupon('+i+')">Deactivate</button>':'<button class="btn btn-success btn-sm" onclick="togCoupon('+i+')">Activate</button>')+'<button class="btn btn-danger btn-sm" onclick="delCoupon('+i+')">Delete</button></div></div>';}).join('');
+  el.innerHTML=coupons.map(function(c,i){var d=c.type==='percent'?c.val+'% off':'Rs.'+c.val+' off';return'<div class="coupon-card"'+(!c.active?' style="opacity:.6"':'')+'><div class="coupon-code">'+escHTML(c.code)+'</div><div class="coupon-meta">'+d+(c.min?' • Min Rs.'+c.min:'')+' • Expires '+fmtExpiry(c.expiry)+'</div><div class="coupon-meta">Used: '+(c.uses||0)+'x</div><div style="position:absolute;top:12px;right:12px">'+(c.active?'<span class="tag tg">Active</span>':'<span class="tag tr">Inactive</span>')+'</div><div style="display:flex;gap:7px;margin-top:10px">'+(c.active?'<button class="btn btn-danger btn-sm" onclick="togCoupon('+i+')">Deactivate</button>':'<button class="btn btn-success btn-sm" onclick="togCoupon('+i+')">Activate</button>')+'<button class="btn btn-danger btn-sm" onclick="delCoupon('+i+')">Delete</button></div></div>';}).join('');
 }
-function togCoupon(i){coupons[i].active=!coupons[i].active;renderCoupons();toast(coupons[i].active?'Activated':'Deactivated');}
-function delCoupon(i){if(!confirm('Delete '+coupons[i].code+'?'))return;coupons.splice(i,1);renderCoupons();toast('Deleted');}
+function togCoupon(i){coupons[i].active=!coupons[i].active;saveCoupons();renderCoupons();toast(coupons[i].active?'Activated':'Deactivated');logAct((coupons[i].active?'Activated':'Deactivated')+' coupon: '+coupons[i].code,'var(--blue)');}
+function delCoupon(i){if(!confirm('Delete '+coupons[i].code+'? Customers will no longer be able to use it at checkout.'))return;var code=coupons[i].code;coupons.splice(i,1);saveCoupons();renderCoupons();toast('Deleted');logAct('Deleted coupon: '+code,'var(--red)');}
 function createCoupon(){
   var code=document.getElementById('nc-code').value.trim().toUpperCase(),type=document.getElementById('nc-type').value,val=parseInt(document.getElementById('nc-val').value)||0,min=parseInt(document.getElementById('nc-min').value)||0,exp=document.getElementById('nc-exp').value;
   if(!code){toast('Enter a code','error');return;}if(!val){toast('Enter a value','error');return;}
-  coupons.push({code:code,type:type,val:val,min:min,expiry:exp?new Date(exp).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'No expiry',uses:0,active:true});
-  renderCoupons();['nc-code','nc-val','nc-min','nc-exp'].forEach(function(id){document.getElementById(id).value='';});toast('Coupon '+code+' created!','success');
+  if(coupons.some(function(c){return c.code===code;})){toast('A coupon with that code already exists','error');return;}
+  coupons.push({code:code,type:type,val:val,min:min,expiry:exp||'',uses:0,active:true});
+  saveCoupons();renderCoupons();['nc-code','nc-val','nc-min','nc-exp'].forEach(function(id){document.getElementById(id).value='';});toast('Coupon '+code+' created — live at checkout now!','success');logAct('Created coupon: '+code,'var(--green)');
 }
 function createCouponMod(){
-  var code=document.getElementById('mc-code').value.trim().toUpperCase(),type=document.getElementById('mc-type').value,val=parseInt(document.getElementById('mc-val').value)||0,exp=document.getElementById('mc-exp').value;
+  var code=document.getElementById('mc-code').value.trim().toUpperCase(),type=document.getElementById('mc-type').value,val=parseInt(document.getElementById('mc-val').value)||0,min=parseInt(document.getElementById('mc-min').value)||0,exp=document.getElementById('mc-exp').value;
   if(!code){toast('Enter a code','error');return;}if(!val){toast('Enter a value','error');return;}
-  coupons.push({code:code,type:type,val:val,min:0,expiry:exp?new Date(exp).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'No expiry',uses:0,active:true});
-  renderCoupons();closeMod('couponMod');['mc-code','mc-val','mc-exp'].forEach(function(id){document.getElementById(id).value='';});toast('Coupon created!','success');
+  if(coupons.some(function(c){return c.code===code;})){toast('A coupon with that code already exists','error');return;}
+  coupons.push({code:code,type:type,val:val,min:min,expiry:exp||'',uses:0,active:true});
+  saveCoupons();renderCoupons();closeMod('couponMod');['mc-code','mc-val','mc-min','mc-exp'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});toast('Coupon created — live at checkout now!','success');logAct('Created coupon: '+code,'var(--green)');
 }
 
 // REVIEWS
