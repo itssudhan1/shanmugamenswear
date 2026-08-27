@@ -1,4 +1,4 @@
-/* Shanmuga Mens Wear Products — 4 items — Updated 25/8/2026, 7:59:01 pm */
+/* Shanmuga Mens Wear Products — 2 items — Updated 27/8/2026, 10:12:20 pm */
 /* 2026 Shanmuga Mens Wear. All rights reserved. */
 
 var SMW_DEFAULT_PRODUCTS = [
@@ -40,110 +40,38 @@ var SMW_DEFAULT_PRODUCTS = [
     ]
   },
   {
-    "id": 101,
-    "name": "Beige linen pant",
-    "cat": "pants",
-    "tagline": "premium cotton",
-    "description": "",
-    "fabric": "100% cotton",
-    "fit": "regular fit",
-    "orig": 1299,
-    "sale": 899,
-    "stock": 14,
-    "threshold": 5,
-    "status": "outofstock",
-    "visible": true,
-    "lowStock": false,
-    "badge": "",
-    "sizes": [
-      "28",
-      "30",
-      "32",
-      "34",
-      "36"
-    ],
-    "sizeStock": {
-      "28": 3,
-      "30": 3,
-      "32": 3,
-      "34": 5,
-      "36": 0
-    },
-    "photos": [
-      "https://res.cloudinary.com/do2topls5/image/upload/v1777637789/tuebbxwdcj8uxovgnvfg.webp",
-      "https://res.cloudinary.com/do2topls5/image/upload/v1777637816/v0x46fm2lk56klrq8gq6.jpg",
-      "https://res.cloudinary.com/do2topls5/image/upload/v1777637827/hquiozogvibaoh2z98yz.jpg",
-      "https://res.cloudinary.com/do2topls5/image/upload/v1777637861/hsfsbwbemzfaa76o0l98.webp"
-    ]
-  },
-  {
-    "id": 200,
-    "name": "CLASSIC OVERSIZED TSHIRT",
+    "id": 202,
+    "name": "Premium brown waffle textured polo",
     "cat": "tshirts",
-    "tagline": "premium tshirt",
-    "description": "",
-    "fabric": "100% cotton",
-    "fit": "OVERSIED",
+    "tagline": "Rich  texture.Everday comfort",
+    "description": "Elevate your everyday wardrobe with this premium brown textured polo. Designed with a distinctive waffle texture, contrast collar and sleeve trims, and a clean regular-fit silhouette. Soft, breathable, and easy to style with chinos, trousers, or denim.",
+    "fabric": "Premium waffle textured knit",
+    "fit": "Regular fit",
     "orig": 699,
-    "sale": 399,
-    "stock": 15,
-    "threshold": 5,
-    "status": "lowstock",
-    "visible": true,
-    "lowStock": false,
-    "badge": "sale",
-    "sizes": [
-      "XS",
-      "S",
-      "M",
-      "L",
-      "XL"
-    ],
-    "sizeStock": {
-      "XS": 3,
-      "S": 3,
-      "M": 3,
-      "L": 3,
-      "XL": 3
-    },
-    "photos": [
-      "https://res.cloudinary.com/do2topls5/image/upload/v1783872499/sl6w4q6aoxpl3pgwcknu.jpg",
-      "https://res.cloudinary.com/do2topls5/image/upload/v1783872513/itwuevpnlin0crudpk9m.jpg",
-      "https://res.cloudinary.com/do2topls5/image/upload/v1783872514/wbj2tacw9boh0sp9lgcd.jpg"
-    ]
-  },
-  {
-    "id": 201,
-    "name": "Classic Grey Shirt",
-    "cat": "shirts",
-    "tagline": "Premium cotton, regular fit",
-    "description": "A classic grey shirt for everyday wear",
-    "fabric": "100% Cotton",
-    "fit": "Regular Fit",
-    "orig": 899,
-    "sale": 799,
-    "stock": 10,
+    "sale": 499,
+    "stock": 6,
     "threshold": 5,
     "status": "instock",
     "visible": true,
     "lowStock": false,
-    "badge": "New",
+    "badge": "",
     "sizes": [
-      "S",
       "M",
       "L",
-      "XL"
+      "XL",
+      "S"
     ],
     "sizeStock": {
-      "S": 3,
-      "M": 3,
+      "M": 2,
       "L": 2,
-      "XL": 2
+      "XL": 2,
+      "S": 0
     },
     "photos": [
-      "https://res.cloudinary.com/do2topls5/image/upload/v1787377281/xlrn6kl1lak0qsqqlsri.png",
-      "https://res.cloudinary.com/do2topls5/image/upload/v1787377285/xtnwyliowkortej08dwu.png",
-      "https://res.cloudinary.com/do2topls5/image/upload/v1787377288/xqwti3fpqymfnvcswufb.png"
+      "https://res.cloudinary.com/do2topls5/image/upload/v1787848607/e63ur1zyui00p0gk1ko8.png",
+      "https://res.cloudinary.com/do2topls5/image/upload/v1787848630/dmhw5njpitpf6ywscuma.png",
+      "https://res.cloudinary.com/do2topls5/image/upload/v1787848663/g9txkmhk2qkuqbkyzwrc.png",
+      "https://res.cloudinary.com/do2topls5/image/upload/v1787848731/lp42ww3aq3rikzvwuxul.png"
     ]
   }
 ];
