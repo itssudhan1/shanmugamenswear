@@ -1,4 +1,4 @@
-/* Shanmuga Mens Wear Products — 2 items — Updated 27/8/2026, 10:12:20 pm */
+/* Shanmuga Mens Wear Products — 3 items — Updated 28/8/2026, 6:20:24 pm */
 /* 2026 Shanmuga Mens Wear. All rights reserved. */
 
 var SMW_DEFAULT_PRODUCTS = [
@@ -72,6 +72,41 @@ var SMW_DEFAULT_PRODUCTS = [
       "https://res.cloudinary.com/do2topls5/image/upload/v1787848630/dmhw5njpitpf6ywscuma.png",
       "https://res.cloudinary.com/do2topls5/image/upload/v1787848663/g9txkmhk2qkuqbkyzwrc.png",
       "https://res.cloudinary.com/do2topls5/image/upload/v1787848731/lp42ww3aq3rikzvwuxul.png"
+    ]
+  },
+  {
+    "id": 203,
+    "name": "Premium Black Waffle Polo",
+    "cat": "tshirts",
+    "tagline": "Timeless Texture. Effortless Comfort.",
+    "description": "A premium black polo T-shirt crafted with a distinctive waffle-textured fabric for a refined, modern look. Featuring a clean polo collar, textured finish, comfortable sleeves, and a smart regular fit, it’s designed for effortless everyday styling. Perfect for casual outings, weekends, and elevated everyday wear.",
+    "fabric": "Premium Waffle Texture Fabric",
+    "fit": "Regular fit",
+    "orig": 699,
+    "sale": 499,
+    "stock": 3,
+    "threshold": 5,
+    "status": "instock",
+    "visible": true,
+    "lowStock": false,
+    "badge": "new",
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "sizeStock": {
+      "S": 0,
+      "M": 1,
+      "L": 1,
+      "XL": 1
+    },
+    "photos": [
+      "https://res.cloudinary.com/do2topls5/image/upload/v1787921324/orrmfoo7ddmdmxkne9ck.png",
+      "https://res.cloudinary.com/do2topls5/image/upload/v1787921363/gqzgevu8ze1ppsje6khq.png",
+      "https://res.cloudinary.com/do2topls5/image/upload/v1787921378/ytyhzrveblcnqdrbzyx9.png",
+      "https://res.cloudinary.com/do2topls5/image/upload/v1787921386/qu5whj2a5mfvd9i7kngw.png"
     ]
   }
 ];
