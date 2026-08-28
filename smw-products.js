@@ -1,44 +1,7 @@
-/* Shanmuga Mens Wear Products — 3 items — Updated 28/8/2026, 6:20:24 pm */
+/* Shanmuga Mens Wear Products — 3 items — Updated 28/8/2026, 6:28:13 pm */
 /* 2026 Shanmuga Mens Wear. All rights reserved. */
 
 var SMW_DEFAULT_PRODUCTS = [
-  {
-    "id": 100,
-    "name": "Classic Blue oxford shirt",
-    "cat": "shirts",
-    "tagline": "premium cotton",
-    "description": "",
-    "fabric": "100% cotton",
-    "fit": "regular fit",
-    "orig": 1199,
-    "sale": 849,
-    "stock": 10,
-    "threshold": 1,
-    "status": "instock",
-    "visible": true,
-    "lowStock": false,
-    "badge": "offer",
-    "sizes": [
-      "XS",
-      "S",
-      "M",
-      "L",
-      "XL"
-    ],
-    "sizeStock": {
-      "XS": 2,
-      "S": 2,
-      "M": 2,
-      "L": 2,
-      "XL": 2
-    },
-    "photos": [
-      "https://res.cloudinary.com/do2topls5/image/upload/v1775839926/dliscmryhwvfye5q2nnv.webp",
-      "https://res.cloudinary.com/do2topls5/image/upload/v1775839929/dgqraelrtkczyacikyrb.webp",
-      "https://res.cloudinary.com/do2topls5/image/upload/v1775839949/yv4vybbbmn5pxstenr5p.webp",
-      "https://res.cloudinary.com/do2topls5/image/upload/v1775839955/avy2rxwl04gg6xvdt4nm.webp"
-    ]
-  },
   {
     "id": 202,
     "name": "Premium brown waffle textured polo",
@@ -54,7 +17,7 @@ var SMW_DEFAULT_PRODUCTS = [
     "status": "instock",
     "visible": true,
     "lowStock": false,
-    "badge": "",
+    "badge": "new",
     "sizes": [
       "M",
       "L",
@@ -107,6 +70,41 @@ var SMW_DEFAULT_PRODUCTS = [
       "https://res.cloudinary.com/do2topls5/image/upload/v1787921363/gqzgevu8ze1ppsje6khq.png",
       "https://res.cloudinary.com/do2topls5/image/upload/v1787921378/ytyhzrveblcnqdrbzyx9.png",
       "https://res.cloudinary.com/do2topls5/image/upload/v1787921386/qu5whj2a5mfvd9i7kngw.png"
+    ]
+  },
+  {
+    "id": 204,
+    "name": "Premium White Waffle Polo",
+    "cat": "tshirts",
+    "tagline": "Clean Texture. Timeless Comfort.",
+    "description": "Elevate your everyday style with this premium white waffle-textured polo T-shirt. Designed with a clean polo collar, textured knit finish, comfortable short sleeves, and a smart regular fit, it offers a refined look with breathable all-day comfort. Easy to pair with trousers, chinos, or jeans for both casual and elevated occasions.",
+    "fabric": "Premium waffle textured  fabric",
+    "fit": "Regular fit",
+    "orig": 699,
+    "sale": 470,
+    "stock": 3,
+    "threshold": 5,
+    "status": "instock",
+    "visible": true,
+    "lowStock": false,
+    "badge": "new",
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "sizeStock": {
+      "S": 0,
+      "M": 1,
+      "L": 1,
+      "XL": 1
+    },
+    "photos": [
+      "https://res.cloudinary.com/do2topls5/image/upload/v1787921696/dkpug0rnmolm9djpfgog.png",
+      "https://res.cloudinary.com/do2topls5/image/upload/v1787921714/lyopq15cztjgqdznpmkg.png",
+      "https://res.cloudinary.com/do2topls5/image/upload/v1787921726/wnbvzvyhasskkvi0cgul.png",
+      "https://res.cloudinary.com/do2topls5/image/upload/v1787921748/zirxvgar0rq1lsutzp7o.png"
     ]
   }
 ];
