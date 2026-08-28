@@ -1,4 +1,4 @@
-/* Shanmuga Mens Wear Products — 3 items — Updated 28/8/2026, 6:28:13 pm */
+/* Shanmuga Mens Wear Products — 3 items — Updated 28/8/2026, 6:36:10 pm */
 /* 2026 Shanmuga Mens Wear. All rights reserved. */
 
 var SMW_DEFAULT_PRODUCTS = [
@@ -81,7 +81,7 @@ var SMW_DEFAULT_PRODUCTS = [
     "fabric": "Premium waffle textured  fabric",
     "fit": "Regular fit",
     "orig": 699,
-    "sale": 470,
+    "sale": 499,
     "stock": 3,
     "threshold": 5,
     "status": "instock",
