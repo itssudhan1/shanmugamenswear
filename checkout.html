@@ -683,8 +683,11 @@ footer{background:var(--black);color:var(--white);padding:2rem;text-align:center
 <script>
 'use strict';
 
-/* ── WhatsApp number (store owner) ── */
+/* ── WhatsApp number the "chat with us" bubble opens (unchanged) ── */
 var WA_NUMBER = '919442689858';
+
+/* ── WhatsApp number order-confirmation messages are sent to (new number) ── */
+var WA_ORDER_NUMBER = '918807246785';
 
 /* ── Razorpay public key (safe to expose client-side) ── */
 var RZP_KEY_ID = 'rzp_test_TAGc9RidKy77kO'; // swap to rzp_live_... when going live
@@ -858,18 +861,41 @@ function applyCoupon(){
   try { adminCoupons = JSON.parse(localStorage.getItem('smw_coupons') || '[]'); } catch(e){}
   var adminFound = adminCoupons.find(function(c){ return c.code === code && c.active !== false; });
 
-  if (adminFound) {
-    appliedCoupon = code;
-    discountAmount = adminFound.type === 'percent' ? Math.round(getSubtotal() * adminFound.val / 100) : Math.min(adminFound.val, getSubtotal());
-    msgEl.className = 'coupon-msg ok';
-    msgEl.textContent = '✓ Coupon applied! You save ' + fmt(discountAmount);
-    updateTotals();
-  } else {
+  if (!adminFound) {
     discountAmount = 0; appliedCoupon = '';
     msgEl.className = 'coupon-msg err';
-    msgEl.textContent = '✗ Invalid or expired coupon code.';
+    msgEl.textContent = '✗ Invalid or inactive coupon code.';
     updateTotals();
+    return;
   }
+
+  // Expiry check: admin stores expiry as a plain YYYY-MM-DD date (or '' for none).
+  if (adminFound.expiry) {
+    var expiryEnd = new Date(adminFound.expiry + 'T23:59:59');
+    if (!isNaN(expiryEnd) && new Date() > expiryEnd) {
+      discountAmount = 0; appliedCoupon = '';
+      msgEl.className = 'coupon-msg err';
+      msgEl.textContent = '✗ This coupon expired on ' + expiryEnd.toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'}) + '.';
+      updateTotals();
+      return;
+    }
+  }
+
+  // Minimum order check.
+  var minOrder = parseFloat(adminFound.min) || 0;
+  if (minOrder > 0 && getSubtotal() < minOrder) {
+    discountAmount = 0; appliedCoupon = '';
+    msgEl.className = 'coupon-msg err';
+    msgEl.textContent = '✗ Add ' + fmt(minOrder - getSubtotal()) + ' more to use this coupon (min order ' + fmt(minOrder) + ').';
+    updateTotals();
+    return;
+  }
+
+  appliedCoupon = code;
+  discountAmount = adminFound.type === 'percent' ? Math.round(getSubtotal() * adminFound.val / 100) : Math.min(adminFound.val, getSubtotal());
+  msgEl.className = 'coupon-msg ok';
+  msgEl.textContent = '✓ Coupon applied! You save ' + fmt(discountAmount);
+  updateTotals();
 }
 
 /* ── VALIDATION ── */
@@ -942,7 +968,7 @@ function buildWhatsAppMsg(order){
 function sendWhatsApp(){
   if (!lastOrderData) return;
   var msg = buildWhatsAppMsg(lastOrderData);
-  window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
+  window.open('https://wa.me/' + WA_ORDER_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
 /* ── MAIN PAYMENT / ORDER ENTRY POINT ── */
