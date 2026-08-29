@@ -263,6 +263,8 @@ input:checked+.slider::before{transform:translateX(18px)}
   <button class="nav-btn active" id="nav-products" onclick="goto('products')">Products</button>
   <button class="nav-btn" id="nav-add" onclick="gotoAdd()">Add Product</button>
   <button class="nav-btn" id="nav-content" onclick="goto('content')">Website Content</button>
+
+  <button class="nav-btn" id="nav-banners" onclick="goto('banners')">Homepage Banners</button>
   <div class="s-section">Marketing</div>
   <button class="nav-btn" id="nav-offers" onclick="goto('offers')">Offers &amp; Coupons</button>
   <button class="nav-btn" id="nav-reviews" onclick="goto('reviews')">Reviews</button>
@@ -602,9 +604,21 @@ input:checked+.slider::before{transform:translateX(18px)}
     <div class="fg"><label>Store Address (one line each)</label><textarea id="c-footerAddress" rows="5" style="width:100%;padding:.75rem 1rem;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;background:var(--surface2);color:var(--text)"></textarea></div>
     <div class="g2">
       <div class="fg"><label>Store Hours</label><input type="text" id="c-footerHours"></div>
-      <div class="fg"><label>WhatsApp Number (with country code, no +)</label><input type="text" id="c-whatsappNumber" placeholder="918807246785"></div>
+      <div class="fg"><label>WhatsApp Number (with country code, no +)</label><input type="text" id="c-whatsappNumber" placeholder="919442689858"></div>
     </div>
   </div>
+</div>
+<div class="page" id="page-banners">
+  <div class="ph">
+    <div class="ph-left"><h1>Homepage Banners</h1><div class="sub">Edit the dark promo section on the homepage (e.g. "UP TO 40% OFFER ON TSHIRTS") — no coding needed</div></div>
+    <div class="ph-right">
+      <button class="btn btn-outline btn-sm" onclick="resetBannersForm()">Reset Changes</button>
+      <button class="btn btn-primary btn-sm" onclick="addBanner()">+ Add Banner</button>
+      <button class="btn btn-success btn-sm" onclick="publishBannersToGitHub()" id="bannersPublishBtn">Publish to Website</button>
+    </div>
+  </div>
+  <div id="bannersPubStatus" style="display:none;margin-bottom:16px"></div>
+  <div id="bannersList"></div>
 </div>
 <div class="page" id="page-view">
   <div class="ph">
@@ -852,7 +866,6 @@ input:checked+.slider::before{transform:translateX(18px)}
     <div class="fg"><label>Coupon Code</label><input type="text" id="mc-code" placeholder="FESTIVE30" style="text-transform:uppercase;font-weight:700"></div>
     <div class="fg"><label>Type</label><select id="mc-type"><option value="percent">Percentage (%)</option><option value="flat">Flat Amount (Rs.)</option></select></div>
     <div class="fg"><label>Discount Value</label><input type="number" id="mc-val" placeholder="30" min="1"></div>
-    <div class="fg"><label>Min Order (Rs.)</label><input type="number" id="mc-min" placeholder="0" min="0"></div>
     <div class="fg"><label>Expiry Date</label><input type="date" id="mc-exp"></div>
     <div class="modal-foot">
       <button class="btn btn-outline" onclick="closeMod('couponMod')">Cancel</button>
@@ -910,11 +923,7 @@ var nextId=200;
 var currentImgs=[],selSizes=[],sizeStockMap={},selBadge='',viewingId=-1,revFilter='all',uploading=false;
 var ALL_SIZES=['XS','S','M','L','XL','XXL','28','30','32','34','36','38'];
 var ALL_BADGES=[{val:'',label:'None',cls:'sel-none'},{val:'new',label:'New',cls:'sel-new'},{val:'sale',label:'Sale',cls:'sel-sale'},{val:'offer',label:'Offer',cls:'sel-offer'}];
-// COUPONS — persisted to localStorage under 'smw_coupons' so checkout.html
-// (a separate page, same origin) can read them live. This is the single
-// source of truth: admin reads/writes the same key it renders from, and
-// checkout.html only ever reads it — never admin's in-memory array.
-var coupons=[];
+var coupons=[{code:'SAVE10',type:'percent',val:10,min:0,expiry:'31 Dec 2026',uses:0,active:true},{code:'WELCOME',type:'percent',val:5,min:0,expiry:'31 Dec 2026',uses:0,active:true},{code:'SMW20',type:'percent',val:20,min:999,expiry:'31 Dec 2026',uses:0,active:true}];
 var notifs=[];
 var reviews=[
   {init:'R',name:'Rahul Menon',prod:'Classic Blue Oxford Shirt',date:'2 days ago',stars:5,text:'Absolutely love this shirt! Premium cotton and perfect fit.',status:'pending'},
@@ -1165,7 +1174,7 @@ function clearOrders(){
 }
 
 // NAV
-var PAGE_TITLES={orders:'Orders',customers:'Customer Lookup',products:'Products',add:'Add Product',content:'Website Content',view:'Product Details',deploy:'Publish to Website',offers:'Offers & Coupons',reviews:'Reviews',notifications:'Notifications',security:'Security',analytics:'Analytics & AI Insights'};
+var PAGE_TITLES={orders:'Orders',customers:'Customer Lookup',products:'Products',add:'Add Product',content:'Website Content',banners:'Homepage Banners',view:'Product Details',deploy:'Publish to Website',offers:'Offers & Coupons',reviews:'Reviews',notifications:'Notifications',security:'Security',analytics:'Analytics & AI Insights'};
 function goto(pg){
   document.querySelectorAll('.page').forEach(function(e){e.classList.remove('active');});
   document.querySelectorAll('.nav-btn').forEach(function(e){e.classList.remove('active');});
@@ -1176,7 +1185,7 @@ function goto(pg){
   if(pg==='deploy'){updateExpCount();loadCheckoutMode();}
   if(pg==='analytics'){renderAnalytics();}
   if(pg==='content'){populateContentForm();}
-  if(pg==='offers'){loadCoupons();renderCoupons();}
+  if(pg==='banners'){renderBannersAdmin();}
   if(pg==='orders'){
     localStorage.setItem('smw_orders_seen_count',String(cachedOrders.length));
     var nb=document.getElementById('nb-orders');if(nb){nb.style.display='none';}
@@ -1416,6 +1425,129 @@ function publishContentToGitHub(){
     if(msg.indexOf('Bad credentials')>=0)msg='Token invalid. Generate a new one.';
     else if(msg.indexOf('Not Found')>=0)msg='Repo not found. Check username and repo name.';
     showContentPubStatus('err','Publish failed: '+msg);toast('Publish failed: '+msg,'error');
+  });
+}
+
+// HOMEPAGE BANNERS — same "defaults + localStorage overlay + GitHub
+// publish" pattern as Website Content, but for the dark promo section(s)
+// on the homepage (id="promoBanners" in index.html). Unlike Content this
+// is a LIST (zero or more banners), so it needs its own add/delete UI
+// instead of a fixed set of fields.
+var bannersDraft=null; // null = not loaded yet this session
+function loadBanners(){
+  var defaults=(typeof SMW_DEFAULT_BANNERS!=='undefined'&&Array.isArray(SMW_DEFAULT_BANNERS))?SMW_DEFAULT_BANNERS:[];
+  var stored=null;
+  try{var raw=localStorage.getItem('smw_banners');if(raw)stored=JSON.parse(raw);}catch(e){stored=null;}
+  // If there's no draft in localStorage yet, start from the published
+  // defaults so the admin sees what's actually live right now.
+  return Array.isArray(stored)?stored:JSON.parse(JSON.stringify(defaults));
+}
+function saveBannersDraft(){
+  localStorage.setItem('smw_banners',JSON.stringify(bannersDraft||[]));
+  showBannersPubStatus('info','Saved locally. Click "Publish to Website" to make these changes live for customers.');
+}
+function renderBannersAdmin(){
+  if(bannersDraft===null)bannersDraft=loadBanners();
+  var el=document.getElementById('bannersList');if(!el)return;
+  if(!bannersDraft.length){el.innerHTML='<p style="color:var(--text2)">No banners yet — click "+ Add Banner" to create one.</p>';return;}
+  el.innerHTML=bannersDraft.map(function(b,i){
+    return '<div class="card" style="margin-bottom:16px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+        '<div class="card-title" style="margin:0">Banner '+(i+1)+(b.heading?' — '+escHTML(b.heading):'')+'</div>'+
+        '<div style="display:flex;align-items:center;gap:12px">'+
+          '<label class="toggle"><input type="checkbox" '+(b.active!==false?'checked':'')+' onchange="updateBannerField('+i+',\'active\',this.checked)"><span class="slider"></span></label>'+
+          '<button class="btn btn-danger btn-sm" onclick="deleteBanner('+i+')">Delete</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="g2">'+
+        '<div class="fg"><label>Eyebrow (small text above heading)</label><input type="text" value="'+escHTML(b.eyebrow||'')+'" placeholder="DIWALI SALE" oninput="updateBannerField('+i+',\'eyebrow\',this.value)"></div>'+
+        '<div class="fg"><label>Order (lower shows first)</label><input type="number" value="'+(b.order!=null?b.order:0)+'" oninput="updateBannerField('+i+',\'order\',parseFloat(this.value)||0)"></div>'+
+      '</div>'+
+      '<div class="fg"><label>Heading</label><input type="text" value="'+escHTML(b.heading||'')+'" placeholder="UP TO 40% OFFER ON TSHIRTS" oninput="updateBannerField('+i+',\'heading\',this.value)"></div>'+
+      '<div class="fg"><label>Subtext</label><input type="text" value="'+escHTML(b.subtext||'')+'" placeholder="shop our sale collection before stock run out" oninput="updateBannerField('+i+',\'subtext\',this.value)"></div>'+
+      '<div class="g2">'+
+        '<div class="fg"><label>Button Text</label><input type="text" value="'+escHTML(b.btnText||'')+'" placeholder="Shop Sale" oninput="updateBannerField('+i+',\'btnText\',this.value)"></div>'+
+        '<div class="fg"><label>Button Link</label><input type="text" value="'+escHTML(b.btnLink||'')+'" placeholder="#shop=tshirts or a full URL" oninput="updateBannerField('+i+',\'btnLink\',this.value)"></div>'+
+      '</div>'+
+      '<div class="fg"><label>Background Image URL</label><input type="text" value="'+escHTML(b.bg||'')+'" placeholder="https://... (leave blank for plain black background)" oninput="updateBannerField('+i+',\'bg\',this.value)"></div>'+
+    '</div>';
+  }).join('');
+}
+function updateBannerField(i,key,val){
+  if(!bannersDraft||!bannersDraft[i])return;
+  bannersDraft[i][key]=val;
+  saveBannersDraft();
+  // Re-render only the heading text in that card's title without a full
+  // re-render, so the input doesn't lose focus mid-typing.
+  if(key==='heading'){
+    var titleEl=document.querySelectorAll('#bannersList .card-title')[i];
+    if(titleEl)titleEl.textContent='Banner '+(i+1)+(val?' — '+val:'');
+  }
+}
+function addBanner(){
+  if(bannersDraft===null)bannersDraft=loadBanners();
+  bannersDraft.push({id:'banner-'+Date.now(),eyebrow:'',heading:'New Offer',subtext:'',btnText:'Shop Now',btnLink:'#shop',bg:'',active:true,order:bannersDraft.length});
+  saveBannersDraft();
+  renderBannersAdmin();
+  toast('Banner added — fill in the details below','success');
+}
+function deleteBanner(i){
+  if(!bannersDraft||!bannersDraft[i])return;
+  if(!confirm('Delete this banner?'))return;
+  bannersDraft.splice(i,1);
+  saveBannersDraft();
+  renderBannersAdmin();
+  toast('Banner deleted');
+}
+function resetBannersForm(){
+  if(!confirm('Discard unsaved changes and reset to the currently published banners?'))return;
+  localStorage.removeItem('smw_banners');
+  bannersDraft=null;
+  renderBannersAdmin();
+  document.getElementById('bannersPubStatus').style.display='none';
+  toast('Reset to published banners','success');
+}
+function showBannersPubStatus(type,msg){
+  var el=document.getElementById('bannersPubStatus');if(!el)return;
+  el.style.display='block';
+  var bg={ok:'var(--green-bg)',err:'var(--red-bg)',info:'var(--blue-bg)'};var tc={ok:'var(--green)',err:'var(--red)',info:'var(--blue)'};
+  el.style.background=bg[type];el.style.color=tc[type];el.style.borderRadius='8px';el.style.padding='12px 16px';el.style.fontSize='13px';el.style.fontWeight='600';el.textContent=msg;
+}
+function publishBannersToGitHub(){
+  if(!GH_TOKEN||!GH_USER_V||!GH_REPO){toast('Set up GitHub first (see Publish to Website page)','error');return;}
+  if(bannersDraft===null)bannersDraft=loadBanners();
+  saveBannersDraft();
+  var banners=bannersDraft;
+  var btn=document.getElementById('bannersPublishBtn');
+  showBannersPubStatus('info','Connecting to GitHub...');if(btn){btn.disabled=true;btn.textContent='Publishing...';}
+  var jsContent='// HOMEPAGE BANNERS — edited from admin.html\'s "Homepage Banners" page.\n// Updated '+new Date().toLocaleString('en-IN')+'\nvar SMW_DEFAULT_BANNERS = '+JSON.stringify(banners,null,2)+';\n';
+  var encoded;try{encoded=btoa(unescape(encodeURIComponent(jsContent)));}catch(e){toast('Encoding error','error');if(btn){btn.disabled=false;btn.textContent='Publish to Website';}return;}
+  var apiUrl='https://api.github.com/repos/'+GH_USER_V+'/'+GH_REPO+'/contents/smw-banners.js';
+  var headers={'Authorization':'token '+GH_TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'};
+  fetch(apiUrl+'?ref='+GH_BRANCH,{headers:headers})
+  .then(function(r){if(r.status===404)return{sha:null};if(!r.ok)return r.json().then(function(d){throw new Error(d.message||('HTTP '+r.status));});return r.json();})
+  .then(function(data){
+    showBannersPubStatus('info','Uploading banners...');
+    var body={message:'Update homepage banners — '+new Date().toLocaleDateString('en-IN'),content:encoded,branch:GH_BRANCH};
+    if(data.sha)body.sha=data.sha;
+    return fetch(apiUrl,{method:'PUT',headers:headers,body:JSON.stringify(body)});
+  })
+  .then(function(r){
+    if(r.ok||r.status===200||r.status===201){
+      return r.json().then(function(){
+        if(btn){btn.disabled=false;btn.textContent='Published!';setTimeout(function(){btn.textContent='Publish to Website';},2500);}
+        showBannersPubStatus('ok','Banners published! Vercel updates in ~30 seconds.');
+        toast('Homepage banners are live!','success');
+        logAct('Published homepage banner changes','var(--green)');
+      });
+    }else{return r.json().then(function(d){throw new Error(d.message||('HTTP '+r.status));});}
+  })
+  .catch(function(err){
+    if(btn){btn.disabled=false;btn.textContent='Publish to Website';}
+    var msg=err.message||'Unknown error';
+    if(msg.indexOf('Bad credentials')>=0)msg='Token invalid. Generate a new one.';
+    else if(msg.indexOf('Not Found')>=0)msg='Repo not found. Check username and repo name.';
+    showBannersPubStatus('err','Publish failed: '+msg);toast('Publish failed: '+msg,'error');
   });
 }
 
@@ -1954,7 +2086,7 @@ window.addEventListener('pageshow',function(e){
 function initApp(){
   syncFromPublished();
   loadProds().forEach(function(p){if(p.id>=nextId)nextId=p.id+1;});
-  loadCloudConfig();loadGHConfig();loadCheckoutMode();loadCoupons();
+  loadCloudConfig();loadGHConfig();loadCheckoutMode();
   buildSizeChips();buildBadgeChips();
   renderProds();renderCoupons();renderNotifs();renderRevs();updateExpCount();refreshLiveStock(renderProds);
   checkUnpublished();startTimer();logAct('Admin logged in','var(--green)');
@@ -2160,45 +2292,27 @@ function doImport(input){
 }
 function clearProds(){if(!confirm('Delete ALL products? Cannot be undone!'))return;saveProds([]);renderProds();updateExpCount();checkUnpublished();toast('All cleared');logAct('All products cleared','var(--red)');}
 
-// COUPONS — persisted to localStorage ('smw_coupons') so checkout.html
-// can read them live, without any redeploy. loadCoupons() is called on
-// initApp() and whenever the Offers page is opened, so a coupon created
-// or deleted in one admin tab is picked up the next time this page (or
-// checkout.html) reads localStorage.
-function loadCoupons(){
-  try{
-    var raw=localStorage.getItem('smw_coupons');
-    coupons=raw?JSON.parse(raw):[];
-    if(!Array.isArray(coupons))coupons=[];
-  }catch(e){coupons=[];}
-}
-function saveCoupons(){
-  try{localStorage.setItem('smw_coupons',JSON.stringify(coupons));}
-  catch(e){toast('Storage error: '+e.message,'error');}
-}
-function fmtExpiry(exp){return exp?new Date(exp).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'No expiry';}
+// COUPONS
 function renderCoupons(){
   var active=coupons.filter(function(c){return c.active;}).length;
   var cc=document.getElementById('couponCount');if(cc)cc.textContent=active+' active';
   var el=document.getElementById('couponList');if(!el)return;
   if(!coupons.length){el.innerHTML='<p style="color:var(--text2)">No coupons yet.</p>';return;}
-  el.innerHTML=coupons.map(function(c,i){var d=c.type==='percent'?c.val+'% off':'Rs.'+c.val+' off';return'<div class="coupon-card"'+(!c.active?' style="opacity:.6"':'')+'><div class="coupon-code">'+escHTML(c.code)+'</div><div class="coupon-meta">'+d+(c.min?' • Min Rs.'+c.min:'')+' • Expires '+fmtExpiry(c.expiry)+'</div><div class="coupon-meta">Used: '+(c.uses||0)+'x</div><div style="position:absolute;top:12px;right:12px">'+(c.active?'<span class="tag tg">Active</span>':'<span class="tag tr">Inactive</span>')+'</div><div style="display:flex;gap:7px;margin-top:10px">'+(c.active?'<button class="btn btn-danger btn-sm" onclick="togCoupon('+i+')">Deactivate</button>':'<button class="btn btn-success btn-sm" onclick="togCoupon('+i+')">Activate</button>')+'<button class="btn btn-danger btn-sm" onclick="delCoupon('+i+')">Delete</button></div></div>';}).join('');
+  el.innerHTML=coupons.map(function(c,i){var d=c.type==='percent'?c.val+'% off':'Rs.'+c.val+' off';return'<div class="coupon-card"'+(!c.active?' style="opacity:.6"':'')+'><div class="coupon-code">'+escHTML(c.code)+'</div><div class="coupon-meta">'+d+(c.min?' • Min Rs.'+c.min:'')+' • Expires '+c.expiry+'</div><div class="coupon-meta">Used: '+c.uses+'x</div><div style="position:absolute;top:12px;right:12px">'+(c.active?'<span class="tag tg">Active</span>':'<span class="tag tr">Inactive</span>')+'</div><div style="display:flex;gap:7px;margin-top:10px">'+(c.active?'<button class="btn btn-danger btn-sm" onclick="togCoupon('+i+')">Deactivate</button>':'<button class="btn btn-success btn-sm" onclick="togCoupon('+i+')">Activate</button>')+'<button class="btn btn-danger btn-sm" onclick="delCoupon('+i+')">Delete</button></div></div>';}).join('');
 }
-function togCoupon(i){coupons[i].active=!coupons[i].active;saveCoupons();renderCoupons();toast(coupons[i].active?'Activated':'Deactivated');logAct((coupons[i].active?'Activated':'Deactivated')+' coupon: '+coupons[i].code,'var(--blue)');}
-function delCoupon(i){if(!confirm('Delete '+coupons[i].code+'? Customers will no longer be able to use it at checkout.'))return;var code=coupons[i].code;coupons.splice(i,1);saveCoupons();renderCoupons();toast('Deleted');logAct('Deleted coupon: '+code,'var(--red)');}
+function togCoupon(i){coupons[i].active=!coupons[i].active;renderCoupons();toast(coupons[i].active?'Activated':'Deactivated');}
+function delCoupon(i){if(!confirm('Delete '+coupons[i].code+'?'))return;coupons.splice(i,1);renderCoupons();toast('Deleted');}
 function createCoupon(){
   var code=document.getElementById('nc-code').value.trim().toUpperCase(),type=document.getElementById('nc-type').value,val=parseInt(document.getElementById('nc-val').value)||0,min=parseInt(document.getElementById('nc-min').value)||0,exp=document.getElementById('nc-exp').value;
   if(!code){toast('Enter a code','error');return;}if(!val){toast('Enter a value','error');return;}
-  if(coupons.some(function(c){return c.code===code;})){toast('A coupon with that code already exists','error');return;}
-  coupons.push({code:code,type:type,val:val,min:min,expiry:exp||'',uses:0,active:true});
-  saveCoupons();renderCoupons();['nc-code','nc-val','nc-min','nc-exp'].forEach(function(id){document.getElementById(id).value='';});toast('Coupon '+code+' created — live at checkout now!','success');logAct('Created coupon: '+code,'var(--green)');
+  coupons.push({code:code,type:type,val:val,min:min,expiry:exp?new Date(exp).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'No expiry',uses:0,active:true});
+  renderCoupons();['nc-code','nc-val','nc-min','nc-exp'].forEach(function(id){document.getElementById(id).value='';});toast('Coupon '+code+' created!','success');
 }
 function createCouponMod(){
-  var code=document.getElementById('mc-code').value.trim().toUpperCase(),type=document.getElementById('mc-type').value,val=parseInt(document.getElementById('mc-val').value)||0,min=parseInt(document.getElementById('mc-min').value)||0,exp=document.getElementById('mc-exp').value;
+  var code=document.getElementById('mc-code').value.trim().toUpperCase(),type=document.getElementById('mc-type').value,val=parseInt(document.getElementById('mc-val').value)||0,exp=document.getElementById('mc-exp').value;
   if(!code){toast('Enter a code','error');return;}if(!val){toast('Enter a value','error');return;}
-  if(coupons.some(function(c){return c.code===code;})){toast('A coupon with that code already exists','error');return;}
-  coupons.push({code:code,type:type,val:val,min:min,expiry:exp||'',uses:0,active:true});
-  saveCoupons();renderCoupons();closeMod('couponMod');['mc-code','mc-val','mc-min','mc-exp'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});toast('Coupon created — live at checkout now!','success');logAct('Created coupon: '+code,'var(--green)');
+  coupons.push({code:code,type:type,val:val,min:0,expiry:exp?new Date(exp).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'No expiry',uses:0,active:true});
+  renderCoupons();closeMod('couponMod');['mc-code','mc-val','mc-exp'].forEach(function(id){document.getElementById(id).value='';});toast('Coupon created!','success');
 }
 
 // REVIEWS
