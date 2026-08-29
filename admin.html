@@ -2311,7 +2311,13 @@ function startEdit(id){
   resetForm();
   document.getElementById('f-editId').value=id;document.getElementById('f-name').value=p.name||'';document.getElementById('f-cat').value=p.cat||'';document.getElementById('f-tagline').value=p.tagline||'';document.getElementById('f-desc').value=p.description||'';document.getElementById('f-fabric').value=p.fabric||'';document.getElementById('f-fit').value=p.fit||'';document.getElementById('f-orig').value=p.orig||'';document.getElementById('f-sale').value=p.sale||'';document.getElementById('f-stock').value=p.stock||'';document.getElementById('f-threshold').value=p.threshold||5;document.getElementById('f-status').value=p.status||'instock';document.getElementById('f-visible').checked=p.visible!==false;document.getElementById('f-lowstock').checked=p.lowStock||false;
   currentImgs=(p.photos&&p.photos.length)?p.photos.slice():[];selSizes=(p.sizes&&p.sizes.length)?p.sizes.slice():[];selBadge=p.badge||'';
-  sizeStockMap={};selSizes.forEach(function(s){sizeStockMap[s]=(p.sizeStock&&p.sizeStock[s]!=null)?parseInt(p.sizeStock[s])||0:(parseInt(p.stock)||0);});
+  // Show LIVE stock (post-sales), not the stale originally-published
+  // number — otherwise admin can show "M: 1" while the website (which
+  // reads live KV stock) already correctly shows M as out of stock,
+  // because a sale silently dropped the live number without touching
+  // the published base. mergedSizeStock() prefers live over base.
+  var mergedStk=mergedSizeStock(p);
+  sizeStockMap={};selSizes.forEach(function(s){sizeStockMap[s]=mergedStk[s]!=null?parseInt(mergedStk[s])||0:(parseInt(p.stock)||0);});
   renderImgGrid();applySz();applyBadge();goto('add');document.getElementById('addTitle').textContent='Edit Product';document.getElementById('addSub').textContent='Update product details';
 }
 function saveProduct(){
