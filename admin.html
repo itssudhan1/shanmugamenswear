@@ -516,6 +516,15 @@ input:checked+.slider::before{transform:translateX(18px)}
   <div id="contentPubStatus" style="display:none;margin-bottom:16px"></div>
 
   <div class="card" style="margin-bottom:16px">
+    <div class="card-title">SEO / Google Search Result</div>
+    <div class="hint" style="margin-bottom:10px">This is the title and description text people see on Google when they search for your shop (and when the link is shared on WhatsApp/social media).</div>
+    <div class="fg"><label>Page Title</label><input type="text" id="c-metaTitle" placeholder="Shanmuga Mens Wear" maxlength="60"></div>
+    <div class="fg"><label>Search Result Description</label><textarea id="c-metaDescription" rows="3" placeholder="Shanmuga Mens Wear, part of Shanmuga City Centre — Premium men's shirts, t-shirts, and pants in Tamil Nadu." maxlength="160" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:14px;resize:vertical"></textarea></div>
+    <div class="hint">Keep the description under ~160 characters — Google usually cuts off longer text.</div>
+  </div>
+
+
+  <div class="card" style="margin-bottom:16px">
     <div class="card-title">Marquee Ticker</div>
     <div class="hint" style="margin-bottom:10px">Up to 4 short messages that scroll across the top red bar.</div>
     <div class="g2">
@@ -1354,12 +1363,16 @@ function publishToGitHub(){
 }
 // WEBSITE CONTENT — same "defaults + localStorage overlay + GitHub
 // publish" pattern as products/banners, just for homepage text/images.
-var CONTENT_FIELDS=['marquee1','marquee2','marquee3','marquee4','heroLine1','heroLine2','heroLine3','heroSubtitle','heroVideo','heroBtnPrimaryText','heroBtnSecondaryText','counter1Num','counter1Label','counter2Num','counter2Label','counter3Num','counter3Label','cat1Img','cat1Label','cat1Sub','cat2Img','cat2Label','cat2Sub','cat3Img','cat3Label','cat3Sub','feat1Icon','feat1Title','feat1Sub','feat2Icon','feat2Title','feat2Sub','feat3Icon','feat3Title','feat3Sub','footerTagline','footerAddress','footerHours','whatsappNumber'];
+var CONTENT_FIELDS=['metaTitle','metaDescription','marquee1','marquee2','marquee3','marquee4','heroLine1','heroLine2','heroLine3','heroSubtitle','heroVideo','heroBtnPrimaryText','heroBtnSecondaryText','counter1Num','counter1Label','counter2Num','counter2Label','counter3Num','counter3Label','cat1Img','cat1Label','cat1Sub','cat2Img','cat2Label','cat2Sub','cat3Img','cat3Label','cat3Sub','feat1Icon','feat1Title','feat1Sub','feat2Icon','feat2Title','feat2Sub','feat3Icon','feat3Title','feat3Sub','footerTagline','footerAddress','footerHours','whatsappNumber'];
+// SEO fields don't ship in smw-content.js (they live as static <head> tags
+// in index.html, not in the JS-rendered body) — so if there's no default
+// and no draft yet, fall back to what's actually live right now.
+var SEO_FALLBACKS={metaTitle:'Shanmuga Mens Wear',metaDescription:'Shanmuga Mens Wear, part of Shanmuga City Centre \u2014 Premium men\'s shirts, t-shirts, and pants in Tamil Nadu. Shop the latest collection with free delivery on orders above Rs.1999.'};
 function loadContent(){
   var defaults=(typeof SMW_DEFAULT_CONTENT!=='undefined'&&SMW_DEFAULT_CONTENT)?SMW_DEFAULT_CONTENT:{};
   var stored={};
   try{var raw=localStorage.getItem('smw_content');if(raw)stored=JSON.parse(raw)||{};}catch(e){stored={};}
-  return Object.assign({},defaults,stored);
+  return Object.assign({},SEO_FALLBACKS,defaults,stored);
 }
 function populateContentForm(){
   var c=loadContent();
@@ -1391,6 +1404,55 @@ function showContentPubStatus(type,msg){
   var bg={ok:'var(--green-bg)',err:'var(--red-bg)',info:'var(--blue-bg)'};var tc={ok:'var(--green)',err:'var(--red)',info:'var(--blue)'};
   el.style.background=bg[type];el.style.color=tc[type];el.style.borderRadius='8px';el.style.padding='12px 16px';el.style.fontSize='13px';el.style.fontWeight='600';el.textContent=msg;
 }
+function escAttr(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// SEO tags (<title>, meta description, og:title, og:description) live as
+// STATIC tags in index.html's <head> — index.html has no JS wiring to pull
+// them from smw-content.js the way hero text/images do. So to actually
+// change what Google/WhatsApp previews show, we have to fetch index.html
+// itself, patch those specific tags in place with a regex, and commit it
+// back. Everything else in index.html is left untouched.
+function publishSeoTagsToIndexHtml(content,headers){
+  var title=(content.metaTitle||SEO_FALLBACKS.metaTitle).trim();
+  var desc=(content.metaDescription||SEO_FALLBACKS.metaDescription).trim();
+  var apiUrl='https://api.github.com/repos/'+GH_USER_V+'/'+GH_REPO+'/contents/index.html';
+  return fetch(apiUrl+'?ref='+GH_BRANCH,{headers:headers})
+  .then(function(r){if(!r.ok)return r.json().then(function(d){throw new Error(d.message||('HTTP '+r.status));});return r.json();})
+  .then(function(data){
+    var html;
+    try{html=decodeURIComponent(escape(atob(data.content.replace(/\n/g,''))));}
+    catch(e){throw new Error('Could not read index.html');}
+
+    html=html.replace(/<title>[\s\S]*?<\/title>/,'<title>'+escAttr(title)+'</title>');
+
+    if(/<meta\s+name="description"\s+content="[^"]*">/.test(html)){
+      html=html.replace(/<meta\s+name="description"\s+content="[^"]*">/,'<meta name="description" content="'+escAttr(desc)+'">');
+    }else{
+      html=html.replace(/<title>/,'<meta name="description" content="'+escAttr(desc)+'">\n<title>');
+    }
+
+    if(/<meta\s+property="og:title"\s+content="[^"]*">/.test(html)){
+      html=html.replace(/<meta\s+property="og:title"\s+content="[^"]*">/,'<meta property="og:title" content="'+escAttr(title)+'">');
+    }else{
+      html=html.replace(/<title>[\s\S]*?<\/title>/,function(m){return m+'\n<meta property="og:title" content="'+escAttr(title)+'">';});
+    }
+
+    if(/<meta\s+property="og:description"\s+content="[^"]*">/.test(html)){
+      html=html.replace(/<meta\s+property="og:description"\s+content="[^"]*">/,'<meta property="og:description" content="'+escAttr(desc)+'">');
+    }else{
+      html=html.replace(/<title>[\s\S]*?<\/title>/,function(m){return m+'\n<meta property="og:description" content="'+escAttr(desc)+'">';});
+    }
+
+    var encoded=btoa(unescape(encodeURIComponent(html)));
+    var body={message:'Update SEO title/description — '+new Date().toLocaleDateString('en-IN'),content:encoded,branch:GH_BRANCH,sha:data.sha};
+    return fetch(apiUrl,{method:'PUT',headers:headers,body:JSON.stringify(body)});
+  })
+  .then(function(r){
+    if(!r.ok)return r.json().then(function(d){throw new Error(d.message||('HTTP '+r.status));});
+    return r.json();
+  });
+}
+
 function publishContentToGitHub(){
   if(!GH_TOKEN||!GH_USER_V||!GH_REPO){toast('Set up GitHub first (see Publish to Website page)','error');return;}
   saveContentDraft();
@@ -1410,16 +1472,18 @@ function publishContentToGitHub(){
     return fetch(apiUrl,{method:'PUT',headers:headers,body:JSON.stringify(body)});
   })
   .then(function(r){
-    if(r.ok||r.status===200||r.status===201){
-      return r.json().then(function(){
-        if(btn){btn.disabled=false;btn.textContent='Published!';setTimeout(function(){btn.textContent='Publish to Website';},2500);}
-        showContentPubStatus('ok','Content published! Vercel updates in ~30 seconds.');
-        toast('Homepage content is live!','success');
-        logAct('Published homepage content changes','var(--green)');
-      });
-    }else{return r.json().then(function(d){throw new Error(d.message||('HTTP '+r.status));});}
+    if(!(r.ok||r.status===200||r.status===201))return r.json().then(function(d){throw new Error(d.message||('HTTP '+r.status));});
+    showContentPubStatus('info','Updating page title & search description...');
+    return publishSeoTagsToIndexHtml(content,headers);
+  })
+  .then(function(){
+    if(btn){btn.disabled=false;btn.textContent='Published!';setTimeout(function(){btn.textContent='Publish to Website';},2500);}
+    showContentPubStatus('ok','Content published! Vercel updates in ~30 seconds.');
+    toast('Homepage content is live!','success');
+    logAct('Published homepage content changes','var(--green)');
   })
   .catch(function(err){
+
     if(btn){btn.disabled=false;btn.textContent='Publish to Website';}
     var msg=err.message||'Unknown error';
     if(msg.indexOf('Bad credentials')>=0)msg='Token invalid. Generate a new one.';
